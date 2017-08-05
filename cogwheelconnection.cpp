@@ -62,16 +62,16 @@ void CogWheelConnection::sendReply(quint16 replyCode)
 void CogWheelConnection::sendData(QString reponse)
 {
 
-    if (m_dataChannel->m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-        qDebug() << "NOT CONNECTED BUT " << m_dataChannel->m_dataChannelSocket->state();
-    }
+//    if (m_dataChannel->m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
+//        qDebug() << "NOT CONNECTED BUT " << m_dataChannel->m_dataChannelSocket->state();
+//    }
 
     QByteArray reply { reponse.toUtf8() };
-    m_dataChannel->m_dataChannelSocket->write(reply.data());
+    m_dataChannel.m_dataChannelSocket->write(reply.data());
     qDebug() << "Data [" << reply.data() << "]";
-    if (m_dataChannel->m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
-        qDebug() << "CONNECTED.";
-    }
+//    if (m_dataChannel->m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
+//        qDebug() << "CONNECTED.";
+//    }
 
 }
 

@@ -164,7 +164,7 @@ void CogWheelFTPCore::commandLIST(CogWheelConnection *connection, QStringList co
 
     connection->sendReply(150);
     connection->sendData(listing);
-    connection->m_dataChannel->disconnectFromClient();
+    connection->m_dataChannel.disconnectFromClient();
     connection->sendReply(226);
 
 }
@@ -196,16 +196,16 @@ void CogWheelFTPCore::commandTYPE(CogWheelConnection *connection, QStringList co
 void CogWheelFTPCore::commandPORT(CogWheelConnection *connection, QStringList commandAndArgments)
 {
     qDebug() << "PORT " << commandAndArgments[1];
-    if (connection->m_dataChannel == nullptr) {
-        return;
-    }
-    connection->m_dataChannel  = new CogWheelDataChannel();
+//    if (connection->m_dataChannel == nullptr) {
+//        return;
+//    }
+//    connection->m_dataChannel  = new CogWheelDataChannel();
     QStringList ipList = commandAndArgments[1].split(',');
-    connection->m_dataChannel->setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
+    connection->m_dataChannel.setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
     QString first = ipList[4];
     QString second = ipList[5];
-    connection->m_dataChannel->setClientHostPort((first.toInt()<<8)|second.toInt());
-    connection->m_dataChannel->startChannel();
+    connection->m_dataChannel.setClientHostPort((first.toInt()<<8)|second.toInt());
+    connection->m_dataChannel.startChannel();
     connection->sendReply(200);
 }
 

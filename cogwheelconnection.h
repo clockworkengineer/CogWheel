@@ -32,7 +32,7 @@ public slots:
 public:
 
     QTcpSocket *m_controlChannelSocket;
-    CogWheelDataChannel *m_dataChannel;
+    CogWheelDataChannel m_dataChannel;
 
     QString m_user;
     QString m_password;
