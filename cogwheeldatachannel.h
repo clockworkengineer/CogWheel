@@ -15,6 +15,7 @@ public:
 
     void connectToClient();
     void disconnectFromClient();
+
     void setClientHostIP(QString clientIP);
     void setClientHostPort(quint16 clientPort);
 

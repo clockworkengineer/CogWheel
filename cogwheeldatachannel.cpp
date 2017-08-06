@@ -66,15 +66,15 @@ void CogWheelDataChannel::disconnected()
 
 void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 {
-    qDebug() << "CogWheelDataChannel::stateChanged: " << socketState;
+  //  qDebug() << "CogWheelDataChannel::stateChanged: " << socketState;
 }
 
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
-    qDebug() << "CogWheelDataChannel::bytesWritten: " << numBytes;
+  //  qDebug() << "CogWheelDataChannel::bytesWritten: " << numBytes;
 }
 
 void CogWheelDataChannel::readyRead()
 {
-    qDebug() << "CogWheelDataChannel::readyRead()";
+ //   qDebug() << "CogWheelDataChannel::readyRead()";
 }

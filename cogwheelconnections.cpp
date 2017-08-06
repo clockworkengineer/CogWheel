@@ -5,33 +5,62 @@ CogWheelConnections::CogWheelConnections(QObject *parent) : QObject(parent)
 
 }
 
-void CogWheelConnections::accept(qint64 handle)
+void CogWheelConnections::acceptConnection(qint64 handle)
 {
+
+    if (m_connections.contains(handle)) {
+        qWarning() << "CogWheelConnections::accept() : connection already bsing used";
+        return;
+    }
+
     CogWheelConnection *connection = new CogWheelConnection();
 
-    m_connections.append(connection);
+    if (connection==nullptr) {
+        qWarning() << "CogWheelConnections::accept() : failed to create connection.";
+        return;
+    }
 
-   // connection->moveToThread(&connection->m_connectionThread);
+    connection->setConnectionThread( new QThread());
 
-   // connection->m_connectionThread.start();
+    if (connection->connectionThread()==nullptr) {
+        qWarning() << "CogWheelConnections::accept() : failed to create thread.";
+        return;
+    }
 
-    connect(this,&CogWheelConnections::open, connection, &CogWheelConnection::open);
+    m_connections[handle] = connection;
 
-    emit open(handle);
+    connection->moveToThread(connection->connectionThread());
+
+    connection->connectionThread()->start();
+
+    connect(this,&CogWheelConnections::openConnection, connection, &CogWheelConnection::openConnection);
+    connect(connection,&CogWheelConnection::finishedConnection,this, &CogWheelConnections::finishedConnection);
+    connect(connection,&CogWheelConnection::abortedConnection,this, &CogWheelConnections::finishedConnection);
+
+    connect(connection->connectionThread(),&QThread::finished,connection->connectionThread(), &QThread::deleteLater );
+
+    emit openConnection(handle);
 
 }
 
-void CogWheelConnections::close(qint64 handle)
+void CogWheelConnections::finishedConnection(qint64 handle)
 {
+    qDebug() << "CogWheelConnections::finishedConnection: removing connection";
+
+    if (!m_connections.contains(handle)) {
+        qWarning() << "CogWheelConnections::close() : connection not present.";
+        return;
+    }
+
+    CogWheelConnection *connection = m_connections[handle];
+    m_connections.remove(handle);
+    connection->deleteLater();
 
 }
 
-//void CogWheelConnections::finished(qint64 handle)
-//{
 
-//}
-
-void CogWheelConnections::aborted(qint64 handle)
+void CogWheelConnections::abortedConnection(qint64 handle)
 {
-
+    qDebug() << "CogWheelConnections::abortedConnection: aborting connection";
+    finishedConnection(handle);
 }

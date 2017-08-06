@@ -6,7 +6,7 @@
 CogWheelConnection::CogWheelConnection(QObject *parent) : QObject(parent)
 {
 
-    qDebug() << "CogWheelConnection creation";
+  //  qDebug() << "CogWheelConnection creation";
 
     m_currentWorkingDirectory =  QCoreApplication::applicationDirPath();
 
@@ -26,8 +26,13 @@ void CogWheelConnection::processFTPCommand(QString command)
 
 }
 
-void CogWheelConnection::open(qint64 socketHandle)
+void CogWheelConnection::openConnection(qint64 socketHandle)
 {
+
+        qDebug() << "CogWheelConnection::openConnection: on thread " << QThread::currentThreadId();
+
+        m_dataChannel = new CogWheelDataChannel();
+
         m_controlChannelSocket = new QTcpSocket();
 
         m_socketHandle = socketHandle;
@@ -43,9 +48,10 @@ void CogWheelConnection::open(qint64 socketHandle)
 
         sendReplyCode(200);
 
+
 }
 
-void CogWheelConnection::close()
+void CogWheelConnection::closeConnection()
 {
     qDebug() << "CogWheelConnection::close(): " << m_socketHandle;
 
@@ -57,13 +63,17 @@ void CogWheelConnection::close()
     m_controlChannelSocket->close();
     m_controlChannelSocket->deleteLater();
 
-    if ( m_dataChannel.m_dataChannelSocket == nullptr) {
-        qWarning() << " m_dataChannel.m_dataChannelSocket == nullptr";
+    if ( m_dataChannel->m_dataChannelSocket == nullptr) {
+        qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
         return;
     }
 
-    m_dataChannel.m_dataChannelSocket->close();
-    m_dataChannel.m_dataChannelSocket->deleteLater();
+    m_dataChannel->m_dataChannelSocket->close();
+    m_dataChannel->m_dataChannelSocket->deleteLater();
+
+    m_dataChannel->deleteLater();
+
+    emit finishedConnection(m_socketHandle);
 
 }
 
@@ -73,7 +83,7 @@ void CogWheelConnection::sendReplyCode(quint16 replyCode, QString message)
     QString replyStr { QString::number(replyCode) + " " + message + "\r\n"};
     QByteArray reply { replyStr.toUtf8() };
     m_controlChannelSocket->write(reply.data());
-    qDebug() << "SendReply [" << replyStr << "]";
+//    qDebug() << "SendReply [" << replyStr << "]";
 
 }
 
@@ -84,8 +94,8 @@ void CogWheelConnection::sendReplyCode(quint16 replyCode)
 
 void CogWheelConnection::sendOnDataChannel(QString data)
 {
-    m_dataChannel.m_dataChannelSocket->write(data.toUtf8().data());
-    qDebug() << "Data [" << data.toUtf8().data() << "]";
+    m_dataChannel->m_dataChannelSocket->write(data.toUtf8().data());
+//    qDebug() << "Data [" << data.toUtf8().data() << "]";
 }
 
 void CogWheelConnection::connected()
@@ -96,11 +106,14 @@ void CogWheelConnection::connected()
 void CogWheelConnection::disconnected()
 {
     qDebug() << "CogWheelConnection disconnected.";
+
+    closeConnection();
+
 }
 
 void CogWheelConnection::readyRead()
 {
-    qDebug() << "CogWheelConnection readReady";
+ //   qDebug() << "CogWheelConnection readReady";
 
     processFTPCommand(m_controlChannelSocket->readAll());
 
@@ -108,6 +121,106 @@ void CogWheelConnection::readyRead()
 
 void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
 {
-    qDebug() << "CogWheelConnection bytesWritten" << numberOfBytes;
+   // qDebug() << "CogWheelConnection bytesWritten" << numberOfBytes;
+}
+
+qintptr CogWheelConnection::socketHandle() const
+{
+    return m_socketHandle;
+}
+
+void CogWheelConnection::setSocketHandle(const qintptr &socketHandle)
+{
+    m_socketHandle = socketHandle;
+}
+
+QTcpSocket *CogWheelConnection::controlChannelSocket() const
+{
+    return m_controlChannelSocket;
+}
+
+void CogWheelConnection::setControlChannelSocket(QTcpSocket *controlChannelSocket)
+{
+    m_controlChannelSocket = controlChannelSocket;
+}
+
+QThread *CogWheelConnection::connectionThread() const
+{
+    return m_connectionThread;
+}
+
+void CogWheelConnection::setConnectionThread(QThread *connectionThread)
+{
+    m_connectionThread = connectionThread;
+}
+
+CogWheelDataChannel *CogWheelConnection::dataChannel() const
+{
+    return m_dataChannel;
+}
+
+void CogWheelConnection::setDataChannel(CogWheelDataChannel *dataChannel)
+{
+    m_dataChannel = dataChannel;
+}
+
+bool CogWheelConnection::anonymous() const
+{
+    return m_anonymous;
+}
+
+void CogWheelConnection::setAnonymous(bool anonymous)
+{
+    m_anonymous = anonymous;
+}
+
+bool CogWheelConnection::authorized() const
+{
+    return m_authorized;
+}
+
+void CogWheelConnection::setAuthorized(bool authorized)
+{
+    m_authorized = authorized;
+}
+
+bool CogWheelConnection::passive() const
+{
+    return m_passive;
+}
+
+void CogWheelConnection::setPassive(bool passive)
+{
+    m_passive = passive;
+}
+
+QString CogWheelConnection::currentWorkingDirectory() const
+{
+    return m_currentWorkingDirectory;
+}
+
+void CogWheelConnection::setCurrentWorkingDirectory(const QString &currentWorkingDirectory)
+{
+    m_currentWorkingDirectory = currentWorkingDirectory;
+}
+
+QString CogWheelConnection::user() const
+{
+    return m_user;
+}
+
+void CogWheelConnection::setUser(const QString &user)
+{
+    m_user = user;
+}
+
+QString CogWheelConnection::password() const
+{
+    return m_password;
+}
+
+void CogWheelConnection::setPassword(const QString &password)
+{
+    m_password = password;
 }
 

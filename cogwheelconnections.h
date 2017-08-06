@@ -13,17 +13,15 @@ public:
     explicit CogWheelConnections(QObject *parent = nullptr);
 
 signals:
-    void open(qint64 handle);
-    void close();
+    void openConnection(qint64 handle);
 
 public slots:
-    void accept(qint64 handle);
-    void close(qint64 handle);
-//    void finished(qint64 handle);
-    void aborted(qint64 handle);
+    void acceptConnection(qint64 handle);
+    void finishedConnection(qint64 handle);
+    void abortedConnection(qint64 handle);
 
 private:
-    QVector<CogWheelConnection *>  m_connections;
+    QMap<qint64, CogWheelConnection *> m_connections;
 
 };
 

@@ -161,14 +161,14 @@ void CogWheelFTPCore::commandLIST(CogWheelConnection *connection, QStringList co
 
     try {
 
-        QDir    currentWorkingDirectory(connection->m_currentWorkingDirectory);
+        QDir    currentWorkingDirectory(connection->currentWorkingDirectory());
         QString listing;
 
         if (commandAndArgments.size()>1) {
             qWarning() << "LIST argument passed : " << commandAndArgments[1];
         }
 
-//        qDebug() << "CogWheelFTPCore::commandLIST";
+        //        qDebug() << "CogWheelFTPCore::commandLIST";
 
         for (QFileInfo &item : currentWorkingDirectory.entryInfoList())
         {
@@ -178,7 +178,7 @@ void CogWheelFTPCore::commandLIST(CogWheelConnection *connection, QStringList co
         connection->sendReplyCode(150);
 
         connection->sendOnDataChannel(listing);
-        connection->m_dataChannel.disconnectFromClient();
+        connection->dataChannel()->disconnectFromClient();
 
         connection->sendReplyCode(226);
 
@@ -225,9 +225,9 @@ void CogWheelFTPCore::commandPWD(CogWheelConnection *connection, QStringList com
 {
     try {
 
-//        qDebug() << "CogWheelFTPCore::commandPWD : Working Directotry [" << connection->m_currentWorkingDirectory << "]";
+        //        qDebug() << "CogWheelFTPCore::commandPWD : Working Directotry [" << connection->m_currentWorkingDirectory << "]";
 
-        connection->sendReplyCode (257, connection->m_currentWorkingDirectory);
+        connection->sendReplyCode (257, connection->currentWorkingDirectory());
 
     } catch(QString err) {
         connection->sendReplyCode(550,err);
@@ -256,16 +256,14 @@ void CogWheelFTPCore::commandPORT(CogWheelConnection *connection, QStringList co
 {
     try {
 
-//        qDebug() << "PORT " << commandAndArgments[1];
-
         QStringList ipList = commandAndArgments[1].split(',');
-        connection->m_dataChannel.setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
+        connection->dataChannel()->setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
 
         QString first = ipList[4];
         QString second = ipList[5];
-        connection->m_dataChannel.setClientHostPort((first.toInt()<<8)|second.toInt());
+        connection->dataChannel()->setClientHostPort((first.toInt()<<8)|second.toInt());
 
-        connection->m_dataChannel.connectToClient();
+        connection->dataChannel()->connectToClient();
 
         connection->sendReplyCode(200);
 
@@ -282,6 +280,8 @@ void CogWheelFTPCore::commandCWD(CogWheelConnection *connection, QStringList com
 
     try {
 
+        qDebug() << "CogWheelFTPCore::commandCWD : " << commandAndArgments[1];
+
         QDir path(commandAndArgments[1]);
         if(!path.exists())
         {
@@ -289,7 +289,8 @@ void CogWheelFTPCore::commandCWD(CogWheelConnection *connection, QStringList com
         }
         else
         {
-            connection->m_currentWorkingDirectory = commandAndArgments[1];
+            connection->currentWorkingDirectory() = commandAndArgments[1];
+
             connection->sendReplyCode(250);
         }
 

@@ -8,21 +8,18 @@ CogWheelServer::CogWheelServer(QObject *parent) : QTcpServer(parent)
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
-//    m_connections.moveToThread(&m_serverThread);
-
 }
 
 void CogWheelServer::startServer()
 {
-    qDebug() << "CogWheelServer FTP Server started....";
+    qDebug() << "CogWheelServer FTP Server started on thread " << QThread::currentThreadId();
 
     if (listen(QHostAddress::Any, m_controlPort)) {
-        qDebug() << "CogWheelServer listening....";
+        qDebug() << "CogWheelServer listening....";        
+        connect(this,&CogWheelServer::acceptConnection, &m_connections, &CogWheelConnections::acceptConnection);
     } else {
         qDebug() << "CogWheelServer listen failure.";
     }
-
-    //m_serverThread.start();
 
 }
 
@@ -35,8 +32,6 @@ void CogWheelServer::incomingConnection(qintptr handle)
 {
     qDebug() << "CogWheelServer incomingConnection" << handle;
 
-    connect(this,&CogWheelServer::open, &m_connections, &CogWheelConnections::accept);
-
-    emit open(handle);
+    emit acceptConnection(handle);
 
 }
