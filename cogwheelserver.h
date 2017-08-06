@@ -1,11 +1,12 @@
 #ifndef COGWHEELSERVER_H
 #define COGWHEELSERVER_H
 
+
+#include "cogwheelconnections.h"
+
 #include <QObject>
 #include <QTcpServer>
-#include <QThread>
-
-#include "cogwheelconnection.h"
+//#include <QThread>
 
 class CogWheelServer : public QTcpServer
 {
@@ -20,15 +21,17 @@ protected:
     void incomingConnection(qintptr handle);
 
 signals:
+    void open(qint64 handle);
 
 public slots:
 
-private:
-    QThread m_serverThread;
+public:
+//    QThread m_serverThread;
     QString m_user="user";
     QString m_password="password";
     qint64 m_controlPort=2221;
-    QVector<CogWheelConnection *>  m_connections;
+    CogWheelConnections m_connections;
+
 };
 
 #endif // COGWHEELSERVER_H

@@ -3,30 +3,12 @@
 
 #include <QCoreApplication>
 
-CogWheelConnection::CogWheelConnection(qintptr socketHandle,  QObject *parent) : QObject(parent), m_socketHandle(socketHandle)
+CogWheelConnection::CogWheelConnection(QObject *parent) : QObject(parent)
 {
 
     qDebug() << "CogWheelConnection creation";
 
     m_currentWorkingDirectory =  QCoreApplication::applicationDirPath();
-
-}
-
-void CogWheelConnection::start()
-{
-    m_controlChannelSocket = new QTcpSocket();
-
-    if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
-        qWarning () << "CogWheelConnection error setting up socket";
-        return;
-    }
-
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten);
-
-    sendReply(200);
 
 }
 
@@ -44,7 +26,48 @@ void CogWheelConnection::processFTPCommand(QString command)
 
 }
 
-void CogWheelConnection::sendReply(quint16 replyCode, QString message)
+void CogWheelConnection::open(qint64 socketHandle)
+{
+        m_controlChannelSocket = new QTcpSocket();
+
+        m_socketHandle = socketHandle;
+        if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
+            qWarning () << "CogWheelConnection error setting up socket";
+            return;
+        }
+
+        connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten, Qt::DirectConnection);
+
+        sendReplyCode(200);
+
+}
+
+void CogWheelConnection::close()
+{
+    qDebug() << "CogWheelConnection::close(): " << m_socketHandle;
+
+    if (m_controlChannelSocket == nullptr) {
+        qWarning() << "m_controlChannelSocket == nullptr";
+        return;
+    }
+
+    m_controlChannelSocket->close();
+    m_controlChannelSocket->deleteLater();
+
+    if ( m_dataChannel.m_dataChannelSocket == nullptr) {
+        qWarning() << " m_dataChannel.m_dataChannelSocket == nullptr";
+        return;
+    }
+
+    m_dataChannel.m_dataChannelSocket->close();
+    m_dataChannel.m_dataChannelSocket->deleteLater();
+
+}
+
+void CogWheelConnection::sendReplyCode(quint16 replyCode, QString message)
 {
 
     QString replyStr { QString::number(replyCode) + " " + message + "\r\n"};
@@ -54,25 +77,15 @@ void CogWheelConnection::sendReply(quint16 replyCode, QString message)
 
 }
 
-void CogWheelConnection::sendReply(quint16 replyCode)
+void CogWheelConnection::sendReplyCode(quint16 replyCode)
 {
-    sendReply(replyCode, CogWheelFTPCore::getResponseText(replyCode));
+    sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
 }
 
-void CogWheelConnection::sendData(QString reponse)
+void CogWheelConnection::sendOnDataChannel(QString data)
 {
-
-//    if (m_dataChannel->m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-//        qDebug() << "NOT CONNECTED BUT " << m_dataChannel->m_dataChannelSocket->state();
-//    }
-
-    QByteArray reply { reponse.toUtf8() };
-    m_dataChannel.m_dataChannelSocket->write(reply.data());
-    qDebug() << "Data [" << reply.data() << "]";
-//    if (m_dataChannel->m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
-//        qDebug() << "CONNECTED.";
-//    }
-
+    m_dataChannel.m_dataChannelSocket->write(data.toUtf8().data());
+    qDebug() << "Data [" << data.toUtf8().data() << "]";
 }
 
 void CogWheelConnection::connected()

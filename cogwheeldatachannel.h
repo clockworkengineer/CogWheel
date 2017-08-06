@@ -9,9 +9,10 @@
 class CogWheelDataChannel : public QObject
 {
     Q_OBJECT
+
 public:
     explicit CogWheelDataChannel(QObject *parent = nullptr);
-    void startChannel();
+
     void connectToClient();
     void disconnectFromClient();
     void setClientHostIP(QString clientIP);
@@ -20,6 +21,7 @@ public:
 signals:
 
 public slots:
+
     void connected();
     void disconnected();
     void stateChanged(QAbstractSocket::SocketState socketState);
