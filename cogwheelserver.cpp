@@ -30,7 +30,7 @@ void CogWheelServer::stopServer()
 
 void CogWheelServer::incomingConnection(qintptr handle)
 {
-    qDebug() << "CogWheelServer incomingConnection" << handle;
+    qDebug() << "--- CogWheelServer incomingConnection ---" << handle;
 
     emit acceptConnection(handle);
 

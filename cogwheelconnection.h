@@ -20,8 +20,8 @@ public:
 
     QString password() const;
     void setPassword(const QString &password);
-    QString user() const;
-    void setUser(const QString &user);
+    QString userName() const;
+    void setUserName(const QString &userName);
     QString currentWorkingDirectory() const;
     void setCurrentWorkingDirectory(const QString &currentWorkingDirectory);
     bool passive() const;
@@ -49,15 +49,19 @@ signals:
 public slots:
     void openConnection(qint64 socketHandle);
     void closeConnection();
+    void uploadFinished();
+    void dataChannelSocketError(QAbstractSocket::SocketError socketError);
+    void passiveConnection();
 
     void connected();
     void disconnected();
     void readyRead();
     void bytesWritten(qint64 numberOfBytes);
 
+
 private:
 
-    QString m_user;
+    QString m_userName;
     QString m_password;
     QString m_currentWorkingDirectory;
     bool m_passive=false;
@@ -67,6 +71,7 @@ private:
     QThread *m_connectionThread;
     QTcpSocket *m_controlChannelSocket;
     CogWheelDataChannel *m_dataChannel;
+    QString m_readBufer;
     qintptr m_socketHandle;
 
 };

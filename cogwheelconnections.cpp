@@ -20,6 +20,8 @@ void CogWheelConnections::acceptConnection(qint64 handle)
         return;
     }
 
+        qDebug() << "CONN:" << connection;
+
     connection->setConnectionThread( new QThread());
 
     if (connection->connectionThread()==nullptr) {
@@ -33,6 +35,8 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     connection->connectionThread()->start();
 
+    disconnect(this, &CogWheelConnections::openConnection,0,0);
+
     connect(this,&CogWheelConnections::openConnection, connection, &CogWheelConnection::openConnection);
     connect(connection,&CogWheelConnection::finishedConnection,this, &CogWheelConnections::finishedConnection);
     connect(connection,&CogWheelConnection::abortedConnection,this, &CogWheelConnections::finishedConnection);
@@ -40,6 +44,8 @@ void CogWheelConnections::acceptConnection(qint64 handle)
     connect(connection->connectionThread(),&QThread::finished,connection->connectionThread(), &QThread::deleteLater );
 
     emit openConnection(handle);
+
+    qDebug() << "NUMBER OF CONNECTIONS: " << m_connections.size();
 
 }
 
@@ -53,7 +59,9 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     }
 
     CogWheelConnection *connection = m_connections[handle];
+
     m_connections.remove(handle);
+//    disconnect(connection);
     connection->deleteLater();
 
 }
