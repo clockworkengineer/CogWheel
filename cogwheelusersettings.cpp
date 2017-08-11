@@ -1,4 +1,5 @@
 #include "cogwheelusersettings.h"
+#include <QtCore>
 
 CogWheelUserSettings::CogWheelUserSettings(QObject *parent) : QObject(parent)
 {
@@ -44,7 +45,7 @@ bool CogWheelUserSettings::checkPassword(const QString& userName, const QString&
     encryptedPassword = userSettings.value("password").toString();
     userSettings.endGroup();
 
-    return(encryptedPassword == password);
+    return(encryptedPassword==password);
 }
 
 QString CogWheelUserSettings::getHomePath(const QString &userName)

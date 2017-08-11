@@ -14,9 +14,11 @@ class CogWheelConnection : public QObject
 public:
     explicit CogWheelConnection(QObject *parent = nullptr);
 
-    void sendReplyCode(quint16 replyCode, QString message);
+    void sendReplyCode(quint16 replyCode, const QString &message);
     void sendReplyCode(quint16 replyCode);
-    void sendOnDataChannel(QString data);
+
+    void sendOnControlChannel(const QString &data);
+    void sendOnDataChannel(const QString &data);
 
     QString password() const;
     void setPassword(const QString &password);

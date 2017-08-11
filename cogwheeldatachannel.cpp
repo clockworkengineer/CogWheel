@@ -41,9 +41,9 @@ bool CogWheelDataChannel::connectToClient(CogWheelConnection *connection)
         qDebug() << "Waiting";
    //     while(m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
             waitForNewConnection(-1);
-            if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-                qDebug() << "Not Connected" << m_dataChannelSocket->state();
-            }
+           // if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
+           //     qDebug() << "Not Connected" << m_dataChannelSocket->state();
+          //  }
    //     }
         connection->sendReplyCode(125);
 
@@ -145,7 +145,7 @@ void CogWheelDataChannel::downloadFile(CogWheelConnection *connection, QString f
         //Send the contents of the file
         while (!file.atEnd()) {
             QByteArray buffer = file.read(1024 * 8);
-            connection->sendOnDataChannel(buffer);
+            connection->sendOnDataChannel(QString(buffer));
         }
 
         //Close the file

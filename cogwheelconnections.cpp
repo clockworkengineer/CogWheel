@@ -20,8 +20,6 @@ void CogWheelConnections::acceptConnection(qint64 handle)
         return;
     }
 
-        qDebug() << "CONN:" << connection;
-
     connection->setConnectionThread( new QThread());
 
     if (connection->connectionThread()==nullptr) {
@@ -61,7 +59,6 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     CogWheelConnection *connection = m_connections[handle];
 
     m_connections.remove(handle);
-//    disconnect(connection);
     connection->deleteLater();
 
 }

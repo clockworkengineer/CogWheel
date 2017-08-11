@@ -40,6 +40,25 @@ private:
     static void MODE(CogWheelConnection *connection, QStringList commandAndArgments);
     static void STOR(CogWheelConnection *connection, QStringList commandAndArgments);
     static void PASV(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void HELP(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void STAT(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void SITE(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void NLST(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void MKD(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void RMD(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void DELE(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void ACCT(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void SMNT(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void QUIT(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void REIN(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void STRU(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void STOU(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void APPE(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void ALLO(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void REST(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void RNFR(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void RNTO(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void ABOR(CogWheelConnection *connection, QStringList commandAndArgments);
 
 signals:
 
@@ -47,6 +66,7 @@ public slots:
 
 public:
 
+    static QMap<QString, FTPCommandFunction> m_unauthorizedCommandTable;
     static QMap<QString, FTPCommandFunction> m_ftpCommandTable;
     static QMap<quint16, QString> m_ftpServerResponse;
 

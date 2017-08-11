@@ -18,11 +18,16 @@ void CogWheelConnection::processFTPCommand(QString command)
 
     command.chop(2);
 
-   // qDebug() << "[" << command.mid(0, command.indexOf(' ')) << "]";
-
-    commandAndArguments = command.split(' ');// TODO SPLIT ALTERNATIVE
+    if (command.contains(' ')) {
+        commandAndArguments.append(command.mid(0, command.indexOf(' ')));
+        command.remove(0, command.indexOf(' ')+1);
+    }
+    commandAndArguments.append(command);
 
     qDebug() << "Command = [" << commandAndArguments[0] << "]";
+    if (commandAndArguments.size()>1) {
+         qDebug() << "Arguments = [" << commandAndArguments[1] << "]";
+    }
 
     CogWheelFTPCore::performCommand(this, commandAndArguments);
 
@@ -50,7 +55,7 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
 
     connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::dataChannelSocketError, this, &CogWheelConnection::dataChannelSocketError, Qt::DirectConnection);
-      connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
 
     sendReplyCode(200);
 
@@ -66,7 +71,6 @@ void CogWheelConnection::closeConnection()
     }
 
     m_controlChannelSocket->close();
-//    disconnect(m_controlChannelSocket);
     m_controlChannelSocket->deleteLater();
 
     if ( m_dataChannel->m_dataChannelSocket == nullptr) {
@@ -75,9 +79,7 @@ void CogWheelConnection::closeConnection()
     }
 
     m_dataChannel->m_dataChannelSocket->close();
-//    disconnect(m_dataChannel->m_dataChannelSocket);
     m_dataChannel->m_dataChannelSocket->deleteLater();
-
     m_dataChannel->deleteLater();
 
     emit finishedConnection(m_socketHandle);
@@ -86,7 +88,6 @@ void CogWheelConnection::closeConnection()
 
 void CogWheelConnection::uploadFinished()
 {
-    qDebug() << "UPLOAD FINISHED";
     sendReplyCode(226);
 }
 
@@ -97,21 +98,25 @@ void CogWheelConnection::dataChannelSocketError(QAbstractSocket::SocketError soc
 
 void CogWheelConnection::passiveConnection()
 {
-    QString ipAddress = m_dataChannel->clientHostIP().toString().replace(".",",");
-    ipAddress.append(","+QString::number(m_dataChannel->clientHostPort()>>8));
-    ipAddress.append(","+QString::number(m_dataChannel->clientHostPort()&0xFF));
-    sendReplyCode(227,"Entering Passive Mode (" + ipAddress + ").");
-    qDebug() << "STATE" << m_dataChannel->m_dataChannelSocket->state();
+    QString passiveChannelAddress = m_dataChannel->clientHostIP().toString().replace(".",",");
+
+    passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()>>8));
+    passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()&0xFF));
+    sendReplyCode(227,"Entering Passive Mode (" + passiveChannelAddress + ").");
 
 }
 
-void CogWheelConnection::sendReplyCode(quint16 replyCode, QString message)
+void CogWheelConnection::sendOnControlChannel(const QString &data) {
+    QByteArray reply { data.toUtf8() };
+    m_controlChannelSocket->write(reply.data());
+}
+
+void CogWheelConnection::sendReplyCode(quint16 replyCode,const QString &message)
 {
 
     QString replyStr { QString::number(replyCode) + " " + message + "\r\n"};
     QByteArray reply { replyStr.toUtf8() };
     m_controlChannelSocket->write(reply.data());
-    //    qDebug() << "SendReply [" << replyStr << "]";
 
 }
 
@@ -120,10 +125,11 @@ void CogWheelConnection::sendReplyCode(quint16 replyCode)
     sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
 }
 
-void CogWheelConnection::sendOnDataChannel(QString data)
+void CogWheelConnection::sendOnDataChannel(const QString &data)
 {
 
-  m_dataChannel->m_dataChannelSocket->write(data.toUtf8().data());
+  QByteArray reply { data.toUtf8() };
+  m_dataChannel->m_dataChannelSocket->write(reply.data());
 
 }
 
@@ -142,7 +148,6 @@ void CogWheelConnection::disconnected()
 
 void CogWheelConnection::readyRead()
 {
-    //   qDebug() << "CogWheelConnection readReady";
 
     m_readBufer.append(m_controlChannelSocket->readAll());
 
@@ -155,7 +160,7 @@ void CogWheelConnection::readyRead()
 
 void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
 {
-    // qDebug() << "CogWheelConnection bytesWritten" << numberOfBytes;
+
 }
 
 qintptr CogWheelConnection::socketHandle() const
