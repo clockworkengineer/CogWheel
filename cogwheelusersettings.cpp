@@ -16,7 +16,7 @@ void CogWheelUserSettings::defaultSettings()
 
    defaultSettings.beginGroup("guest");
    defaultSettings.setValue("password","password");
-   defaultSettings.setValue("home", "/home/robt");
+   defaultSettings.setValue("root", "/home/robt");
    defaultSettings.setValue("passive", "false");
    defaultSettings.endGroup();
 
@@ -35,7 +35,7 @@ bool CogWheelUserSettings::checkUserName(const QString& userName)
 
 }
 
-bool CogWheelUserSettings::checkPassword(const QString& userName, const QString& password)
+bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QString& password)
 {
 
     QSettings  userSettings;
@@ -48,15 +48,15 @@ bool CogWheelUserSettings::checkPassword(const QString& userName, const QString&
     return(encryptedPassword==password);
 }
 
-QString CogWheelUserSettings::getHomePath(const QString &userName)
+QString CogWheelUserSettings::getRootPath(const QString &userName)
 {
     QSettings  userSettings;
-    QString homePath;
+    QString rootPath;
 
     userSettings.beginGroup(userName);
-    homePath = userSettings.value("home").toString();
+    rootPath = userSettings.value("root").toString();
     userSettings.endGroup();
 
-    return(homePath);
+    return(rootPath);
 
 }

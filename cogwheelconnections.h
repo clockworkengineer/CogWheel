@@ -10,6 +10,7 @@ class CogWheelConnections : public QObject
     Q_OBJECT
 
 public:
+
     explicit CogWheelConnections(QObject *parent = nullptr);
 
 signals:

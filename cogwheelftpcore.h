@@ -66,7 +66,7 @@ public slots:
 
 public:
 
-    static QMap<QString, FTPCommandFunction> m_unauthorizedCommandTable;
+    static QMap<QString, FTPCommandFunction> m_unauthCommandTable;
     static QMap<QString, FTPCommandFunction> m_ftpCommandTable;
     static QMap<quint16, QString> m_ftpServerResponse;
 

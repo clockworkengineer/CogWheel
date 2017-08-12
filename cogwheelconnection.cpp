@@ -26,7 +26,7 @@ void CogWheelConnection::processFTPCommand(QString command)
 
     qDebug() << "Command = [" << commandAndArguments[0] << "]";
     if (commandAndArguments.size()>1) {
-         qDebug() << "Arguments = [" << commandAndArguments[1] << "]";
+        qDebug() << "Arguments = [" << commandAndArguments[1] << "]";
     }
 
     CogWheelFTPCore::performCommand(this, commandAndArguments);
@@ -44,18 +44,30 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
 
     m_socketHandle = socketHandle;
     if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
-        qWarning () << "CogWheelConnection error setting up socket";
+        qWarning () << "Error setting up socket for control channel.";
         return;
     }
+
+    QHostAddress host = m_controlChannelSocket->peerAddress();
+    m_clientHostIP = host.toString();
+    m_clientHostIP.remove(0,QString("::ffff:").length());
+
+    host = m_controlChannelSocket->localAddress();
+    m_serverIP = host.toString();
+    m_serverIP.remove(0,QString("::ffff:").length());
+
+    qDebug() << "Opened control channel from " << m_clientHostIP;
+    qDebug() << "Opened control channel to " << m_serverIP;
+
 
     connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected, Qt::DirectConnection);
     connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected, Qt::DirectConnection);
     connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead, Qt::DirectConnection);
     connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten, Qt::DirectConnection);
 
-    connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::dataChannelSocketError, this, &CogWheelConnection::dataChannelSocketError, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
+    connect(m_dataChannel,&CogWheelDataChannel::dataChannelUploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::dataChannelError, this, &CogWheelConnection::dataChannelError, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::dataChannelPassiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
 
     sendReplyCode(200);
 
@@ -91,9 +103,9 @@ void CogWheelConnection::uploadFinished()
     sendReplyCode(226);
 }
 
-void CogWheelConnection::dataChannelSocketError(QAbstractSocket::SocketError socketError)
+void CogWheelConnection::dataChannelError(QString errorNessage)
 {
-    qDebug() << "CogWheelConnection::dataChannelSocketError: " << socketError;
+    qDebug() << "CogWheelConnection::dataChannelError: " << errorNessage;
 }
 
 void CogWheelConnection::passiveConnection()
@@ -103,6 +115,7 @@ void CogWheelConnection::passiveConnection()
     passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()>>8));
     passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()&0xFF));
     sendReplyCode(227,"Entering Passive Mode (" + passiveChannelAddress + ").");
+    qDebug() << "Entering Passive Mode (" + passiveChannelAddress + ").";
 
 }
 
@@ -128,8 +141,8 @@ void CogWheelConnection::sendReplyCode(quint16 replyCode)
 void CogWheelConnection::sendOnDataChannel(const QString &data)
 {
 
-  QByteArray reply { data.toUtf8() };
-  m_dataChannel->m_dataChannelSocket->write(reply.data());
+    QByteArray reply { data.toUtf8() };
+    m_dataChannel->m_dataChannelSocket->write(reply.data());
 
 }
 
@@ -161,6 +174,76 @@ void CogWheelConnection::readyRead()
 void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
 {
 
+}
+
+QString CogWheelConnection::serverIP() const
+{
+    return m_serverIP;
+}
+
+void CogWheelConnection::setServerIP(const QString &serverIP)
+{
+    m_serverIP = serverIP;
+}
+
+QString CogWheelConnection::clientHostIP() const
+{
+    return m_clientHostIP;
+}
+
+void CogWheelConnection::setClientHostIP(const QString &clientHostIP)
+{
+    m_clientHostIP = clientHostIP;
+}
+
+qint64 CogWheelConnection::restoreFilePostion() const
+{
+    return m_restoreFilePostion;
+}
+
+void CogWheelConnection::setRestoreFilePostion(const qint64 &restoreFilePostion)
+{
+    m_restoreFilePostion = restoreFilePostion;
+}
+
+QString CogWheelConnection::renameFromFileName() const
+{
+    return m_renameFromFileName;
+}
+
+void CogWheelConnection::setRenameFromFileName(const QString &renameFromFileName)
+{
+    m_renameFromFileName = renameFromFileName;
+}
+
+bool CogWheelConnection::allowSMNT() const
+{
+    return m_allowSMNT;
+}
+
+void CogWheelConnection::setAllowSMNT(bool allowSMT)
+{
+    m_allowSMNT = allowSMT;
+}
+
+QString CogWheelConnection::accountName() const
+{
+    return m_accountName;
+}
+
+void CogWheelConnection::setAccountName(const QString &accountName)
+{
+    m_accountName = accountName;
+}
+
+QString CogWheelConnection::rootDirectory() const
+{
+    return m_rootDirectory;
+}
+
+void CogWheelConnection::setRootDirectory(const QString &rootDirectory)
+{
+    m_rootDirectory = rootDirectory;
 }
 
 qintptr CogWheelConnection::socketHandle() const
