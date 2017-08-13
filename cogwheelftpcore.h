@@ -12,53 +12,55 @@ class CogWheelFTPCore : public QObject
 {
     Q_OBJECT
 
-    typedef std::function<void (CogWheelConnection *, QStringList) > FTPCommandFunction;
+    typedef std::function<void (CogWheelConnection *, QString) > FTPCommandFunction;
 
 public:
     explicit CogWheelFTPCore(QObject *parent = nullptr);
 
-    static void performCommand(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void performCommand(CogWheelConnection *connection, const QString &command, const QString &arguments);
     static QString buildLISTLine(QFileInfo &file);
     static QString getResponseText(quint16 responseCode);
 
 private:
-    static QString buildCWDPath(CogWheelConnection *connection, const QString& path);
-    static QString buildFilePath(CogWheelConnection *connection, const QString &file);
+//    static QString buildCWDPath(CogWheelConnection *connection, const QString& path);
+//    static QString buildFilePath(CogWheelConnection *connection, const QString &file);
+    static QString mapPathToLocal(CogWheelConnection *connection, const QString& path);
+    static QString mapPathFromLocal(CogWheelConnection *connection, const QString& path);
 
-    static void USER(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void LIST(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void FEAT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void SYST(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void PWD(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void TYPE(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void PORT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void CWD(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void PASS(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void CDUP(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void RETR(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void NOOP(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void MODE(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void STOR(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void PASV(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void HELP(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void STAT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void SITE(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void NLST(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void MKD(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void RMD(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void DELE(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void ACCT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void SMNT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void QUIT(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void REIN(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void STRU(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void STOU(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void APPE(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void ALLO(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void REST(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void RNFR(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void RNTO(CogWheelConnection *connection, QStringList commandAndArgments);
-    static void ABOR(CogWheelConnection *connection, QStringList commandAndArgments);
+    static void USER(CogWheelConnection *connection, QString arguments);
+    static void LIST(CogWheelConnection *connection, QString arguments);
+    static void FEAT(CogWheelConnection *connection, QString arguments);
+    static void SYST(CogWheelConnection *connection, QString arguments);
+    static void PWD(CogWheelConnection *connection, QString arguments);
+    static void TYPE(CogWheelConnection *connection, QString arguments);
+    static void PORT(CogWheelConnection *connection, QString arguments);
+    static void CWD(CogWheelConnection *connection, QString arguments);
+    static void PASS(CogWheelConnection *connection, QString arguments);
+    static void CDUP(CogWheelConnection *connection, QString arguments);
+    static void RETR(CogWheelConnection *connection, QString arguments);
+    static void NOOP(CogWheelConnection *connection, QString arguments);
+    static void MODE(CogWheelConnection *connection, QString arguments);
+    static void STOR(CogWheelConnection *connection, QString arguments);
+    static void PASV(CogWheelConnection *connection, QString arguments);
+    static void HELP(CogWheelConnection *connection, QString arguments);
+    static void STAT(CogWheelConnection *connection, QString arguments);
+    static void SITE(CogWheelConnection *connection, QString arguments);
+    static void NLST(CogWheelConnection *connection, QString arguments);
+    static void MKD(CogWheelConnection *connection, QString arguments);
+    static void RMD(CogWheelConnection *connection, QString arguments);
+    static void DELE(CogWheelConnection *connection, QString arguments);
+    static void ACCT(CogWheelConnection *connection, QString arguments);
+    static void SMNT(CogWheelConnection *connection, QString arguments);
+    static void QUIT(CogWheelConnection *connection, QString arguments);
+    static void REIN(CogWheelConnection *connection, QString arguments);
+    static void STRU(CogWheelConnection *connection, QString arguments);
+    static void STOU(CogWheelConnection *connection, QString arguments);
+    static void APPE(CogWheelConnection *connection, QString arguments);
+    static void ALLO(CogWheelConnection *connection, QString arguments);
+    static void REST(CogWheelConnection *connection, QString arguments);
+    static void RNFR(CogWheelConnection *connection, QString arguments);
+    static void RNTO(CogWheelConnection *connection, QString arguments);
+    static void ABOR(CogWheelConnection *connection, QString arguments);
 
 signals:
 
@@ -66,9 +68,9 @@ public slots:
 
 public:
 
-    static QMap<QString, FTPCommandFunction> m_unauthCommandTable;
-    static QMap<QString, FTPCommandFunction> m_ftpCommandTable;
-    static QMap<quint16, QString> m_ftpServerResponse;
+    static QHash<QString, FTPCommandFunction> m_unauthCommandTable;
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;
+    static QHash<quint16, QString> m_ftpServerResponse;
 
 };
 

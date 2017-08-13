@@ -34,7 +34,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelConnection *connection)
         qDebug() << "Active Mode. Connecting data channel to client ....";
 
         m_dataChannelSocket->connectToHost(m_clientHostIP, m_clientHostPort);
-        m_dataChannelSocket->waitForConnected();
+        m_dataChannelSocket->waitForConnected(-1);
         connection->sendReplyCode(150);
 
     } else {
@@ -69,6 +69,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelConnection *connection)
     if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
         m_dataChannelSocket->disconnectFromHost();
         m_dataChannelSocket->waitForDisconnected(-1);
+        connection->sendReplyCode(226);
     } else {
         qDebug() << "Data channel socket not connected.";
     }
@@ -206,6 +207,7 @@ void CogWheelDataChannel::dataChannelDisconnect()
     if (m_fileBeingUploaded) {
         m_fileBeingUploaded=false;
         m_transferFileName="";
+        m_connected=false;
         emit dataChannelUploadFinished();
     }
 
@@ -229,11 +231,12 @@ void CogWheelDataChannel::dataChannelReadyRead()
 
         QFile file(m_transferFileName);
 
-        if(!file.open(QFile::Append))
-        {
+        if(!file.open(QFile::Append)) {
             emit dataChannelError("Could not open file!");
             return;
         }
+
+        qDebug() << "STATE =" << m_dataChannelSocket->state();
 
         QByteArray buffer = m_dataChannelSocket->readAll();
         file.write(buffer);
@@ -243,9 +246,9 @@ void CogWheelDataChannel::dataChannelReadyRead()
 
 void CogWheelDataChannel::dataChannelSocketError(QAbstractSocket::SocketError socketError)
 {
-    qDebug() << "CogWheelDataChannel::error()";
+    qDebug() << "dataChannelSocketError" << socketError;
 
-    emit dataChannelSocketError(socketError);
+  //  emit dataChannelSocketError(socketError);
 
 }
 

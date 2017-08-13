@@ -6,30 +6,24 @@
 CogWheelConnection::CogWheelConnection(QObject *parent) : QObject(parent)
 {
 
-    //  qDebug() << "CogWheelConnection creation";
-
-    m_currentWorkingDirectory =  QCoreApplication::applicationDirPath();
-
 }
 
-void CogWheelConnection::processFTPCommand(QString command)
+void CogWheelConnection::processFTPCommand(QString commandLine)
 {
-    QStringList commandAndArguments;
+    QString command;
+    QString arguments;
 
-    command.chop(2);
+    commandLine.chop(2);
 
-    if (command.contains(' ')) {
-        commandAndArguments.append(command.mid(0, command.indexOf(' ')));
-        command.remove(0, command.indexOf(' ')+1);
-    }
-    commandAndArguments.append(command);
-
-    qDebug() << "Command = [" << commandAndArguments[0] << "]";
-    if (commandAndArguments.size()>1) {
-        qDebug() << "Arguments = [" << commandAndArguments[1] << "]";
+    if (commandLine.contains(' ')) {
+        command = commandLine.mid(0, commandLine.indexOf(' '));
+        commandLine.remove(0, commandLine.indexOf(' ')+1);
+        arguments = commandLine;
+    } else {
+        command = commandLine;
     }
 
-    CogWheelFTPCore::performCommand(this, commandAndArguments);
+    CogWheelFTPCore::performCommand(this, command.toUpper(), arguments);
 
 }
 
@@ -59,15 +53,16 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
     qDebug() << "Opened control channel from " << m_clientHostIP;
     qDebug() << "Opened control channel to " << m_serverIP;
 
-
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::controlChannelConnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::controlChannelDisconnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::controlChannelReadyRead, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::controlChannelBytesWritten, Qt::DirectConnection);
 
     connect(m_dataChannel,&CogWheelDataChannel::dataChannelUploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::dataChannelError, this, &CogWheelConnection::dataChannelError, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::dataChannelPassiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
+
+    setConnected(true);
 
     sendReplyCode(200);
 
@@ -77,6 +72,11 @@ void CogWheelConnection::closeConnection()
 {
     qDebug() << "CogWheelConnection::close(): " << m_socketHandle;
 
+    if (!connected()) {
+        qDebug() << "Control Channel already disconnected.";
+        return;
+    }
+
     if (m_controlChannelSocket == nullptr) {
         qWarning() << "m_controlChannelSocket == nullptr";
         return;
@@ -84,6 +84,7 @@ void CogWheelConnection::closeConnection()
 
     m_controlChannelSocket->close();
     m_controlChannelSocket->deleteLater();
+    m_controlChannelSocket = nullptr;
 
     if ( m_dataChannel->m_dataChannelSocket == nullptr) {
         qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
@@ -93,6 +94,9 @@ void CogWheelConnection::closeConnection()
     m_dataChannel->m_dataChannelSocket->close();
     m_dataChannel->m_dataChannelSocket->deleteLater();
     m_dataChannel->deleteLater();
+    m_dataChannel = nullptr;
+
+    setConnected(false);
 
     emit finishedConnection(m_socketHandle);
 
@@ -146,12 +150,12 @@ void CogWheelConnection::sendOnDataChannel(const QString &data)
 
 }
 
-void CogWheelConnection::connected()
+void CogWheelConnection::controlChannelConnected()
 {
     qDebug() << "CogWheelConnection connected...";
 }
 
-void CogWheelConnection::disconnected()
+void CogWheelConnection::controlChannelDisconnected()
 {
     qDebug() << "CogWheelConnection disconnected.";
 
@@ -159,7 +163,7 @@ void CogWheelConnection::disconnected()
 
 }
 
-void CogWheelConnection::readyRead()
+void CogWheelConnection::controlChannelReadyRead()
 {
 
     m_readBufer.append(m_controlChannelSocket->readAll());
@@ -171,9 +175,49 @@ void CogWheelConnection::readyRead()
 
 }
 
-void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
+void CogWheelConnection::controlChannelBytesWritten(qint64 numberOfBytes)
 {
 
+}
+
+QChar CogWheelConnection::transferType() const
+{
+    return m_transferType;
+}
+
+void CogWheelConnection::setTransferType(const QChar &transferType)
+{
+    m_transferType = transferType;
+}
+
+QChar CogWheelConnection::fileStructure() const
+{
+    return m_fileStructure;
+}
+
+void CogWheelConnection::setFileStructure(const QChar &fileStructure)
+{
+    m_fileStructure = fileStructure;
+}
+
+QChar CogWheelConnection::transferMode() const
+{
+    return m_transferMode;
+}
+
+void CogWheelConnection::setTransferMode(const QChar &tranfersMode)
+{
+    m_transferMode = tranfersMode;
+}
+
+bool CogWheelConnection::connected() const
+{
+    return m_connected;
+}
+
+void CogWheelConnection::setConnected(bool connected)
+{
+    m_connected = connected;
 }
 
 QString CogWheelConnection::serverIP() const
@@ -244,6 +288,9 @@ QString CogWheelConnection::rootDirectory() const
 void CogWheelConnection::setRootDirectory(const QString &rootDirectory)
 {
     m_rootDirectory = rootDirectory;
+    if (m_rootDirectory.endsWith('\'')) {
+        m_rootDirectory.chop(1);
+    }
 }
 
 qintptr CogWheelConnection::socketHandle() const
@@ -324,7 +371,8 @@ QString CogWheelConnection::currentWorkingDirectory() const
 void CogWheelConnection::setCurrentWorkingDirectory(const QString &currentWorkingDirectory)
 {
     m_currentWorkingDirectory = currentWorkingDirectory;
-    if(!m_currentWorkingDirectory.endsWith('/')); {
+
+    if(m_currentWorkingDirectory.isEmpty()) {
         m_currentWorkingDirectory.append('/');
     }
 

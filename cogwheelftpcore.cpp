@@ -4,13 +4,13 @@
 #include <QDir>
 #include <QDateTime>
 
-QMap<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCommandTable = {
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCommandTable = {
     {"USER", CogWheelFTPCore::USER },
     {"PASS", CogWheelFTPCore::PASS },
     {"TYPE", CogWheelFTPCore::TYPE },
 };
 
-QMap<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable = {
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable = {
     {"USER", CogWheelFTPCore::USER },
     {"PASS", CogWheelFTPCore::PASS },
     {"LIST", CogWheelFTPCore::LIST },
@@ -46,7 +46,7 @@ QMap<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommand
     {"APPE", CogWheelFTPCore::APPE},
 };
 
-QMap<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
+QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
     {110,"Restart marker reply."},
     {120,"Service ready in nnn minutes."},
     {125,"Data connection already open; transfer starting."},
@@ -98,7 +98,14 @@ QString CogWheelFTPCore::buildLISTLine(QFileInfo &file)
     QString line;
     QString temp;
 
-    line.append(file.isDir() ? 'd' : '-');
+    if (file.isSymLink()) {
+        line.append('l');
+    } else if (file.isDir()){
+        line.append('d');
+    } else {
+        line.append('-');
+    }
+
     line.append((file.permissions() & QFile::ReadUser) ? 'r' : '-');
     line.append((file.permissions() & QFile::WriteUser) ? 'w' : '-');
     line.append((file.permissions() & QFile::ExeUser) ? 'x' : '-');
@@ -113,8 +120,7 @@ QString CogWheelFTPCore::buildLISTLine(QFileInfo &file)
 
     temp = file.owner();
 
-    if(temp == "")
-    {
+    if(temp == "") {
         temp = "0";
     }
 
@@ -124,8 +130,7 @@ QString CogWheelFTPCore::buildLISTLine(QFileInfo &file)
     //padded by 10 and left justified
     temp = file.group();
 
-    if(temp == "")
-    {
+    if(temp == "") {
         temp = "0";
     }
 
@@ -145,7 +150,9 @@ QString CogWheelFTPCore::buildLISTLine(QFileInfo &file)
 
     line.append(file.fileName());
     line.append("\r\n");
+
     return(line);
+
 }
 
 QString CogWheelFTPCore::getResponseText(quint16 responseCode)
@@ -157,66 +164,94 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
     }
 }
 
-QString CogWheelFTPCore::buildCWDPath(CogWheelConnection *connection, const QString &path)
+QString CogWheelFTPCore::mapPathToLocal(CogWheelConnection *connection, const QString &path)
 {
+
+    QString mappedLocalPath;
 
     if (path.startsWith('/')) {
-        return(path);
+        mappedLocalPath = connection->rootDirectory()+path;
     } else {
-        return(connection->currentWorkingDirectory()+path);
+        mappedLocalPath = connection->rootDirectory()+connection->currentWorkingDirectory();
+        if (connection->currentWorkingDirectory()=="/") {
+            mappedLocalPath += path;
+        } else {
+            mappedLocalPath += ("/" + path);
+        }
     }
 
+    qDebug() << "Mapping local " << path << " to " << mappedLocalPath;
+
+    return(mappedLocalPath);
 }
 
-QString CogWheelFTPCore::buildFilePath(CogWheelConnection *connection, const QString &file)
+QString CogWheelFTPCore::mapPathFromLocal(CogWheelConnection *connection, const QString &path)
 {
 
-    if (file.startsWith('/')) {
-        return(file);
-    } else {
-        return(connection->currentWorkingDirectory()+file);
+    QString mappedPath { QFileInfo(path).absoluteFilePath()};
+
+    qDebug() << "mapped path : " << mappedPath;
+
+    // Strip off root path
+
+    if (mappedPath.startsWith(connection->rootDirectory())) {
+        mappedPath = mappedPath.remove(0,connection->rootDirectory().length());
+
+        // If trying to go above root then reset to root
+
+    } else if (mappedPath.length() < connection->rootDirectory().length()){
+        qDebug() << "Have gone above root so reset.";
+        mappedPath = "";
     }
 
+    qDebug() << "Mapping local from " << path << " to " << mappedPath;
+
+    return(mappedPath);
 }
 
-void CogWheelFTPCore::performCommand(CogWheelConnection *connection, QStringList commandAndArgments)
+
+void CogWheelFTPCore::performCommand(CogWheelConnection *connection, const QString &command, const QString &arguments)
 {
 
     try {
-        QString upperCaseCommand=commandAndArgments[0];
-        upperCaseCommand=upperCaseCommand.toUpper();
-        if (m_ftpCommandTable.contains(upperCaseCommand)) {
+
+        qDebug() << "COMMAND : [" << command << "]  ARGUMENT [" << arguments << "]";
+
+        if (m_ftpCommandTable.contains(command)) {
+
             if (connection->authorized()) {
-                FTPCommandFunction command=m_ftpCommandTable[upperCaseCommand];
-                command(connection, commandAndArgments);
-            } else if (m_unauthCommandTable.contains(upperCaseCommand)) {
-                FTPCommandFunction command=m_unauthCommandTable[upperCaseCommand];
-                command(connection, commandAndArgments);
+                FTPCommandFunction commandFn=m_ftpCommandTable[command];
+                commandFn(connection, arguments);
+            } else if (m_unauthCommandTable.contains(command)) {
+                FTPCommandFunction commandFn=m_unauthCommandTable[command];
+                commandFn(connection, arguments);
             } else {
                 connection->sendReplyCode(530, "Please login with USER and PASS");
             }
+
         } else {
-            qWarning() << "Unsupported FTP command [" << commandAndArgments[0] << "]";
+            qWarning() << "Unsupported FTP command [" << command << "]";
             connection->sendReplyCode(500);
         }
+
 
     } catch(QString err) {
         connection->sendReplyCode(550,err);
     } catch(...) {
-        connection->sendReplyCode(550, "Unknown error handling " + commandAndArgments[0] + " command.");
+        connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
     }
 
 }
-void CogWheelFTPCore::USER(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::USER(CogWheelConnection *connection, QString arguments)
 {
 
     // Anonymous login
 
-    if (commandAndArgments[1]=="anonymous") {
+    if (arguments=="anonymous") {
 
         connection->setAnonymous(true);
 
-    } else if (!CogWheelUserSettings::checkUserName(commandAndArgments[1])) {
+    } else if (!CogWheelUserSettings::checkUserName(arguments)) {
 
         // User does not exist
 
@@ -227,15 +262,19 @@ void CogWheelFTPCore::USER(CogWheelConnection *connection, QStringList commandAn
 
     // Set user name
 
-    connection->setUserName(commandAndArgments[1]);
+    connection->setUserName(arguments);
 
     // Set intial workign directory
 
     if (!connection->anonymous()) {
-        connection->setCurrentWorkingDirectory(CogWheelUserSettings::getRootPath(connection->userName()));
+        connection->setRootDirectory(CogWheelUserSettings::getRootPath(connection->userName()));
     } else {
-        connection->setCurrentWorkingDirectory("");
+        connection->setRootDirectory("/tmp");
     }
+
+    // Start at root
+
+    connection->setCurrentWorkingDirectory("");
 
     // Ask for password
 
@@ -243,22 +282,12 @@ void CogWheelFTPCore::USER(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::LIST(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::LIST(CogWheelConnection *connection, QString arguments)
 {
 
-    QString path;
-    QString listing;
+    QString path { mapPathToLocal(connection, arguments) } ;
 
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
-    QFileInfo fileInfo { QFile { path }};
+    QFileInfo fileInfo { path };
 
     if (!fileInfo.exists()) {
         connection->sendReplyCode(550, "Requested path not found.");
@@ -266,6 +295,8 @@ void CogWheelFTPCore::LIST(CogWheelConnection *connection, QStringList commandAn
     }
 
     if (connection->dataChannel()->connectToClient(connection)) {
+
+        QString listing;
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
@@ -278,27 +309,26 @@ void CogWheelFTPCore::LIST(CogWheelConnection *connection, QStringList commandAn
 
         connection->sendOnDataChannel(listing);
         connection->dataChannel()->disconnectFromClient(connection);
-        connection->sendReplyCode(226);
 
     }
 
 }
 
-void CogWheelFTPCore::FEAT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::FEAT(CogWheelConnection *connection, QString arguments)
 {
 
     connection->sendReplyCode (500);
 
 }
 
-void CogWheelFTPCore::SYST(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::SYST(CogWheelConnection *connection, QString arguments)
 {
 
     connection->sendReplyCode(215, "UNIX Type: L8");
 
 }
 
-void CogWheelFTPCore::PWD(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::PWD(CogWheelConnection *connection, QString arguments)
 {
 
     qDebug() << "PWD " << connection->currentWorkingDirectory();
@@ -307,81 +337,76 @@ void CogWheelFTPCore::PWD(CogWheelConnection *connection, QStringList commandAnd
 
 }
 
-void CogWheelFTPCore::TYPE(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::TYPE(CogWheelConnection *connection, QString arguments)
 {
-
+    connection->setTransferType(arguments[0]);  // Just keep first character for the record
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::PORT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::PORT(CogWheelConnection *connection, QString arguments)
 {
 
-    QStringList ipList = commandAndArgments[1].split(',');
+    QStringList ipList = arguments.split(',');
+
     connection->dataChannel()->setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
-
-    QString first = ipList[4];
-    QString second = ipList[5];
-
-    connection->dataChannel()->setClientHostPort((first.toInt()<<8)|second.toInt());
+    connection->dataChannel()->setClientHostPort((ipList[4].toInt()<<8)|ipList[5].toInt());
 
     connection->sendReplyCode(200);
 
 }
 
-void CogWheelFTPCore::CWD(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::CWD(CogWheelConnection *connection, QString arguments)
 {
 
-    QString newCWDPath { buildCWDPath(connection, commandAndArgments[1]) };
+    QString cwdPath = mapPathToLocal(connection, arguments);
+    QDir path { cwdPath };
 
-    QDir path(newCWDPath);
     if(!path.exists()) {
         connection->sendReplyCode(550, "Requested path not found.");
     } else {
-        connection->setCurrentWorkingDirectory(newCWDPath);
+        connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, cwdPath));
         connection->sendReplyCode(250);
     }
 
 }
 
-void CogWheelFTPCore::PASS(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::PASS(CogWheelConnection *connection, QString arguments)
 {
 
     // For non-anonymous check users password
 
     if (!connection->anonymous()) {
-        if (!CogWheelUserSettings::checkUserPassword(connection->userName(), commandAndArgments[1])) {
+        if (!CogWheelUserSettings::checkUserPassword(connection->userName(), arguments)) {
             connection->sendReplyCode(530); // Failure
             return;
         }
         connection->sendReplyCode(230); // Success then login
     } else {
-        connection->sendReplyCode(230, "Logged in Anonymous as "+commandAndArgments[1]);
+        connection->sendReplyCode(230, "Logged in Anonymous as "+arguments);
     }
 
     connection->setAuthorized(true);
 
 }
 
-void CogWheelFTPCore::CDUP(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::CDUP(CogWheelConnection *connection, QString arguments)
 {
 
-    QDir currentPath  { connection->currentWorkingDirectory() };
+    QDir path  { mapPathToLocal(connection, arguments) };
 
-    if(!currentPath.cdUp()) {
+    if(!path.cdUp()) {
         connection->sendReplyCode(550, "Requested path not found.");
     } else {
-        connection->setCurrentWorkingDirectory(currentPath.absolutePath());
+        connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, path.absolutePath()));
         connection->sendReplyCode(250);
     }
 
 }
 
-void CogWheelFTPCore::RETR(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::RETR(CogWheelConnection *connection, QString arguments)
 {
 
-    qDebug() << "RETR " <<  commandAndArgments[1];
-
-    QFile file { buildFilePath(connection,commandAndArgments[1]) } ;
+    QFile file { mapPathToLocal(connection, arguments) } ;
 
     if(!file.exists()){
         connection->sendReplyCode(450);
@@ -389,43 +414,44 @@ void CogWheelFTPCore::RETR(CogWheelConnection *connection, QStringList commandAn
     }
 
     if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->downloadFile(connection, buildFilePath(connection,commandAndArgments[1]) );
+        connection->dataChannel()->downloadFile(connection, mapPathToLocal(connection, arguments ));
         connection->sendReplyCode(226);
     }
 
 }
 
-void CogWheelFTPCore::NOOP(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::NOOP(CogWheelConnection *connection, QString arguments)
 {
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::MODE(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::MODE(CogWheelConnection *connection, QString arguments)
 {
+
+    connection->setTransferMode(arguments[0]);
+
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::STOR(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::STOR(CogWheelConnection *connection, QString arguments)
 {
 
-    QFile file { buildFilePath(connection,commandAndArgments[1]) } ;
+    QFile file { mapPathToLocal(connection,arguments) } ;
 
-    if(file.exists())
-    {
-        if(!file.remove())
-        {
+    if(file.exists()) {
+        if(!file.remove()) {
             connection->sendReplyCode(551, "File could not be overwritten");
             return;
         }
     }
 
     if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, buildFilePath(connection,commandAndArgments[1]) );
+        connection->dataChannel()->uploadFile(connection, mapPathToLocal(connection,arguments) );
     }
 
 }
 
-void CogWheelFTPCore::PASV(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::PASV(CogWheelConnection *connection, QString arguments)
 {
 
     connection->setPassive(true);
@@ -433,7 +459,7 @@ void CogWheelFTPCore::PASV(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::HELP(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::HELP(CogWheelConnection *connection, QString arguments)
 {
     QString helpReply;
     int column;
@@ -453,26 +479,16 @@ void CogWheelFTPCore::HELP(CogWheelConnection *connection, QStringList commandAn
     connection->sendReplyCode(214, "Help OK.");
 }
 
-void CogWheelFTPCore::SITE(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::SITE(CogWheelConnection *connection, QString arguments)
 {
     connection->sendReplyCode(202);
 }
 
-void CogWheelFTPCore::NLST(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::NLST(CogWheelConnection *connection, QString arguments)
 {
-    QString path;
-    QString listing;
 
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
-    QFileInfo fileInfo { QFile { path }};
+    QString path { mapPathToLocal(connection, arguments) };
+    QFileInfo fileInfo { path };
 
     if (!fileInfo.exists() || !fileInfo.isDir()) {
         connection->sendReplyCode(550, "Requested path not found.");
@@ -480,6 +496,7 @@ void CogWheelFTPCore::NLST(CogWheelConnection *connection, QStringList commandAn
 
     if (connection->dataChannel()->connectToClient(connection)) {
 
+        QString listing;
         QDir listDirectory { path };
 
         for (QString item : listDirectory.entryList()) {
@@ -488,27 +505,16 @@ void CogWheelFTPCore::NLST(CogWheelConnection *connection, QStringList commandAn
 
         connection->sendOnDataChannel(listing);
         connection->dataChannel()->disconnectFromClient(connection);
-        connection->sendReplyCode(226);
 
     }
 
 }
 
-void CogWheelFTPCore::MKD(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::MKD(CogWheelConnection *connection, QString arguments)
 {
 
-    QString path;
-
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
-    QDir newDirectory(path);
+    QString path { mapPathToLocal(connection, arguments) };
+    QDir newDirectory { path };
 
     if(!newDirectory.mkdir(path)){
         connection->sendReplyCode(530);
@@ -518,20 +524,12 @@ void CogWheelFTPCore::MKD(CogWheelConnection *connection, QStringList commandAnd
 
 }
 
-void CogWheelFTPCore::RMD(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::RMD(CogWheelConnection *connection, QString arguments)
 {
-    QString path;
 
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
+    QString path { mapPathToLocal(connection, arguments) };
+    QDir directoryToDelete { path  };
 
-    QDir directoryToDelete(path);
     if(directoryToDelete.exists()){
 
         if(directoryToDelete.rmdir(path)){
@@ -545,7 +543,7 @@ void CogWheelFTPCore::RMD(CogWheelConnection *connection, QStringList commandAnd
     }
 }
 
-void CogWheelFTPCore::QUIT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::QUIT(CogWheelConnection *connection, QString arguments)
 {
 
     connection->sendReplyCode(221);
@@ -553,20 +551,10 @@ void CogWheelFTPCore::QUIT(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::DELE(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::DELE(CogWheelConnection *connection, QString arguments)
 {
-    QString path;
 
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
-    QFile fileToDelete(path);
+    QFile fileToDelete { mapPathToLocal(connection, arguments) };
 
     if(fileToDelete.exists()){
 
@@ -581,17 +569,18 @@ void CogWheelFTPCore::DELE(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::ACCT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::ACCT(CogWheelConnection *connection, QString arguments)
 {
 
-    connection->setAccountName(commandAndArgments[1]);
+    connection->setAccountName(arguments);
     connection->sendReplyCode(200);
 
 }
 
-void CogWheelFTPCore::STOU(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::STOU(CogWheelConnection *connection, QString arguments)
 {
-    QFile file { buildFilePath(connection,commandAndArgments[1]) } ;
+    QString path { mapPathToLocal(connection, arguments) };
+    QFile file { path  } ;
 
     if(file.exists())
     {
@@ -600,17 +589,17 @@ void CogWheelFTPCore::STOU(CogWheelConnection *connection, QStringList commandAn
     }
 
     if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, buildFilePath(connection,commandAndArgments[1]) );
+        connection->dataChannel()->uploadFile(connection, path);
     }
 
 }
 
-void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QString arguments)
 {
 
     if(connection->allowSMNT()) {
 
-        QDir newRootDirectory(commandAndArgments[1]);
+        QDir newRootDirectory(arguments);
 
         if(newRootDirectory.exists()){
             connection->setRootDirectory(newRootDirectory.absolutePath());
@@ -624,35 +613,27 @@ void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QStringList commandAn
     }
 }
 
-void CogWheelFTPCore::STRU(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::STRU(CogWheelConnection *connection, QString arguments)
+{
+    connection->setFileStructure(arguments[0]);
+    connection->sendReplyCode(200);
+}
+
+void CogWheelFTPCore::ALLO(CogWheelConnection *connection, QString arguments)
 {
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::ALLO(CogWheelConnection *connection, QStringList commandAndArgments)
-{
-    connection->sendReplyCode(200);
-}
 
-
-void CogWheelFTPCore::RNFR(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::RNFR(CogWheelConnection *connection, QString arguments)
 {
-    QString path;
+    QString path { mapPathToLocal(connection, arguments) };
 
     connection->setRenameFromFileName("");
 
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
-    QFileInfo fileToRename(path);
+    QFileInfo fileToRename { path };
     if(!fileToRename.exists()){
-        connection->sendReplyCode(550, "Could not find '" + commandAndArgments[1] + "'");
+        connection->sendReplyCode(550, "Could not find '" + arguments + "'");
     } else{
         connection->setRenameFromFileName(path);
         connection->sendReplyCode(350);
@@ -660,7 +641,7 @@ void CogWheelFTPCore::RNFR(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QString arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -668,20 +649,9 @@ void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QStringList commandAn
         return;
     }
 
-    QString path;
-
-    if (commandAndArgments.size()==1) {
-        path = connection->currentWorkingDirectory();
-    } else {
-        path = commandAndArgments[1];
-        if (path[0]!='/') {
-            path = connection->currentWorkingDirectory()+path;
-        }
-    }
-
     QFile sourceName(connection->renameFromFileName());
 
-    if(sourceName.rename(path)){
+    if(sourceName.rename(mapPathToLocal(connection, arguments) )){
         connection->sendReplyCode(250);
     }else{
         connection->sendReplyCode(553);
@@ -690,7 +660,7 @@ void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QStringList commandAn
     connection->setRenameFromFileName("");
 }
 
-void CogWheelFTPCore::REST(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::REST(CogWheelConnection *connection, QString arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -699,9 +669,8 @@ void CogWheelFTPCore::REST(CogWheelConnection *connection, QStringList commandAn
     }
 
     bool validInteger;
-    QString restorePosition = commandAndArgments[1];
 
-    connection->setRestoreFilePostion(restorePosition.toInt(&validInteger));
+    connection->setRestoreFilePostion(arguments.toInt(&validInteger));
 
     if(validInteger){
         connection->sendReplyCode(350);
@@ -712,19 +681,19 @@ void CogWheelFTPCore::REST(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::ABOR(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::ABOR(CogWheelConnection *connection, QString arguments)
 {
 
     if(connection->dataChannel()) {
         if(connection->dataChannel()->connected() ||connection->dataChannel()->listening()){
             connection->dataChannel()->disconnectFromClient(connection);
         }
+    } else {
+        connection->sendReplyCode(226);
     }
-    connection->sendReplyCode(226);
-
 }
 
-void CogWheelFTPCore::REIN(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::REIN(CogWheelConnection *connection, QString arguments)
 {
 
     connection->setAccountName("");
@@ -745,17 +714,16 @@ void CogWheelFTPCore::REIN(CogWheelConnection *connection, QStringList commandAn
 
 }
 
-void CogWheelFTPCore::APPE(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::APPE(CogWheelConnection *connection, QString arguments)
 {
-    QFile file { buildFilePath(connection,commandAndArgments[1]) } ;
 
     if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, buildFilePath(connection,commandAndArgments[1]) );
+        connection->dataChannel()->uploadFile(connection, mapPathToLocal(connection,arguments) );
     }
 
 }
 
-void CogWheelFTPCore::STAT(CogWheelConnection *connection, QStringList commandAndArgments)
+void CogWheelFTPCore::STAT(CogWheelConnection *connection, QString arguments)
 {
     qDebug() << "Need to fill in";
 }

@@ -55,25 +55,37 @@ public:
     void setClientHostIP(const QString &clientHostIP);
     QString serverIP() const;
     void setServerIP(const QString &serverIP);
+    bool connected() const;
+    void setConnected(bool connected);
+    QChar transferMode() const;
+    void setTransferMode(const QChar &transferMode);
+
+    QChar fileStructure() const;
+    void setFileStructure(const QChar &fileStructure);
+
+    QChar transferType() const;
+    void setTransferType(const QChar &transferType);
 
 private:
-    void processFTPCommand(QString command);
+    void processFTPCommand(QString commandLine);
 
 signals:
     void finishedConnection(qint64 socketHandle);
     void abortedConnection(qint64 socketHandle);
 
 public slots:
+
     void openConnection(qint64 socketHandle);
     void closeConnection();
+
     void uploadFinished();
     void dataChannelError(QString errorNessage);
     void passiveConnection();
 
-    void connected();
-    void disconnected();
-    void readyRead();
-    void bytesWritten(qint64 numberOfBytes);
+    void controlChannelConnected();
+    void controlChannelDisconnected();
+    void controlChannelReadyRead();
+    void controlChannelBytesWritten(qint64 numberOfBytes);
 
 
 private:
@@ -81,6 +93,7 @@ private:
     QString m_userName;
     QString m_password;
     QString m_currentWorkingDirectory;
+    bool m_connected=false;
     bool m_passive=false;
     bool m_authorized=false;
     bool m_anonymous=false;
@@ -89,7 +102,9 @@ private:
     QString m_accountName;
     QString m_clientHostIP;
     QString m_serverIP;
-
+    QChar m_transferMode = 'S';
+    QChar m_fileStructure = 'F';
+    QChar m_transferType = 'I';
     qint64 m_restoreFilePostion=0;
     QString m_renameFromFileName;
 
