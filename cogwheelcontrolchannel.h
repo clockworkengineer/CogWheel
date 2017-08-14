@@ -74,6 +74,9 @@ public:
     QChar transferType() const;
     void setTransferType(const QChar &transferType);
 
+    CogWheelDataChannel *dataChannel() const;
+    void setDataChannel(CogWheelDataChannel *dataChannel);
+
 private:
     void processFTPCommand(QString commandLine);
 

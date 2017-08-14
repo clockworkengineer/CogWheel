@@ -44,6 +44,7 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpComman
     {"ABOR", CogWheelFTPCore::ABOR},
     {"REIN", CogWheelFTPCore::REIN},
     {"APPE", CogWheelFTPCore::APPE},
+    {"STAT", CogWheelFTPCore::STAT},
 };
 
 QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
@@ -346,9 +347,7 @@ void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, QString arguments
 void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments)
 {
 
-    QStringList ipList = arguments.split(',');
-
-    connection->setHostPortForDataChannel(ipList);
+    connection->setHostPortForDataChannel(arguments.split(','));
 
     connection->sendReplyCode(200);
 
@@ -609,7 +608,7 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments
         }
 
     }else{
-        connection->sendReplyCode(550, "SMNT not allowed.");
+        connection->sendReplyCode(550, "SMNT is not allowed.");
     }
 }
 
@@ -719,10 +718,45 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments
 
 }
 
+// Initial version (Need to improve)
+
 void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments)
 {
-    qDebug() << "Need to fill in";
+
+    if(!arguments.isEmpty()) {
+
+        connection->sendOnControlChannel("213-status of " + arguments + "\r\n");
+
+        QDir pathToList(mapPathToLocal(connection, arguments));
+
+        if(pathToList.exists()) {
+            for (auto item : pathToList.entryInfoList()){
+                connection->sendOnControlChannel(buildListLine(item));
+            }
+        }else{
+            connection->sendOnControlChannel(arguments+" does not exist.\r\n");
+        }
+
+        connection->sendReplyCode(213);
+        return;
+    }
+
+
+    // We are in a transfer
+
+    if(connection->dataChannel()) {
+        connection->sendReplyCode(211, "Transfering data.");
+        return;
+    }
+
+    // No File transfer and no argument
+
+    if(!connection->dataChannel() && arguments.isEmpty()) {
+        connection->sendReplyCode(211);
+    }
+
 }
+
 
 
 

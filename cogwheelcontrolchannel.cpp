@@ -1,5 +1,5 @@
 #include "cogwheelcontrolchannel.h"
-#include"cogwheelftpcore.h"
+#include "cogwheelftpcore.h"
 
 #include <QCoreApplication>
 
@@ -288,6 +288,16 @@ void CogWheelControlChannel::readyRead()
 void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 {
 
+}
+
+CogWheelDataChannel *CogWheelControlChannel::dataChannel() const
+{
+    return m_dataChannel;
+}
+
+void CogWheelControlChannel::setDataChannel(CogWheelDataChannel *dataChannel)
+{
+    m_dataChannel = dataChannel;
 }
 
 QChar CogWheelControlChannel::transferType() const
