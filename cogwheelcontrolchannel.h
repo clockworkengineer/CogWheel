@@ -7,19 +7,31 @@
 #include <QTcpSocket>
 #include <QThread>
 
-class CogWheelConnection : public QObject
+class CogWheelControlChannel : public QObject
 {
     Q_OBJECT
 
 public:
 
-    explicit CogWheelConnection(QObject *parent = nullptr);
+    explicit CogWheelControlChannel(QObject *parent = nullptr);
+
+    void createDataChannel();
+    void tearDownDataChannel();
+
+    bool connectDataChannel();
+    void uploadFileToDataChannel(const QString &file);
+    void disconnectDataChannel();
+    void setHostPortForDataChannel(QStringList ipAddressAndPort);
+    void downloadFileFromDataChannel(const QString &file);
+    void listenForConnectionOnDataChannel();
+    void abortOnDataChannel();
+
+    void sendOnDataChannel(const QString &data);
 
     void sendReplyCode(quint16 replyCode, const QString &message);
     void sendReplyCode(quint16 replyCode);
 
     void sendOnControlChannel(const QString &data);
-    void sendOnDataChannel(const QString &data);
 
     QString password() const;
     void setPassword(const QString &password);
@@ -33,8 +45,8 @@ public:
     void setAuthorized(bool isAuthorized);
     bool isAnonymous() const;
     void setAnonymous(bool isAnonymous);
-    CogWheelDataChannel *dataChannel() const;
-    void setDataChannel(CogWheelDataChannel *dataChannel);
+//    CogWheelDataChannel *dataChannel() const;
+//    void setDataChannel(CogWheelDataChannel *dataChannel);
     QThread *connectionThread() const;
     void setConnectionThread(QThread *connectionThread);
     QTcpSocket *controlChannelSocket() const;

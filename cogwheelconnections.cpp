@@ -13,7 +13,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
         return;
     }
 
-    CogWheelConnection *connection = new CogWheelConnection();
+    CogWheelControlChannel *connection = new CogWheelControlChannel();
 
     if (connection==nullptr) {
         qWarning() << "CogWheelConnections::accept() : failed to create connection.";
@@ -35,9 +35,9 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     disconnect(this, &CogWheelConnections::openConnection,0,0);
 
-    connect(this,&CogWheelConnections::openConnection, connection, &CogWheelConnection::openConnection);
-    connect(connection,&CogWheelConnection::finishedConnection,this, &CogWheelConnections::finishedConnection);
-    connect(connection,&CogWheelConnection::abortedConnection,this, &CogWheelConnections::finishedConnection);
+    connect(this,&CogWheelConnections::openConnection, connection, &CogWheelControlChannel::openConnection);
+    connect(connection,&CogWheelControlChannel::finishedConnection,this, &CogWheelConnections::finishedConnection);
+    connect(connection,&CogWheelControlChannel::abortedConnection,this, &CogWheelConnections::finishedConnection);
 
     connect(connection->connectionThread(),&QThread::finished,connection->connectionThread(), &QThread::deleteLater );
 
@@ -56,7 +56,7 @@ void CogWheelConnections::finishedConnection(qint64 handle)
         return;
     }
 
-    CogWheelConnection *connection = m_connections[handle];
+    CogWheelControlChannel *connection = m_connections[handle];
 
     m_connections.remove(handle);
     connection->deleteLater();

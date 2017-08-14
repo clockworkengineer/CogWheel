@@ -1,5 +1,5 @@
 #include "cogwheeldatachannel.h"
-#include "cogwheelconnection.h"
+#include "cogwheelcontrolchannel.h"
 
 #include <QtCore>
 #include <QAbstractSocket>
@@ -21,7 +21,7 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 
 }
 
-bool CogWheelDataChannel::connectToClient(CogWheelConnection *connection)
+bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 {
 
     if (m_connected) {
@@ -63,7 +63,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelConnection *connection)
 
 }
 
-void CogWheelDataChannel::disconnectFromClient(CogWheelConnection *connection)
+void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connection)
 {
 
     if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
@@ -112,7 +112,7 @@ void CogWheelDataChannel::listenForConnection(QString serverIP)
     }
 }
 
-void CogWheelDataChannel::downloadFile(CogWheelConnection *connection, QString fileName)
+void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QString fileName)
 {
 
     try
@@ -159,7 +159,7 @@ void CogWheelDataChannel::downloadFile(CogWheelConnection *connection, QString f
     }
 }
 
-void CogWheelDataChannel::uploadFile(CogWheelConnection *connection, QString fileName)
+void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString fileName)
 {
 
     m_transferFileName = fileName;

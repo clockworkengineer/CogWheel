@@ -7,7 +7,7 @@
 #include <QHostAddress>
 #include <QTcpServer>
 
-class CogWheelConnection;
+class CogWheelControlChannel;
 
 class CogWheelDataChannel : public QTcpServer
 {
@@ -16,12 +16,12 @@ class CogWheelDataChannel : public QTcpServer
 public:
     explicit CogWheelDataChannel(QObject *parent = nullptr);
 
-    bool connectToClient(CogWheelConnection *connection);
-    void disconnectFromClient(CogWheelConnection *connection);
+    bool connectToClient(CogWheelControlChannel *connection);
+    void disconnectFromClient(CogWheelControlChannel *connection);
 
     void listenForConnection(QString serverIP);
-    void downloadFile(CogWheelConnection *connection, QString fileName);
-    void uploadFile(CogWheelConnection *connection, QString fileName);
+    void downloadFile(CogWheelControlChannel *connection, QString fileName);
+    void uploadFile(CogWheelControlChannel *connection, QString fileName);
 
     void setClientHostIP(QString clientIP);
     void setClientHostPort(quint16 clientPort);

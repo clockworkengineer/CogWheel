@@ -93,7 +93,7 @@ CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
 
 }
 
-QString CogWheelFTPCore::buildLISTLine(QFileInfo &file)
+QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 {
     QString line;
     QString temp;
@@ -164,7 +164,7 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
     }
 }
 
-QString CogWheelFTPCore::mapPathToLocal(CogWheelConnection *connection, const QString &path)
+QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
 {
 
     QString mappedLocalPath;
@@ -185,7 +185,7 @@ QString CogWheelFTPCore::mapPathToLocal(CogWheelConnection *connection, const QS
     return(mappedLocalPath);
 }
 
-QString CogWheelFTPCore::mapPathFromLocal(CogWheelConnection *connection, const QString &path)
+QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, const QString &path)
 {
 
     QString mappedPath { QFileInfo(path).absoluteFilePath()};
@@ -210,7 +210,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelConnection *connection, const 
 }
 
 
-void CogWheelFTPCore::performCommand(CogWheelConnection *connection, const QString &command, const QString &arguments)
+void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments)
 {
 
     try {
@@ -242,7 +242,7 @@ void CogWheelFTPCore::performCommand(CogWheelConnection *connection, const QStri
     }
 
 }
-void CogWheelFTPCore::USER(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::USER(CogWheelControlChannel *connection, QString arguments)
 {
 
     // Anonymous login
@@ -282,7 +282,7 @@ void CogWheelFTPCore::USER(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::LIST(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) } ;
@@ -294,41 +294,41 @@ void CogWheelFTPCore::LIST(CogWheelConnection *connection, QString arguments)
         return;
     }
 
-    if (connection->dataChannel()->connectToClient(connection)) {
+    if (connection->connectDataChannel()) {
 
         QString listing;
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(buildLISTLine(item));
+                listing.append(buildListLine(item));
             }
         } else {
-            listing.append(buildLISTLine(fileInfo));
+            listing.append(buildListLine(fileInfo));
         }
 
         connection->sendOnDataChannel(listing);
-        connection->dataChannel()->disconnectFromClient(connection);
+        connection->disconnectDataChannel();
 
     }
 
 }
 
-void CogWheelFTPCore::FEAT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->sendReplyCode (500);
 
 }
 
-void CogWheelFTPCore::SYST(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->sendReplyCode(215, "UNIX Type: L8");
 
 }
 
-void CogWheelFTPCore::PWD(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, QString arguments)
 {
 
     qDebug() << "PWD " << connection->currentWorkingDirectory();
@@ -337,25 +337,24 @@ void CogWheelFTPCore::PWD(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::TYPE(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, QString arguments)
 {
     connection->setTransferType(arguments[0]);  // Just keep first character for the record
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::PORT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments)
 {
 
     QStringList ipList = arguments.split(',');
 
-    connection->dataChannel()->setClientHostIP(ipList[0]+"."+ipList[1]+"."+ipList[2]+"."+ipList[3]);
-    connection->dataChannel()->setClientHostPort((ipList[4].toInt()<<8)|ipList[5].toInt());
+    connection->setHostPortForDataChannel(ipList);
 
     connection->sendReplyCode(200);
 
 }
 
-void CogWheelFTPCore::CWD(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, QString arguments)
 {
 
     QString cwdPath = mapPathToLocal(connection, arguments);
@@ -370,7 +369,7 @@ void CogWheelFTPCore::CWD(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::PASS(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, QString arguments)
 {
 
     // For non-anonymous check users password
@@ -389,7 +388,7 @@ void CogWheelFTPCore::PASS(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::CDUP(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, QString arguments)
 {
 
     QDir path  { mapPathToLocal(connection, arguments) };
@@ -403,7 +402,7 @@ void CogWheelFTPCore::CDUP(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::RETR(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, QString arguments)
 {
 
     QFile file { mapPathToLocal(connection, arguments) } ;
@@ -413,19 +412,19 @@ void CogWheelFTPCore::RETR(CogWheelConnection *connection, QString arguments)
         return;
     }
 
-    if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->downloadFile(connection, mapPathToLocal(connection, arguments ));
+    if (connection->connectDataChannel()) {
+        connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
         connection->sendReplyCode(226);
     }
 
 }
 
-void CogWheelFTPCore::NOOP(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, QString arguments)
 {
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::MODE(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->setTransferMode(arguments[0]);
@@ -433,7 +432,7 @@ void CogWheelFTPCore::MODE(CogWheelConnection *connection, QString arguments)
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::STOR(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, QString arguments)
 {
 
     QFile file { mapPathToLocal(connection,arguments) } ;
@@ -442,24 +441,25 @@ void CogWheelFTPCore::STOR(CogWheelConnection *connection, QString arguments)
         if(!file.remove()) {
             connection->sendReplyCode(551, "File could not be overwritten");
             return;
+
         }
     }
 
-    if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, mapPathToLocal(connection,arguments) );
+    if (connection->connectDataChannel()) {
+        connection->uploadFileToDataChannel( mapPathToLocal(connection,arguments) );
     }
 
 }
 
-void CogWheelFTPCore::PASV(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->setPassive(true);
-    connection->dataChannel()->listenForConnection(connection->serverIP());
+    connection->listenForConnectionOnDataChannel();
 
 }
 
-void CogWheelFTPCore::HELP(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments)
 {
     QString helpReply;
     int column;
@@ -479,12 +479,12 @@ void CogWheelFTPCore::HELP(CogWheelConnection *connection, QString arguments)
     connection->sendReplyCode(214, "Help OK.");
 }
 
-void CogWheelFTPCore::SITE(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, QString arguments)
 {
     connection->sendReplyCode(202);
 }
 
-void CogWheelFTPCore::NLST(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -494,7 +494,7 @@ void CogWheelFTPCore::NLST(CogWheelConnection *connection, QString arguments)
         connection->sendReplyCode(550, "Requested path not found.");
     }
 
-    if (connection->dataChannel()->connectToClient(connection)) {
+    if (connection->connectDataChannel()) {
 
         QString listing;
         QDir listDirectory { path };
@@ -504,13 +504,13 @@ void CogWheelFTPCore::NLST(CogWheelConnection *connection, QString arguments)
         }
 
         connection->sendOnDataChannel(listing);
-        connection->dataChannel()->disconnectFromClient(connection);
+        connection->disconnectDataChannel();
 
     }
 
 }
 
-void CogWheelFTPCore::MKD(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, QString arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -524,7 +524,7 @@ void CogWheelFTPCore::MKD(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::RMD(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, QString arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -543,7 +543,7 @@ void CogWheelFTPCore::RMD(CogWheelConnection *connection, QString arguments)
     }
 }
 
-void CogWheelFTPCore::QUIT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->sendReplyCode(221);
@@ -551,7 +551,7 @@ void CogWheelFTPCore::QUIT(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::DELE(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, QString arguments)
 {
 
     QFile fileToDelete { mapPathToLocal(connection, arguments) };
@@ -569,7 +569,7 @@ void CogWheelFTPCore::DELE(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::ACCT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->setAccountName(arguments);
@@ -577,7 +577,7 @@ void CogWheelFTPCore::ACCT(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::STOU(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, QString arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
@@ -588,13 +588,13 @@ void CogWheelFTPCore::STOU(CogWheelConnection *connection, QString arguments)
         return;
     }
 
-    if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, path);
+    if (connection->connectDataChannel()) {
+        connection->uploadFileToDataChannel(path);
     }
 
 }
 
-void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments)
 {
 
     if(connection->isAllowSMNT()) {
@@ -613,19 +613,19 @@ void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QString arguments)
     }
 }
 
-void CogWheelFTPCore::STRU(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, QString arguments)
 {
     connection->setFileStructure(arguments[0]);
     connection->sendReplyCode(200);
 }
 
-void CogWheelFTPCore::ALLO(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, QString arguments)
 {
     connection->sendReplyCode(200);
 }
 
 
-void CogWheelFTPCore::RNFR(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, QString arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
 
@@ -641,7 +641,7 @@ void CogWheelFTPCore::RNFR(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, QString arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -660,7 +660,7 @@ void CogWheelFTPCore::RNTO(CogWheelConnection *connection, QString arguments)
     connection->setRenameFromFileName("");
 }
 
-void CogWheelFTPCore::REST(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::REST(CogWheelControlChannel *connection, QString arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -681,19 +681,15 @@ void CogWheelFTPCore::REST(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::ABOR(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, QString arguments)
 {
 
-    if(connection->dataChannel()) {
-        if(connection->dataChannel()->isConnected() ||connection->dataChannel()->isListening()){
-            connection->dataChannel()->disconnectFromClient(connection);
-        }
-    } else {
-        connection->sendReplyCode(226);
-    }
+    connection->abortOnDataChannel();
+    connection->sendReplyCode(226);
+
 }
 
-void CogWheelFTPCore::REIN(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, QString arguments)
 {
 
     connection->setAccountName("");
@@ -714,16 +710,16 @@ void CogWheelFTPCore::REIN(CogWheelConnection *connection, QString arguments)
 
 }
 
-void CogWheelFTPCore::APPE(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments)
 {
 
-    if (connection->dataChannel()->connectToClient(connection)) {
-        connection->dataChannel()->uploadFile(connection, mapPathToLocal(connection,arguments) );
+    if (connection->connectDataChannel()) {
+        connection->uploadFileToDataChannel(mapPathToLocal(connection,arguments) );
     }
 
 }
 
-void CogWheelFTPCore::STAT(CogWheelConnection *connection, QString arguments)
+void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments)
 {
     qDebug() << "Need to fill in";
 }

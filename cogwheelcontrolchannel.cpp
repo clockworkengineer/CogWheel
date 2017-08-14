@@ -1,14 +1,124 @@
-#include "cogwheelconnection.h"
+#include "cogwheelcontrolchannel.h"
 #include"cogwheelftpcore.h"
 
 #include <QCoreApplication>
 
-CogWheelConnection::CogWheelConnection(QObject *parent) : QObject(parent)
+CogWheelControlChannel::CogWheelControlChannel(QObject *parent) : QObject(parent)
 {
 
 }
 
-void CogWheelConnection::processFTPCommand(QString commandLine)
+void CogWheelControlChannel::createDataChannel()
+{
+
+    if ( m_dataChannel->m_dataChannelSocket != nullptr) {
+        qWarning() << " m_dataChannel->m_dataChannelSocket != nullptr";
+        return;
+    }
+
+    m_dataChannel = new CogWheelDataChannel();
+    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
+
+    connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
+
+}
+
+void CogWheelControlChannel::tearDownDataChannel()
+{
+
+    if ( m_dataChannel->m_dataChannelSocket == nullptr) {
+        qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
+        return;
+    }
+
+    m_dataChannel->m_dataChannelSocket->close();
+    m_dataChannel->m_dataChannelSocket->deleteLater();
+    m_dataChannel->deleteLater();
+    m_dataChannel = nullptr;
+
+
+}
+
+bool CogWheelControlChannel::connectDataChannel()
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return(false);
+    }
+
+    return(m_dataChannel->connectToClient(this));
+
+}
+
+void CogWheelControlChannel::uploadFileToDataChannel(const QString &file)
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return;
+    }
+
+    m_dataChannel->uploadFile(this, file);
+}
+
+void CogWheelControlChannel::disconnectDataChannel()
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return;
+    }
+
+    m_dataChannel->disconnectFromClient(this);
+}
+
+void CogWheelControlChannel::setHostPortForDataChannel(QStringList ipAddressAndPort)
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return;
+    }
+
+    m_dataChannel->setClientHostIP(ipAddressAndPort[0]+"."+ipAddressAndPort[1]+"."+ipAddressAndPort[2]+"."+ipAddressAndPort[3]);
+    m_dataChannel->setClientHostPort((ipAddressAndPort[4].toInt()<<8)|ipAddressAndPort[5].toInt());
+
+}
+
+void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return;
+    }
+
+    m_dataChannel->downloadFile(this, file);
+}
+
+void CogWheelControlChannel::listenForConnectionOnDataChannel()
+{
+    if (m_dataChannel == nullptr) {
+        qDebug() << "Error: Data channel not active.";
+        return;
+    }
+
+    m_dataChannel->listenForConnection(m_serverIP);
+}
+
+void CogWheelControlChannel::abortOnDataChannel()
+{
+
+    if(this->m_dataChannel != nullptr) {
+        if(m_dataChannel->isConnected() || m_dataChannel->isListening()){
+            m_dataChannel->disconnectFromClient(this);
+        }
+    }
+
+}
+
+void CogWheelControlChannel::processFTPCommand(QString commandLine)
 {
     QString command;
     QString arguments;
@@ -27,7 +137,7 @@ void CogWheelConnection::processFTPCommand(QString commandLine)
 
 }
 
-void CogWheelConnection::openConnection(qint64 socketHandle)
+void CogWheelControlChannel::openConnection(qint64 socketHandle)
 {
 
     qDebug() << "CogWheelConnection::openConnection: on thread " << QThread::currentThreadId();
@@ -53,14 +163,14 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
     qDebug() << "Opened control channel from " << m_clientHostIP;
     qDebug() << "Opened control channel to " << m_serverIP;
 
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
+        connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
-    connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelConnection::error, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
+        connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
+        connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
+        connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
 
     setConnected(true);
 
@@ -68,7 +178,7 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
 
 }
 
-void CogWheelConnection::closeConnection()
+void CogWheelControlChannel::closeConnection()
 {
     qDebug() << "CogWheelConnection::close(): " << m_socketHandle;
 
@@ -86,15 +196,15 @@ void CogWheelConnection::closeConnection()
     m_controlChannelSocket->deleteLater();
     m_controlChannelSocket = nullptr;
 
-    if ( m_dataChannel->m_dataChannelSocket == nullptr) {
-        qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
-        return;
-    }
+        if ( m_dataChannel->m_dataChannelSocket == nullptr) {
+            qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
+            return;
+        }
 
-    m_dataChannel->m_dataChannelSocket->close();
-    m_dataChannel->m_dataChannelSocket->deleteLater();
-    m_dataChannel->deleteLater();
-    m_dataChannel = nullptr;
+        m_dataChannel->m_dataChannelSocket->close();
+        m_dataChannel->m_dataChannelSocket->deleteLater();
+        m_dataChannel->deleteLater();
+        m_dataChannel = nullptr;
 
     setConnected(false);
 
@@ -102,17 +212,17 @@ void CogWheelConnection::closeConnection()
 
 }
 
-void CogWheelConnection::uploadFinished()
+void CogWheelControlChannel::uploadFinished()
 {
     sendReplyCode(226);
 }
 
-void CogWheelConnection::error(QString errorNessage)
+void CogWheelControlChannel::error(QString errorNessage)
 {
     qDebug() << "CogWheelConnection::dataChannelError: " << errorNessage;
 }
 
-void CogWheelConnection::passiveConnection()
+void CogWheelControlChannel::passiveConnection()
 {
     QString passiveChannelAddress = m_dataChannel->clientHostIP().toString().replace(".",",");
 
@@ -123,12 +233,12 @@ void CogWheelConnection::passiveConnection()
 
 }
 
-void CogWheelConnection::sendOnControlChannel(const QString &data) {
+void CogWheelControlChannel::sendOnControlChannel(const QString &data) {
     QByteArray reply { data.toUtf8() };
     m_controlChannelSocket->write(reply.data());
 }
 
-void CogWheelConnection::sendReplyCode(quint16 replyCode,const QString &message)
+void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &message)
 {
 
     QString replyStr { QString::number(replyCode) + " " + message + "\r\n"};
@@ -137,12 +247,12 @@ void CogWheelConnection::sendReplyCode(quint16 replyCode,const QString &message)
 
 }
 
-void CogWheelConnection::sendReplyCode(quint16 replyCode)
+void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
 {
     sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
 }
 
-void CogWheelConnection::sendOnDataChannel(const QString &data)
+void CogWheelControlChannel::sendOnDataChannel(const QString &data)
 {
 
     QByteArray reply { data.toUtf8() };
@@ -150,12 +260,12 @@ void CogWheelConnection::sendOnDataChannel(const QString &data)
 
 }
 
-void CogWheelConnection::connected()
+void CogWheelControlChannel::connected()
 {
     qDebug() << "CogWheelConnection connected...";
 }
 
-void CogWheelConnection::disconnected()
+void CogWheelControlChannel::disconnected()
 {
     qDebug() << "CogWheelConnection disconnected.";
 
@@ -163,7 +273,7 @@ void CogWheelConnection::disconnected()
 
 }
 
-void CogWheelConnection::readyRead()
+void CogWheelControlChannel::readyRead()
 {
 
     m_readBufer.append(m_controlChannelSocket->readAll());
@@ -175,117 +285,117 @@ void CogWheelConnection::readyRead()
 
 }
 
-void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
+void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 {
 
 }
 
-QChar CogWheelConnection::transferType() const
+QChar CogWheelControlChannel::transferType() const
 {
     return m_transferType;
 }
 
-void CogWheelConnection::setTransferType(const QChar &transferType)
+void CogWheelControlChannel::setTransferType(const QChar &transferType)
 {
     m_transferType = transferType;
 }
 
-QChar CogWheelConnection::fileStructure() const
+QChar CogWheelControlChannel::fileStructure() const
 {
     return m_fileStructure;
 }
 
-void CogWheelConnection::setFileStructure(const QChar &fileStructure)
+void CogWheelControlChannel::setFileStructure(const QChar &fileStructure)
 {
     m_fileStructure = fileStructure;
 }
 
-QChar CogWheelConnection::transferMode() const
+QChar CogWheelControlChannel::transferMode() const
 {
     return m_transferMode;
 }
 
-void CogWheelConnection::setTransferMode(const QChar &tranfersMode)
+void CogWheelControlChannel::setTransferMode(const QChar &tranfersMode)
 {
     m_transferMode = tranfersMode;
 }
 
-bool CogWheelConnection::isConnected() const
+bool CogWheelControlChannel::isConnected() const
 {
     return m_connected;
 }
 
-void CogWheelConnection::setConnected(bool connected)
+void CogWheelControlChannel::setConnected(bool connected)
 {
     m_connected = connected;
 }
 
-QString CogWheelConnection::serverIP() const
+QString CogWheelControlChannel::serverIP() const
 {
     return m_serverIP;
 }
 
-void CogWheelConnection::setServerIP(const QString &serverIP)
+void CogWheelControlChannel::setServerIP(const QString &serverIP)
 {
     m_serverIP = serverIP;
 }
 
-QString CogWheelConnection::clientHostIP() const
+QString CogWheelControlChannel::clientHostIP() const
 {
     return m_clientHostIP;
 }
 
-void CogWheelConnection::setClientHostIP(const QString &clientHostIP)
+void CogWheelControlChannel::setClientHostIP(const QString &clientHostIP)
 {
     m_clientHostIP = clientHostIP;
 }
 
-qint64 CogWheelConnection::restoreFilePostion() const
+qint64 CogWheelControlChannel::restoreFilePostion() const
 {
     return m_restoreFilePostion;
 }
 
-void CogWheelConnection::setRestoreFilePostion(const qint64 &restoreFilePostion)
+void CogWheelControlChannel::setRestoreFilePostion(const qint64 &restoreFilePostion)
 {
     m_restoreFilePostion = restoreFilePostion;
 }
 
-QString CogWheelConnection::renameFromFileName() const
+QString CogWheelControlChannel::renameFromFileName() const
 {
     return m_renameFromFileName;
 }
 
-void CogWheelConnection::setRenameFromFileName(const QString &renameFromFileName)
+void CogWheelControlChannel::setRenameFromFileName(const QString &renameFromFileName)
 {
     m_renameFromFileName = renameFromFileName;
 }
 
-bool CogWheelConnection::isAllowSMNT() const
+bool CogWheelControlChannel::isAllowSMNT() const
 {
     return m_allowSMNT;
 }
 
-void CogWheelConnection::setAllowSMNT(bool allowSMT)
+void CogWheelControlChannel::setAllowSMNT(bool allowSMT)
 {
     m_allowSMNT = allowSMT;
 }
 
-QString CogWheelConnection::accountName() const
+QString CogWheelControlChannel::accountName() const
 {
     return m_accountName;
 }
 
-void CogWheelConnection::setAccountName(const QString &accountName)
+void CogWheelControlChannel::setAccountName(const QString &accountName)
 {
     m_accountName = accountName;
 }
 
-QString CogWheelConnection::rootDirectory() const
+QString CogWheelControlChannel::rootDirectory() const
 {
     return m_rootDirectory;
 }
 
-void CogWheelConnection::setRootDirectory(const QString &rootDirectory)
+void CogWheelControlChannel::setRootDirectory(const QString &rootDirectory)
 {
     m_rootDirectory = rootDirectory;
     if (m_rootDirectory.endsWith('\'')) {
@@ -293,82 +403,82 @@ void CogWheelConnection::setRootDirectory(const QString &rootDirectory)
     }
 }
 
-qintptr CogWheelConnection::socketHandle() const
+qintptr CogWheelControlChannel::socketHandle() const
 {
     return m_socketHandle;
 }
 
-void CogWheelConnection::setSocketHandle(const qintptr &socketHandle)
+void CogWheelControlChannel::setSocketHandle(const qintptr &socketHandle)
 {
     m_socketHandle = socketHandle;
 }
 
-QTcpSocket *CogWheelConnection::controlChannelSocket() const
+QTcpSocket *CogWheelControlChannel::controlChannelSocket() const
 {
     return m_controlChannelSocket;
 }
 
-void CogWheelConnection::setControlChannelSocket(QTcpSocket *controlChannelSocket)
+void CogWheelControlChannel::setControlChannelSocket(QTcpSocket *controlChannelSocket)
 {
     m_controlChannelSocket = controlChannelSocket;
 }
 
-QThread *CogWheelConnection::connectionThread() const
+QThread *CogWheelControlChannel::connectionThread() const
 {
     return m_connectionThread;
 }
 
-void CogWheelConnection::setConnectionThread(QThread *connectionThread)
+void CogWheelControlChannel::setConnectionThread(QThread *connectionThread)
 {
     m_connectionThread = connectionThread;
 }
 
-CogWheelDataChannel *CogWheelConnection::dataChannel() const
-{
-    return m_dataChannel;
-}
+//CogWheelDataChannel *CogWheelControlChannel::dataChannel() const
+//{
+//    return m_dataChannel;
+//}
 
-void CogWheelConnection::setDataChannel(CogWheelDataChannel *dataChannel)
-{
-    m_dataChannel = dataChannel;
-}
+//void CogWheelControlChannel::setDataChannel(CogWheelDataChannel *dataChannel)
+//{
+//    m_dataChannel = dataChannel;
+//}
 
-bool CogWheelConnection::isAnonymous() const
+bool CogWheelControlChannel::isAnonymous() const
 {
     return m_anonymous;
 }
 
-void CogWheelConnection::setAnonymous(bool anonymous)
+void CogWheelControlChannel::setAnonymous(bool anonymous)
 {
     m_anonymous = anonymous;
 }
 
-bool CogWheelConnection::isAuthorized() const
+bool CogWheelControlChannel::isAuthorized() const
 {
     return m_authorized;
 }
 
-void CogWheelConnection::setAuthorized(bool authorized)
+void CogWheelControlChannel::setAuthorized(bool authorized)
 {
     m_authorized = authorized;
 }
 
-bool CogWheelConnection::isPassive() const
+bool CogWheelControlChannel::isPassive() const
 {
     return m_passive;
 }
 
-void CogWheelConnection::setPassive(bool passive)
+void CogWheelControlChannel::setPassive(bool passive)
 {
     m_passive = passive;
 }
 
-QString CogWheelConnection::currentWorkingDirectory() const
+QString CogWheelControlChannel::currentWorkingDirectory() const
 {
     return m_currentWorkingDirectory;
 }
 
-void CogWheelConnection::setCurrentWorkingDirectory(const QString &currentWorkingDirectory)
+void CogWheelControlChannel::setCurrentWorkingDirectory(const QString &currentWorkingDirectory)
 {
     m_currentWorkingDirectory = currentWorkingDirectory;
 
@@ -378,22 +488,22 @@ void CogWheelConnection::setCurrentWorkingDirectory(const QString &currentWorkin
 
 }
 
-QString CogWheelConnection::userName() const
+QString CogWheelControlChannel::userName() const
 {
     return m_userName;
 }
 
-void CogWheelConnection::setUserName(const QString &user)
+void CogWheelControlChannel::setUserName(const QString &user)
 {
     m_userName = user;
 }
 
-QString CogWheelConnection::password() const
+QString CogWheelControlChannel::password() const
 {
     return m_password;
 }
 
-void CogWheelConnection::setPassword(const QString &password)
+void CogWheelControlChannel::setPassword(const QString &password)
 {
     m_password = password;
 }

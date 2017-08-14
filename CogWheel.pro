@@ -12,11 +12,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     cogwheelserver.cpp \
-    cogwheelconnection.cpp \
     cogwheeldatachannel.cpp \
     cogwheelftpcore.cpp \
     cogwheelconnections.cpp \
-    cogwheelusersettings.cpp
+    cogwheelusersettings.cpp \
+    cogwheelcontrolchannel.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -31,8 +31,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     cogwheelserver.h \
-    cogwheelconnection.h \
     cogwheeldatachannel.h \
     cogwheelftpcore.h \
     cogwheelconnections.h \
-    cogwheelusersettings.h
+    cogwheelusersettings.h \
+    cogwheelcontrolchannel.h

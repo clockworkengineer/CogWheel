@@ -1,7 +1,7 @@
 #ifndef COGWHEELCONNECTIONS_H
 #define COGWHEELCONNECTIONS_H
 
-#include "cogwheelconnection.h"
+#include "cogwheelcontrolchannel.h"
 
 #include <QObject>
 
@@ -22,7 +22,7 @@ public slots:
     void abortedConnection(qint64 handle);
 
 private:
-    QMap<qint64, CogWheelConnection *> m_connections;
+    QMap<qint64, CogWheelControlChannel *> m_connections;
 
 };
 
