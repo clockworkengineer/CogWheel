@@ -45,8 +45,6 @@ public:
     void setAuthorized(bool isAuthorized);
     bool isAnonymous() const;
     void setAnonymous(bool isAnonymous);
-//    CogWheelDataChannel *dataChannel() const;
-//    void setDataChannel(CogWheelDataChannel *dataChannel);
     QThread *connectionThread() const;
     void setConnectionThread(QThread *connectionThread);
     QTcpSocket *controlChannelSocket() const;
@@ -116,9 +114,9 @@ private:
     qint64 m_restoreFilePostion=0;
     QString m_renameFromFileName;
 
-    QThread *m_connectionThread;
-    QTcpSocket *m_controlChannelSocket;
-    CogWheelDataChannel *m_dataChannel;
+    QThread *m_connectionThread=nullptr;
+    QTcpSocket *m_controlChannelSocket=nullptr;
+    CogWheelDataChannel *m_dataChannel=nullptr;
     QString m_readBufer;
     qintptr m_socketHandle;
 

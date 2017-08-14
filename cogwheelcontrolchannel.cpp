@@ -11,16 +11,12 @@ CogWheelControlChannel::CogWheelControlChannel(QObject *parent) : QObject(parent
 void CogWheelControlChannel::createDataChannel()
 {
 
-    if ( m_dataChannel->m_dataChannelSocket != nullptr) {
-        qWarning() << " m_dataChannel->m_dataChannelSocket != nullptr";
+    if ( m_dataChannel != nullptr) {
+        qWarning() << " m_dataChannel != nullptr";
         return;
     }
 
     m_dataChannel = new CogWheelDataChannel();
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
     connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
@@ -31,6 +27,11 @@ void CogWheelControlChannel::createDataChannel()
 void CogWheelControlChannel::tearDownDataChannel()
 {
 
+    if ( m_dataChannel == nullptr) {
+        qWarning() << " m_dataChannel == nullptr";
+        return;
+    }
+
     if ( m_dataChannel->m_dataChannelSocket == nullptr) {
         qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
         return;
@@ -38,14 +39,17 @@ void CogWheelControlChannel::tearDownDataChannel()
 
     m_dataChannel->m_dataChannelSocket->close();
     m_dataChannel->m_dataChannelSocket->deleteLater();
+
     m_dataChannel->deleteLater();
     m_dataChannel = nullptr;
-
 
 }
 
 bool CogWheelControlChannel::connectDataChannel()
 {
+
+    createDataChannel();
+
     if (m_dataChannel == nullptr) {
         qDebug() << "Error: Data channel not active.";
         return(false);
@@ -73,10 +77,15 @@ void CogWheelControlChannel::disconnectDataChannel()
     }
 
     m_dataChannel->disconnectFromClient(this);
+
+    tearDownDataChannel();
+
 }
 
 void CogWheelControlChannel::setHostPortForDataChannel(QStringList ipAddressAndPort)
 {
+     createDataChannel();
+
     if (m_dataChannel == nullptr) {
         qDebug() << "Error: Data channel not active.";
         return;
@@ -99,6 +108,9 @@ void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 
 void CogWheelControlChannel::listenForConnectionOnDataChannel()
 {
+
+    createDataChannel();
+
     if (m_dataChannel == nullptr) {
         qDebug() << "Error: Data channel not active.";
         return;
@@ -110,7 +122,7 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
 void CogWheelControlChannel::abortOnDataChannel()
 {
 
-    if(this->m_dataChannel != nullptr) {
+    if(m_dataChannel != nullptr) {
         if(m_dataChannel->isConnected() || m_dataChannel->isListening()){
             m_dataChannel->disconnectFromClient(this);
         }
@@ -142,8 +154,6 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     qDebug() << "CogWheelConnection::openConnection: on thread " << QThread::currentThreadId();
 
-    m_dataChannel = new CogWheelDataChannel();
-
     m_controlChannelSocket = new QTcpSocket();
 
     m_socketHandle = socketHandle;
@@ -163,14 +173,12 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
     qDebug() << "Opened control channel from " << m_clientHostIP;
     qDebug() << "Opened control channel to " << m_serverIP;
 
-        connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
-        connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
-        connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
-        connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
-        connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
-        connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
-        connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
+   // createDataChannel();
 
     setConnected(true);
 
@@ -196,15 +204,7 @@ void CogWheelControlChannel::closeConnection()
     m_controlChannelSocket->deleteLater();
     m_controlChannelSocket = nullptr;
 
-        if ( m_dataChannel->m_dataChannelSocket == nullptr) {
-            qWarning() << " m_dataChannel->m_dataChannelSocket == nullptr";
-            return;
-        }
-
-        m_dataChannel->m_dataChannelSocket->close();
-        m_dataChannel->m_dataChannelSocket->deleteLater();
-        m_dataChannel->deleteLater();
-        m_dataChannel = nullptr;
+  //  tearDownDataChannel();
 
     setConnected(false);
 
@@ -432,16 +432,6 @@ void CogWheelControlChannel::setConnectionThread(QThread *connectionThread)
 {
     m_connectionThread = connectionThread;
 }
-
-//CogWheelDataChannel *CogWheelControlChannel::dataChannel() const
-//{
-//    return m_dataChannel;
-//}
-
-//void CogWheelControlChannel::setDataChannel(CogWheelDataChannel *dataChannel)
-//{
-//    m_dataChannel = dataChannel;
-//}
 
 bool CogWheelControlChannel::isAnonymous() const
 {
