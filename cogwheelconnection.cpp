@@ -53,14 +53,14 @@ void CogWheelConnection::openConnection(qint64 socketHandle)
     qDebug() << "Opened control channel from " << m_clientHostIP;
     qDebug() << "Opened control channel to " << m_serverIP;
 
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::controlChannelConnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::controlChannelDisconnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::controlChannelReadyRead, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::controlChannelBytesWritten, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelConnection::connected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelConnection::disconnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelConnection::readyRead, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelConnection::bytesWritten, Qt::DirectConnection);
 
-    connect(m_dataChannel,&CogWheelDataChannel::dataChannelUploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::dataChannelError, this, &CogWheelConnection::dataChannelError, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::dataChannelPassiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
+    connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelConnection::uploadFinished, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelConnection::error, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelConnection::passiveConnection, Qt::DirectConnection);
 
     setConnected(true);
 
@@ -72,7 +72,7 @@ void CogWheelConnection::closeConnection()
 {
     qDebug() << "CogWheelConnection::close(): " << m_socketHandle;
 
-    if (!connected()) {
+    if (!isConnected()) {
         qDebug() << "Control Channel already disconnected.";
         return;
     }
@@ -107,7 +107,7 @@ void CogWheelConnection::uploadFinished()
     sendReplyCode(226);
 }
 
-void CogWheelConnection::dataChannelError(QString errorNessage)
+void CogWheelConnection::error(QString errorNessage)
 {
     qDebug() << "CogWheelConnection::dataChannelError: " << errorNessage;
 }
@@ -150,12 +150,12 @@ void CogWheelConnection::sendOnDataChannel(const QString &data)
 
 }
 
-void CogWheelConnection::controlChannelConnected()
+void CogWheelConnection::connected()
 {
     qDebug() << "CogWheelConnection connected...";
 }
 
-void CogWheelConnection::controlChannelDisconnected()
+void CogWheelConnection::disconnected()
 {
     qDebug() << "CogWheelConnection disconnected.";
 
@@ -163,7 +163,7 @@ void CogWheelConnection::controlChannelDisconnected()
 
 }
 
-void CogWheelConnection::controlChannelReadyRead()
+void CogWheelConnection::readyRead()
 {
 
     m_readBufer.append(m_controlChannelSocket->readAll());
@@ -175,7 +175,7 @@ void CogWheelConnection::controlChannelReadyRead()
 
 }
 
-void CogWheelConnection::controlChannelBytesWritten(qint64 numberOfBytes)
+void CogWheelConnection::bytesWritten(qint64 numberOfBytes)
 {
 
 }
@@ -210,7 +210,7 @@ void CogWheelConnection::setTransferMode(const QChar &tranfersMode)
     m_transferMode = tranfersMode;
 }
 
-bool CogWheelConnection::connected() const
+bool CogWheelConnection::isConnected() const
 {
     return m_connected;
 }
@@ -260,7 +260,7 @@ void CogWheelConnection::setRenameFromFileName(const QString &renameFromFileName
     m_renameFromFileName = renameFromFileName;
 }
 
-bool CogWheelConnection::allowSMNT() const
+bool CogWheelConnection::isAllowSMNT() const
 {
     return m_allowSMNT;
 }
@@ -333,7 +333,7 @@ void CogWheelConnection::setDataChannel(CogWheelDataChannel *dataChannel)
     m_dataChannel = dataChannel;
 }
 
-bool CogWheelConnection::anonymous() const
+bool CogWheelConnection::isAnonymous() const
 {
     return m_anonymous;
 }
@@ -343,7 +343,7 @@ void CogWheelConnection::setAnonymous(bool anonymous)
     m_anonymous = anonymous;
 }
 
-bool CogWheelConnection::authorized() const
+bool CogWheelConnection::isAuthorized() const
 {
     return m_authorized;
 }
@@ -353,7 +353,7 @@ void CogWheelConnection::setAuthorized(bool authorized)
     m_authorized = authorized;
 }
 
-bool CogWheelConnection::passive() const
+bool CogWheelConnection::isPassive() const
 {
     return m_passive;
 }

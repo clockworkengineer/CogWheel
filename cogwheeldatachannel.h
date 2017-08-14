@@ -25,37 +25,38 @@ public:
 
     void setClientHostIP(QString clientIP);
     void setClientHostPort(quint16 clientPort);
-    bool listening() const;
-    void setListening(bool listening);
-    bool connected() const;
-    void setConnected(bool connected);
-
-
     QHostAddress clientHostIP() const;
     quint16 clientHostPort() const;
+
+    bool isListening() const;
+    void setListening(bool isListening);
+    bool isConnected() const;
+    void setConnected(bool isConnected);
+    bool isFileBeingUploaded() const;
+    void setFileBeingUploaded(bool isFileBeingUploaded);
+    QString transferFileName() const;
+    void setTransferFileName(const QString &transferFileName);
 
 protected:
     void incomingConnection(qintptr handle);
     void OnConnected();
 
 signals:
-    void dataChannelUploadFinished();
-    void dataChannelError(QString errorNessage);
-    void dataChannelPassiveConnection();
-    void dataChannelFinished();
+    void uploadFinished();
+    void error(QString errorNessage);
+    void passiveConnection();
+    void finished();
 
 public slots:
-
-    void dataChannelConnect();
-    void dataChannelDisconnect();
-    void dataChannelStateChanged(QAbstractSocket::SocketState socketState);
-    void dataChannelBytesWritten(qint64 numBytes);
-    void dataChannelReadyRead();
-    void dataChannelSocketError(QAbstractSocket::SocketError socketError);
+    void connected();
+    void disconnected();
+    void stateChanged(QAbstractSocket::SocketState socketState);
+    void bytesWritten(qint64 numBytes);
+    void readyRead();
+    void socketError(QAbstractSocket::SocketError socketError);
 
 public:
     QTcpSocket *m_dataChannelSocket;
-
 
 private:
     QHostAddress m_clientHostIP;

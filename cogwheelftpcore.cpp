@@ -219,7 +219,7 @@ void CogWheelFTPCore::performCommand(CogWheelConnection *connection, const QStri
 
         if (m_ftpCommandTable.contains(command)) {
 
-            if (connection->authorized()) {
+            if (connection->isAuthorized()) {
                 FTPCommandFunction commandFn=m_ftpCommandTable[command];
                 commandFn(connection, arguments);
             } else if (m_unauthCommandTable.contains(command)) {
@@ -266,7 +266,7 @@ void CogWheelFTPCore::USER(CogWheelConnection *connection, QString arguments)
 
     // Set intial workign directory
 
-    if (!connection->anonymous()) {
+    if (!connection->isAnonymous()) {
         connection->setRootDirectory(CogWheelUserSettings::getRootPath(connection->userName()));
     } else {
         connection->setRootDirectory("/tmp");
@@ -375,7 +375,7 @@ void CogWheelFTPCore::PASS(CogWheelConnection *connection, QString arguments)
 
     // For non-anonymous check users password
 
-    if (!connection->anonymous()) {
+    if (!connection->isAnonymous()) {
         if (!CogWheelUserSettings::checkUserPassword(connection->userName(), arguments)) {
             connection->sendReplyCode(530); // Failure
             return;
@@ -597,7 +597,7 @@ void CogWheelFTPCore::STOU(CogWheelConnection *connection, QString arguments)
 void CogWheelFTPCore::SMNT(CogWheelConnection *connection, QString arguments)
 {
 
-    if(connection->allowSMNT()) {
+    if(connection->isAllowSMNT()) {
 
         QDir newRootDirectory(arguments);
 
@@ -685,7 +685,7 @@ void CogWheelFTPCore::ABOR(CogWheelConnection *connection, QString arguments)
 {
 
     if(connection->dataChannel()) {
-        if(connection->dataChannel()->connected() ||connection->dataChannel()->listening()){
+        if(connection->dataChannel()->isConnected() ||connection->dataChannel()->isListening()){
             connection->dataChannel()->disconnectFromClient(connection);
         }
     } else {

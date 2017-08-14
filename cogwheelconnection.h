@@ -27,12 +27,12 @@ public:
     void setUserName(const QString &userName);
     QString currentWorkingDirectory() const;
     void setCurrentWorkingDirectory(const QString &currentWorkingDirectory);
-    bool passive() const;
-    void setPassive(bool passive);
-    bool authorized() const;
-    void setAuthorized(bool authorized);
-    bool anonymous() const;
-    void setAnonymous(bool anonymous);
+    bool isPassive() const;
+    void setPassive(bool isPassive);
+    bool isAuthorized() const;
+    void setAuthorized(bool isAuthorized);
+    bool isAnonymous() const;
+    void setAnonymous(bool isAnonymous);
     CogWheelDataChannel *dataChannel() const;
     void setDataChannel(CogWheelDataChannel *dataChannel);
     QThread *connectionThread() const;
@@ -45,8 +45,8 @@ public:
     void setRootDirectory(const QString &rootDirectory);
     QString accountName() const;
     void setAccountName(const QString &accountName);
-    bool allowSMNT() const;
-    void setAllowSMNT(bool allowSMNT);
+    bool isAllowSMNT() const;
+    void setAllowSMNT(bool isAllowSMNT);
     QString renameFromFileName() const;
     void setRenameFromFileName(const QString &value);
     qint64 restoreFilePostion() const;
@@ -55,14 +55,12 @@ public:
     void setClientHostIP(const QString &clientHostIP);
     QString serverIP() const;
     void setServerIP(const QString &serverIP);
-    bool connected() const;
-    void setConnected(bool connected);
+    bool isConnected() const;
+    void setConnected(bool isConnected);
     QChar transferMode() const;
     void setTransferMode(const QChar &transferMode);
-
     QChar fileStructure() const;
     void setFileStructure(const QChar &fileStructure);
-
     QChar transferType() const;
     void setTransferType(const QChar &transferType);
 
@@ -74,19 +72,17 @@ signals:
     void abortedConnection(qint64 socketHandle);
 
 public slots:
-
     void openConnection(qint64 socketHandle);
     void closeConnection();
 
     void uploadFinished();
-    void dataChannelError(QString errorNessage);
+    void error(QString errorNessage);
     void passiveConnection();
 
-    void controlChannelConnected();
-    void controlChannelDisconnected();
-    void controlChannelReadyRead();
-    void controlChannelBytesWritten(qint64 numberOfBytes);
-
+    void connected();
+    void disconnected();
+    void readyRead();
+    void bytesWritten(qint64 numberOfBytes);
 
 private:
 
