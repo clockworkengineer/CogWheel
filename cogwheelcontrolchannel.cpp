@@ -25,8 +25,16 @@
 
 #include <QCoreApplication>
 
-CogWheelControlChannel::CogWheelControlChannel(QObject *parent) : QObject(parent)
+CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings *severSettings, QObject *parent) : QObject(parent)
 {
+
+    if (severSettings == nullptr) {
+        qWarning() << "serverSettings == nullptr";
+    }
+
+    setServerName(severSettings->serverName());
+    setServerVersion(severSettings->serverVersion());
+    setAllowSMNT(severSettings->allowSMNT());
 
 }
 
@@ -311,6 +319,26 @@ void CogWheelControlChannel::readyRead()
 void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 {
 
+}
+
+QString CogWheelControlChannel::serverName() const
+{
+    return m_serverName;
+}
+
+void CogWheelControlChannel::setServerName(const QString &serverName)
+{
+    m_serverName = serverName;
+}
+
+QString CogWheelControlChannel::serverVersion() const
+{
+    return m_serverVersion;
+}
+
+void CogWheelControlChannel::setServerVersion(const QString &serverVersion)
+{
+    m_serverVersion = serverVersion;
 }
 
 qint16 CogWheelControlChannel::transTypeByteSize() const

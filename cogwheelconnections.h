@@ -13,6 +13,7 @@
 #define COGWHEELCONNECTIONS_H
 
 #include "cogwheelcontrolchannel.h"
+#include "cogwheelserversettings.h"
 
 #include <QObject>
 
@@ -24,6 +25,9 @@ public:
 
     explicit CogWheelConnections(QObject *parent = nullptr);
 
+    CogWheelServerSettings *serverSettings() const;
+    void setServerSettings(CogWheelServerSettings *serverSettings);
+
 signals:
     void openConnection(qint64 handle);
 
@@ -34,6 +38,7 @@ public slots:
 
 private:
     QMap<qint64, CogWheelControlChannel *> m_connections;
+    CogWheelServerSettings *m_serverSettings;
 
 };
 

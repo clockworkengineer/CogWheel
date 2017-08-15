@@ -35,7 +35,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
         return;
     }
 
-    CogWheelControlChannel *connection = new CogWheelControlChannel();
+    CogWheelControlChannel *connection = new CogWheelControlChannel(m_serverSettings);
 
     if (connection==nullptr) {
         qWarning() << "CogWheelConnections::accept() : failed to create connection.";
@@ -90,4 +90,14 @@ void CogWheelConnections::abortedConnection(qint64 handle)
 {
     qDebug() << "CogWheelConnections::abortedConnection: aborting connection";
     finishedConnection(handle);
+}
+
+CogWheelServerSettings *CogWheelConnections::serverSettings() const
+{
+    return m_serverSettings;
+}
+
+void CogWheelConnections::setServerSettings(CogWheelServerSettings *serverSettings)
+{
+    m_serverSettings = serverSettings;
 }

@@ -747,7 +747,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments
 
     if(!arguments.isEmpty()) {
 
-        connection->sendOnControlChannel("213-status of " + arguments + "\r\n");
+        connection->sendOnControlChannel("213-Status of " + arguments + "\r\n");
 
         QDir pathToList(mapPathToLocal(connection, arguments));
 
@@ -773,8 +773,24 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments
 
     // No File transfer and no argument
 
+    //QString serverName { "BigBoy" };
+    //QString serverVersion { "0.5" };
+
     if(!connection->dataChannel() && arguments.isEmpty()) {
-        connection->sendReplyCode(211);
+        connection->sendOnControlChannel("213- "+ connection->serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + "\r\n");
+        connection->sendOnControlChannel("Version "+ connection->serverVersion() + "\r\n");
+        connection->sendOnControlChannel("Connected from "+connection->clientHostIP()+"\r\n");
+        if (connection->isAnonymous()) {
+            connection->sendOnControlChannel("Logged in anonymously \r\n");
+        } else {
+            connection->sendOnControlChannel("Logged in as user " + connection->userName() + "\r\n");
+        }
+        if (connection->dataChannel()==nullptr) {
+            connection->sendOnControlChannel("No data connection.\r\n");
+        }else {
+            connection->sendOnControlChannel("Trasferring data.\r\n");
+        }
+        connection->sendReplyCode(213);
     }
 
 }

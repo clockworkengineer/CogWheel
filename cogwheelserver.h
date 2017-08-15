@@ -13,6 +13,7 @@
 #define COGWHEELSERVER_H
 
 #include "cogwheelconnections.h"
+#include "cogwheelserversettings.h"
 
 #include <QObject>
 #include <QTcpServer>
@@ -37,9 +38,11 @@ public slots:
 
 private:
 
-    qint64 m_controlPort=2221;
+   // qint64 m_controlPort=2221;
 
     CogWheelConnections m_connections;
+
+    CogWheelServerSettings m_serverSettings;
 
 };
 
