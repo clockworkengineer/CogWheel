@@ -1,3 +1,25 @@
+/*
+ * File:   cogwheelftpcore.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelFTPCore
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelftpcore.h"
 #include "cogwheelusersettings.h"
 
@@ -128,7 +150,8 @@ QString CogWheelFTPCore::buildListLine(QFileInfo &file)
     line.append(file.owner().leftJustified(10,' ',true));
     line.append(" ");
 
-    //padded by 10 and left justified
+    // padded by 10 and left justified
+
     temp = file.group();
 
     if(temp == "") {
@@ -138,12 +161,14 @@ QString CogWheelFTPCore::buildListLine(QFileInfo &file)
     line.append(temp.leftJustified(10,' ',true));
     line.append(" ");
 
-    //padded by 10 and right justified
+    // padded by 10 and right justified
+
     temp = QString::number(file.size());
     line.append(temp.rightJustified(10,' ',true));
     line.append(" ");
 
-    //padded by 12 and left justified
+    // padded by 12 and left justified
+
     temp = file.lastModified().toString("MMM dd hh:mm");
 
     line.append(temp.rightJustified(12,' ',true));
@@ -168,22 +193,22 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
 QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
 {
 
-    QString mappedLocalPath;
+    QString mappedPath;
 
     if (path.startsWith('/')) {
-        mappedLocalPath = connection->rootDirectory()+path;
+        mappedPath = connection->rootDirectory()+path;
     } else {
-        mappedLocalPath = connection->rootDirectory()+connection->currentWorkingDirectory();
+        mappedPath = connection->rootDirectory()+connection->currentWorkingDirectory();
         if (connection->currentWorkingDirectory()=="/") {
-            mappedLocalPath += path;
+            mappedPath += path;
         } else {
-            mappedLocalPath += ("/" + path);
+            mappedPath += ("/" + path);
         }
     }
 
-    qDebug() << "Mapping local " << path << " to " << mappedLocalPath;
+    qDebug() << "Mapping local " << path << " to " << mappedPath;
 
-    return(mappedLocalPath);
+    return(mappedPath);
 }
 
 QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, const QString &path)
@@ -287,7 +312,6 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments
 {
 
     QString path { mapPathToLocal(connection, arguments) } ;
-
     QFileInfo fileInfo { path };
 
     if (!fileInfo.exists()) {
@@ -348,7 +372,6 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments
 {
 
     connection->setHostPortForDataChannel(arguments.split(','));
-
     connection->sendReplyCode(200);
 
 }
@@ -427,7 +450,6 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments
 {
 
     connection->setTransferMode(arguments[0]);
-
     connection->sendReplyCode(200);
 }
 

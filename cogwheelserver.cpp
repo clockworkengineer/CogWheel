@@ -1,3 +1,25 @@
+/*
+ * File:   cogwheelserver.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelServer
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelserver.h"
 #include <QtCore>
 

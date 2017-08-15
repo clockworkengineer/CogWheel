@@ -1,3 +1,14 @@
+/*
+ * File:   cogwheelcconnections.h
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
 #ifndef COGWHEELCONNECTIONS_H
 #define COGWHEELCONNECTIONS_H
 

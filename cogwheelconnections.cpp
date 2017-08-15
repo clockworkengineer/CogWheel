@@ -1,3 +1,25 @@
+/*
+ * File:   cogwheelconnections.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelConnections
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelconnections.h"
 
 CogWheelConnections::CogWheelConnections(QObject *parent) : QObject(parent)

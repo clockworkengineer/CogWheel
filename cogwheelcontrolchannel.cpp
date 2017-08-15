@@ -1,3 +1,25 @@
+/*
+ * File:   cogwheelcontrolchannel.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelControlChannel
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelcontrolchannel.h"
 #include "cogwheelftpcore.h"
 
@@ -224,6 +246,7 @@ void CogWheelControlChannel::error(QString errorNessage)
 
 void CogWheelControlChannel::passiveConnection()
 {
+
     QString passiveChannelAddress = m_dataChannel->clientHostIP().toString().replace(".",",");
 
     passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()>>8));
@@ -288,6 +311,26 @@ void CogWheelControlChannel::readyRead()
 void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 {
 
+}
+
+qint16 CogWheelControlChannel::transTypeByteSize() const
+{
+    return m_transTypeByteSize;
+}
+
+void CogWheelControlChannel::setTransTypeByteSize(const qint16 &transTypeByteSize)
+{
+    m_transTypeByteSize = transTypeByteSize;
+}
+
+QChar CogWheelControlChannel::transferTypeFormat() const
+{
+    return m_transferTypeFormat;
+}
+
+void CogWheelControlChannel::setTransferTypeFormat(const QChar &transferTypeFormat)
+{
+    m_transferTypeFormat = transferTypeFormat;
 }
 
 CogWheelDataChannel *CogWheelControlChannel::dataChannel() const

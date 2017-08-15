@@ -1,5 +1,16 @@
-#ifndef COGWHEELCONNECTION_H
-#define COGWHEELCONNECTION_H
+/*
+ * File:   cogwheelcontrolchannel.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+#ifndef COGWHEELCONTROLCHANNEL_H
+#define COGWHEELCONTROLCHANNEL_H
 
 #include "cogwheeldatachannel.h"
 
@@ -73,9 +84,12 @@ public:
     void setFileStructure(const QChar &fileStructure);
     QChar transferType() const;
     void setTransferType(const QChar &transferType);
-
     CogWheelDataChannel *dataChannel() const;
     void setDataChannel(CogWheelDataChannel *dataChannel);
+    QChar transferTypeFormat() const;
+    void setTransferTypeFormat(const QChar &transferTypeFormat);
+    qint16 transTypeByteSize() const;
+    void setTransTypeByteSize(const qint16 &transTypeByteSize);
 
 private:
     void processFTPCommand(QString commandLine);
@@ -113,7 +127,9 @@ private:
     QString m_serverIP;
     QChar m_transferMode = 'S';
     QChar m_fileStructure = 'F';
-    QChar m_transferType = 'I';
+    QChar m_transferType = 'A';
+    QChar m_transferTypeFormat = 'N';
+    qint16 m_transTypeByteSize = 8;
     qint64 m_restoreFilePostion=0;
     QString m_renameFromFileName;
 
@@ -125,4 +141,4 @@ private:
 
 };
 
-#endif // COGWHEELCONNECTION_H
+#endif // COGWHEELCONTROLCHANNEL_H

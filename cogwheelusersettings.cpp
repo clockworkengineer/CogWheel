@@ -1,3 +1,25 @@
+/*
+ * File:   cogwheelusersettings.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelUserSettings
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelusersettings.h"
 #include <QtCore>
 
