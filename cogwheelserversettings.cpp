@@ -1,18 +1,34 @@
+/*
+ * File:   cogwheelserversettings.cpp
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
+//
+// Class: CogWheelServerSettings
+//
+// Description:
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelserversettings.h"
-#include <QDebug>
-
-CogWheelServerSettings::CogWheelServerSettings(QObject *parent) : QObject(parent)
-{
-
-}
 
 void CogWheelServerSettings::load()
 {
+
     QSettings server;
 
     server.beginGroup("Server");
     if (server.childKeys().isEmpty()) {
-        qDebug () << "Server settings not found creating defaults";
         server.setValue("name", "CogWheel");
         server.setValue("version", "0.5");
         server.setValue("port", 2221);

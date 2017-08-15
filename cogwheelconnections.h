@@ -25,8 +25,8 @@ public:
 
     explicit CogWheelConnections(QObject *parent = nullptr);
 
-    CogWheelServerSettings *serverSettings() const;
-    void setServerSettings(CogWheelServerSettings *serverSettings);
+    CogWheelServerSettings serverSettings() const;
+    void setServerSettings(const CogWheelServerSettings &serverSettings);
 
 signals:
     void openConnection(qint64 handle);
@@ -38,7 +38,7 @@ public slots:
 
 private:
     QMap<qint64, CogWheelControlChannel *> m_connections;
-    CogWheelServerSettings *m_serverSettings;
+    CogWheelServerSettings m_serverSettings;
 
 };
 

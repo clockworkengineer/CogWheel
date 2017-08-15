@@ -21,12 +21,6 @@
 // =============
 
 #include "cogwheelusersettings.h"
-#include <QtCore>
-
-CogWheelUserSettings::CogWheelUserSettings(QObject *parent) : QObject(parent)
-{
-
-}
 
 void CogWheelUserSettings::defaultSettings()
 {
@@ -68,6 +62,7 @@ bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QStr
     userSettings.endGroup();
 
     return(encryptedPassword==password);
+
 }
 
 QString CogWheelUserSettings::getRootPath(const QString &userName)

@@ -23,7 +23,7 @@ class CogWheelServer : public QTcpServer
     Q_OBJECT
 
 public:
-    explicit CogWheelServer(QObject *parent = nullptr);
+    explicit CogWheelServer(bool autoStart = false, QObject *parent = nullptr);
 
     void startServer(void);
     void stopServer(void);
@@ -32,17 +32,14 @@ protected:
     void incomingConnection(qintptr handle);
 
 signals:
-    void acceptConnection(qint64 handle);
+    void accept(qint64 handle);
 
 public slots:
 
 private:
 
-   // qint64 m_controlPort=2221;
-
-    CogWheelConnections m_connections;
-
-    CogWheelServerSettings m_serverSettings;
+    CogWheelConnections m_connections;          // Connections handler
+    CogWheelServerSettings m_serverSettings;    // Server settings
 
 };
 

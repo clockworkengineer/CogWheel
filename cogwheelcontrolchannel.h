@@ -25,7 +25,7 @@ class CogWheelControlChannel : public QObject
 
 public:
 
-    explicit CogWheelControlChannel(CogWheelServerSettings *serverSettings, QObject *parent = nullptr);
+    explicit CogWheelControlChannel(CogWheelServerSettings serverSettings, QObject *parent = nullptr);
 
     void createDataChannel();
     void tearDownDataChannel();
@@ -116,20 +116,15 @@ public slots:
     void readyRead();
     void bytesWritten(qint64 numberOfBytes);
 
-//public:
-  //   CogWheelServerSettings *m_serverSettings;
-
-
 private:
 
-     QString m_userName;
-     QString m_password;
-     QString m_currentWorkingDirectory;
+    QString m_userName;
+    QString m_password;
+    QString m_currentWorkingDirectory;
     bool m_connected=false;
     bool m_passive=false;
     bool m_authorized=false;
     bool m_anonymous=false;
-//    bool m_allowSMNT=false;
     QString m_rootDirectory;
     QString m_accountName;
     QString m_clientHostIP;
@@ -145,8 +140,6 @@ private:
     QString m_serverName;
     QString m_serverVersion;
     bool m_allowSMNT=false;
-
-//    CogWheelServerSettings *m_serverSettings;
 
     QThread *m_connectionThread=nullptr;
     QTcpSocket *m_controlChannelSocket=nullptr;

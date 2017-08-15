@@ -92,12 +92,12 @@ void CogWheelConnections::abortedConnection(qint64 handle)
     finishedConnection(handle);
 }
 
-CogWheelServerSettings *CogWheelConnections::serverSettings() const
+CogWheelServerSettings CogWheelConnections::serverSettings() const
 {
     return m_serverSettings;
 }
 
-void CogWheelConnections::setServerSettings(CogWheelServerSettings *serverSettings)
+void CogWheelConnections::setServerSettings(const CogWheelServerSettings &serverSettings)
 {
     m_serverSettings = serverSettings;
 }

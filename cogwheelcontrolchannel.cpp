@@ -25,16 +25,12 @@
 
 #include <QCoreApplication>
 
-CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings *severSettings, QObject *parent) : QObject(parent)
+CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings severSettings, QObject *parent) : QObject(parent)
 {
 
-    if (severSettings == nullptr) {
-        qWarning() << "serverSettings == nullptr";
-    }
-
-    setServerName(severSettings->serverName());
-    setServerVersion(severSettings->serverVersion());
-    setAllowSMNT(severSettings->allowSMNT());
+    setServerName(severSettings.serverName());
+    setServerVersion(severSettings.serverVersion());
+    setAllowSMNT(severSettings.allowSMNT());
 
 }
 
@@ -114,7 +110,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 
 void CogWheelControlChannel::setHostPortForDataChannel(QStringList ipAddressAndPort)
 {
-     createDataChannel();
+    createDataChannel();
 
     if (m_dataChannel == nullptr) {
         qDebug() << "Error: Data channel not active.";
@@ -208,7 +204,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
     connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
     connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
-   // createDataChannel();
+    // createDataChannel();
 
     setConnected(true);
 
@@ -234,7 +230,7 @@ void CogWheelControlChannel::closeConnection()
     m_controlChannelSocket->deleteLater();
     m_controlChannelSocket = nullptr;
 
-  //  tearDownDataChannel();
+    //  tearDownDataChannel();
 
     setConnected(false);
 
