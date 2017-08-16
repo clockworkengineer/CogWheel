@@ -162,7 +162,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
         //Send the contents of the file
         while (!file.atEnd()) {
             QByteArray buffer = file.read(1024 * 8);
-            connection->sendOnDataChannel(QString(buffer));
+            connection->sendOnDataChannel(buffer);
         }
 
         //Close the file

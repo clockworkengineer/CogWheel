@@ -38,12 +38,12 @@ public:
     void listenForConnectionOnDataChannel();
     void abortOnDataChannel();
 
-    void sendOnDataChannel(const QString &data);
+    void sendOnDataChannel(const QByteArray &dataToSend);
 
     void sendReplyCode(quint16 replyCode, const QString &message);
     void sendReplyCode(quint16 replyCode);
 
-    void sendOnControlChannel(const QString &data);
+    void sendOnControlChannel(const QString &dataToSend);
 
     QString password() const;
     void setPassword(const QString &password);

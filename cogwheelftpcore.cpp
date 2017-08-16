@@ -332,7 +332,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments
             listing.append(buildListLine(fileInfo));
         }
 
-        connection->sendOnDataChannel(listing);
+        connection->sendOnDataChannel(listing.toUtf8().data());
         connection->disconnectDataChannel();
 
     }
@@ -524,7 +524,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments
             listing.append(item+"\r\n");
         }
 
-        connection->sendOnDataChannel(listing);
+        connection->sendOnDataChannel(listing.toUtf8().data());
         connection->disconnectDataChannel();
 
     }
@@ -772,9 +772,6 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments
     }
 
     // No File transfer and no argument
-
-    //QString serverName { "BigBoy" };
-    //QString serverVersion { "0.5" };
 
     if(!connection->dataChannel() && arguments.isEmpty()) {
         connection->sendOnControlChannel("213- "+ connection->serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + "\r\n");
