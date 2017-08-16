@@ -63,6 +63,10 @@ void CogWheelServerSettings::save()
 
 }
 
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
+
 /**
  * @brief CogWheelServerSettings::serverName
  * @return

@@ -17,7 +17,7 @@
 // transfer of files in binary (no ASCII based transfer is suported as this
 // is deemed unnecessary). Each connection is created in a separate thread
 // and the control channel socket left permanently open for commands; the
-// data channel socket is created/destroyed as and when needed.
+// data channel is created/destroyed as and when needed.
 //
 
 // =============
@@ -31,6 +31,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    // Server instance (passing true auto starts it)
 
     CogWheelServer server(true);
 

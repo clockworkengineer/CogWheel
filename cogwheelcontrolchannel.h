@@ -25,10 +25,16 @@ class CogWheelControlChannel : public QObject
 
 public:
 
+    // Constructor
+
     explicit CogWheelControlChannel(CogWheelServerSettings serverSettings, QObject *parent = nullptr);
+
+    // Data channel creation/destrucion
 
     void createDataChannel();
     void tearDownDataChannel();
+
+    // Data channel control
 
     bool connectDataChannel();
     void uploadFileToDataChannel(const QString &file);
@@ -38,12 +44,17 @@ public:
     void listenForConnectionOnDataChannel();
     void abortOnDataChannel();
 
+    // Data channel send data
+
     void sendOnDataChannel(const QByteArray &dataToSend);
+
+    // Control channel send response and data
 
     void sendReplyCode(quint16 replyCode, const QString &message);
     void sendReplyCode(quint16 replyCode);
-
     void sendOnControlChannel(const QString &dataToSend);
+
+    // Private data accessors
 
     QString password() const;
     void setPassword(const QString &password);
@@ -97,19 +108,29 @@ public:
     void setServerVersion(const QString &serverVersion);
 
 private:
-    void processFTPCommand(QString commandLine);
+    void processFTPCommand(QString commandLine);    // Process FTP command
 
 signals:
+
+    // Control channel
+
     void finishedConnection(qint64 socketHandle);
     void abortedConnection(qint64 socketHandle);
 
 public slots:
+
+    // Control channel
+
     void openConnection(qint64 socketHandle);
     void closeConnection();
 
-    void uploadFinished();
-    void error(QString errorNessage);
-    void passiveConnection();
+    // Data channel
+
+    void uploadFinished();              // File upload finished
+    void error(QString errorNessage);   // Channel error
+    void passiveConnection();           // Passive connection
+
+    // Control channel socket
 
     void connected();
     void disconnected();

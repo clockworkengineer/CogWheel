@@ -141,6 +141,10 @@ void CogWheelConnections::abortedConnection(qint64 handle)
     finishedConnection(handle);
 }
 
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
+
 /**
  * @brief CogWheelConnections::serverSettings
  *

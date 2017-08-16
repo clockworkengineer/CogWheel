@@ -624,7 +624,7 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments
     Q_UNUSED(arguments);
 
     QString helpReply;
-    int column;
+    int column=0;
 
     helpReply.append("214-The following commands are available:\r\n");
 

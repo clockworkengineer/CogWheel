@@ -23,18 +23,36 @@ class CogWheelFTPCore : public QObject
 {
     Q_OBJECT
 
+    // FTP command function pointer
+
     typedef std::function<void (CogWheelControlChannel *, QString) > FTPCommandFunction;
 
 public:
+
+    // Constructor
+
     explicit CogWheelFTPCore(QObject *parent = nullptr);
 
-    static void performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments);
+    // Response table accessor
+
     static QString getResponseText(quint16 responseCode);
 
+    // Perform FTP command
+
+    static void performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments);
+
 private:
+
+    // Build list file line
+
     static QString buildListLine(QFileInfo &file);
+
+    // File path mapping functions
+
     static QString mapPathToLocal(CogWheelControlChannel *connection, const QString& path);
     static QString mapPathFromLocal(CogWheelControlChannel *connection, const QString& path);
+
+    // FTP commands
 
     static void USER(CogWheelControlChannel *connection, QString arguments);
     static void LIST(CogWheelControlChannel *connection, QString arguments);

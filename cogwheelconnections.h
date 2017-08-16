@@ -23,18 +23,22 @@ class CogWheelConnections : public QObject
 
 public:
 
+    // Constructor
+
     explicit CogWheelConnections(QObject *parent = nullptr);
+
+    // Private data accessors
 
     CogWheelServerSettings serverSettings() const;
     void setServerSettings(const CogWheelServerSettings &serverSettings);
 
 signals:
-    void openConnection(qint64 handle);
+    void openConnection(qint64 handle); // Open connection
 
 public slots:
-    void acceptConnection(qint64 handle);
-    void finishedConnection(qint64 handle);
-    void abortedConnection(qint64 handle);
+    void acceptConnection(qint64 handle);   // Accept client connection
+    void finishedConnection(qint64 handle); // Connection finished
+    void abortedConnection(qint64 handle);  // Connection aborted
 
 private:
     QMap<qint64, CogWheelControlChannel *> m_connections;   // Socket Handle connection mapping

@@ -26,21 +26,21 @@
 /**
  * @brief CogWheelUserSettings::defaultSettings
  */
-void CogWheelUserSettings::defaultSettings()
-{
-   QSettings  defaultSettings;
+//void CogWheelUserSettings::defaultSettings()
+//{
+//   QSettings  defaultSettings;
 
-   defaultSettings.beginGroup("UserList");
-   defaultSettings.setValue("users","guest");
-   defaultSettings.endGroup();
+//   defaultSettings.beginGroup("UserList");
+//   defaultSettings.setValue("users","guest");
+//   defaultSettings.endGroup();
 
-   defaultSettings.beginGroup("guest");
-   defaultSettings.setValue("password","password");
-   defaultSettings.setValue("root", "/home/robt");
-   defaultSettings.setValue("passive", "false");
-   defaultSettings.endGroup();
+//   defaultSettings.beginGroup("guest");
+//   defaultSettings.setValue("password","password");
+//   defaultSettings.setValue("root", "/home/robt");
+//   defaultSettings.setValue("passive", "false");
+//   defaultSettings.endGroup();
 
-}
+//}
 
 /**
  * @brief CogWheelUserSettings::checkUserName

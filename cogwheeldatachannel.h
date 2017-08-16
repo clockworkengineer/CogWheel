@@ -25,20 +25,28 @@ class CogWheelDataChannel : public QTcpServer
     Q_OBJECT
 
 public:
+
+    // Constructor
+
     explicit CogWheelDataChannel(QObject *parent = nullptr);
+
+    // Channel control
 
     bool connectToClient(CogWheelControlChannel *connection);
     void disconnectFromClient(CogWheelControlChannel *connection);
+
+    // Channel action
 
     void listenForConnection(QString serverIP);
     void downloadFile(CogWheelControlChannel *connection, QString fileName);
     void uploadFile(CogWheelControlChannel *connection, QString fileName);
 
+    // Private data accessors
+
     void setClientHostIP(QString clientIP);
     void setClientHostPort(quint16 clientPort);
     QHostAddress clientHostIP() const;
     quint16 clientHostPort() const;
-
     bool isListening() const;
     void setListening(bool isListening);
     bool isConnected() const;
@@ -49,16 +57,22 @@ public:
     void setTransferFileName(const QString &transferFileName);
 
 protected:
+
+    // QTcpServer overrides
+
     void incomingConnection(qintptr handle);
     void OnConnected();
 
 signals:
-    void uploadFinished();
-    void error(QString errorNessage);
-    void passiveConnection();
-    void finished();
+    void uploadFinished();              // File upload finished
+    void error(QString errorNessage);   // Data channel error
+    void passiveConnection();           // Passive connection
+    void downloadFinished();            // File download finished
 
 public slots:
+
+    // Data channel socket
+
     void connected();
     void disconnected();
     void stateChanged(QAbstractSocket::SocketState socketState);

@@ -12,14 +12,13 @@
 #ifndef COGWHEELUSERSETTINGS_H
 #define COGWHEELUSERSETTINGS_H
 
-//#include <QObject>
 #include <QSettings>
 
 class CogWheelUserSettings
 {
 
 public:
-    static void defaultSettings();
+  //  static void defaultSettings();
     static bool checkUserName(const QString& userName);
     static bool checkUserPassword(const QString& userName, const QString& password);
     static QString getRootPath(const QString& userName);
@@ -33,7 +32,6 @@ private:
     QString m_userPassword;     // User password
     QString m_rootPath;         // Root path
     QString m_accountName;      // Account name
- //   bool m_passiveMode;
 
 };
 #endif // COGWHEELUSERSETTINGS_H

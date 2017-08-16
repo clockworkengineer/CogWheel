@@ -152,9 +152,9 @@ void CogWheelDataChannel::listenForConnection(QString serverIP)
             setClientHostPort(serverPort());
             emit passiveConnection();
             m_listening=true;
-        }else {
-            emit passiveConnection();
-        }
+        }//else {
+        //    emit passiveConnection();
+       // }
     }catch(QString err) {
         emit error(err);
     }
@@ -204,7 +204,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
         file.close();
 
         //Tell connected objects we are done
-        emit finished();
+        emit downloadFinished();
 
         //Close the socket once we are done
         disconnectFromClient(connection);
@@ -337,6 +337,10 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
     qDebug() << "dataChannelSocketError" << socketError;
 
 }
+
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
 
 /**
  * @brief CogWheelDataChannel::transferFileName

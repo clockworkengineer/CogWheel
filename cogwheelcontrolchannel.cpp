@@ -508,7 +508,7 @@ void CogWheelControlChannel::readyRead()
 {
 
     // Read all available data and append to read buffer
-    // When and of line found execute command and clear buffer.
+    // When end of line found execute command and clear buffer.
 
     m_readBufer.append(m_controlChannelSocket->readAll());
 
@@ -529,6 +529,10 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
     Q_UNUSED(numberOfBytes);
 
 }
+
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
 
 /**
  * @brief CogWheelControlChannel::serverName
