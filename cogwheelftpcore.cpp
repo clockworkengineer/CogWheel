@@ -12,7 +12,15 @@
 //
 // Class: CogWheelFTPCore
 //
-// Description:
+// Description: Class to provide core FTP command processing. It supports all
+// the commands in the rfc959 standard. Functions are static and  pass
+// in a pointer to the control channel on thich the command was recieved as a paramater
+// a string which is the commands arguments.
+//
+// Note: Two tables exist that are indexed by command string onto the relevant
+// command. The first tabel contains the commands that maybe used in an unauthorised
+// mode and the second which contains all commands for when a user has been authorised
+// either through USER/PASSWORD or logging on anonymously.
 //
 //
 
@@ -26,11 +34,15 @@
 #include <QDir>
 #include <QDateTime>
 
+// Unathorised command table
+
 QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCommandTable = {
     {"USER", CogWheelFTPCore::USER },
     {"PASS", CogWheelFTPCore::PASS },
     {"TYPE", CogWheelFTPCore::TYPE },
 };
+
+// Authorised command table
 
 QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable = {
     {"USER", CogWheelFTPCore::USER },
@@ -68,6 +80,8 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpComman
     {"APPE", CogWheelFTPCore::APPE},
     {"STAT", CogWheelFTPCore::STAT},
 };
+
+// Command code message responses (taken from rfc959)
 
 QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
     {110,"Restart marker reply."},
@@ -111,11 +125,20 @@ QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
     {553,"Requested action not taken."},
 };
 
+/**
+ * @brief CogWheelFTPCore::CogWheelFTPCore
+ * @param parent
+ */
 CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
 {
 
 }
 
+/**
+ * @brief CogWheelFTPCore::buildListLine
+ * @param file
+ * @return
+ */
 QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 {
     QString line;
@@ -181,6 +204,11 @@ QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 
 }
 
+/**
+ * @brief CogWheelFTPCore::getResponseText
+ * @param responseCode
+ * @return
+ */
 QString CogWheelFTPCore::getResponseText(quint16 responseCode)
 {
     if (m_ftpServerResponse.contains(responseCode)) {
@@ -190,6 +218,12 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
     }
 }
 
+/**
+ * @brief CogWheelFTPCore::mapPathToLocal
+ * @param connection
+ * @param path
+ * @return
+ */
 QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
 {
 
@@ -211,6 +245,12 @@ QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, cons
     return(mappedPath);
 }
 
+/**
+ * @brief CogWheelFTPCore::mapPathFromLocal
+ * @param connection
+ * @param path
+ * @return
+ */
 QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, const QString &path)
 {
 
@@ -236,6 +276,12 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
 }
 
 
+/**
+ * @brief CogWheelFTPCore::performCommand
+ * @param connection
+ * @param command
+ * @param arguments
+ */
 void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments)
 {
 
@@ -268,6 +314,12 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
     }
 
 }
+
+/**
+ * @brief CogWheelFTPCore::USER
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::USER(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -308,6 +360,11 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::LIST
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -339,22 +396,43 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::FEAT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->sendReplyCode (500);
 
 }
 
+/**
+ * @brief CogWheelFTPCore::SYST
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->sendReplyCode(215, "UNIX Type: L8");
 
 }
 
+/**
+ * @brief CogWheelFTPCore::PWD
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     qDebug() << "PWD " << connection->currentWorkingDirectory();
 
@@ -362,12 +440,22 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, QString arguments)
 
 }
 
+/**
+ * @brief CogWheelFTPCore::TYPE
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, QString arguments)
 {
     connection->setTransferType(arguments[0]);  // Just keep first character for the record
     connection->sendReplyCode(200);
 }
 
+/**
+ * @brief CogWheelFTPCore::PORT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -376,6 +464,11 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::CWD
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -391,6 +484,11 @@ void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, QString arguments)
 
 }
 
+/**
+ * @brief CogWheelFTPCore::PASS
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -410,6 +508,11 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::CDUP
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -424,6 +527,11 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::RETR
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -441,11 +549,24 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::NOOP
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
+
     connection->sendReplyCode(200);
 }
 
+/**
+ * @brief CogWheelFTPCore::MODE
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -453,6 +574,11 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments
     connection->sendReplyCode(200);
 }
 
+/**
+ * @brief CogWheelFTPCore::STOR
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -472,16 +598,31 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::PASV
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->setPassive(true);
     connection->listenForConnectionOnDataChannel();
 
 }
 
+/**
+ * @brief CogWheelFTPCore::HELP
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
+
     QString helpReply;
     int column;
 
@@ -500,11 +641,24 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments
     connection->sendReplyCode(214, "Help OK.");
 }
 
+/**
+ * @brief CogWheelFTPCore::SITE
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
+
     connection->sendReplyCode(202);
 }
 
+/**
+ * @brief CogWheelFTPCore::NLST
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -531,6 +685,11 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::MKD
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -545,6 +704,11 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, QString arguments)
 
 }
 
+/**
+ * @brief CogWheelFTPCore::RMD
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -564,14 +728,26 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, QString arguments)
     }
 }
 
+/**
+ * @brief CogWheelFTPCore::QUIT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->sendReplyCode(221);
     connection->closeConnection();
 
 }
 
+/**
+ * @brief CogWheelFTPCore::DELE
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -590,6 +766,11 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::ACCT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -598,6 +779,11 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::STOU
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, QString arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
@@ -615,6 +801,11 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::SMNT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -634,18 +825,35 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments
     }
 }
 
+/**
+ * @brief CogWheelFTPCore::STRU
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, QString arguments)
 {
     connection->setFileStructure(arguments[0]);
     connection->sendReplyCode(200);
 }
 
+/**
+ * @brief CogWheelFTPCore::ALLO
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
+
     connection->sendReplyCode(200);
 }
 
-
+/**
+ * @brief CogWheelFTPCore::RNFR
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, QString arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
@@ -662,6 +870,11 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::RNTO
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -681,6 +894,11 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, QString arguments
     connection->setRenameFromFileName("");
 }
 
+/**
+ * @brief CogWheelFTPCore::REST
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::REST(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -702,16 +920,30 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::ABOR
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->abortOnDataChannel();
     connection->sendReplyCode(226);
 
 }
 
+/**
+ * @brief CogWheelFTPCore::REIN
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, QString arguments)
 {
+
+    Q_UNUSED(arguments);
 
     connection->setAccountName("");
     connection->setAllowSMNT(false);
@@ -731,6 +963,11 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, QString arguments
 
 }
 
+/**
+ * @brief CogWheelFTPCore::APPE
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments)
 {
 
@@ -740,8 +977,11 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments
 
 }
 
-// Initial version (Need to improve)
-
+/**
+ * @brief CogWheelFTPCore::STAT
+ * @param connection
+ * @param arguments
+ */
 void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments)
 {
 

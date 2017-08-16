@@ -29,11 +29,11 @@ signals:
 public slots:
 
 private:
-    QString m_userName;
-    QString m_userPassword;
-    QString m_rootPath;
-    QString m_accountName;
-    bool m_passiveMode;
+    QString m_userName;         // User name
+    QString m_userPassword;     // User password
+    QString m_rootPath;         // Root path
+    QString m_accountName;      // Account name
+ //   bool m_passiveMode;
 
 };
 #endif // COGWHEELUSERSETTINGS_H

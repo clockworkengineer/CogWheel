@@ -12,7 +12,8 @@
 //
 // Class: CogWheelUserSettings
 //
-// Description:
+// Description: Class to validate users and to read in their settings
+// if they exist.
 //
 //
 
@@ -22,6 +23,9 @@
 
 #include "cogwheelusersettings.h"
 
+/**
+ * @brief CogWheelUserSettings::defaultSettings
+ */
 void CogWheelUserSettings::defaultSettings()
 {
    QSettings  defaultSettings;
@@ -38,6 +42,11 @@ void CogWheelUserSettings::defaultSettings()
 
 }
 
+/**
+ * @brief CogWheelUserSettings::checkUserName
+ * @param userName
+ * @return
+ */
 bool CogWheelUserSettings::checkUserName(const QString& userName)
 {
       QSettings  userList;
@@ -51,6 +60,12 @@ bool CogWheelUserSettings::checkUserName(const QString& userName)
 
 }
 
+/**
+ * @brief CogWheelUserSettings::checkUserPassword
+ * @param userName
+ * @param password
+ * @return
+ */
 bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QString& password)
 {
 
@@ -65,6 +80,11 @@ bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QStr
 
 }
 
+/**
+ * @brief CogWheelUserSettings::getRootPath
+ * @param userName
+ * @return
+ */
 QString CogWheelUserSettings::getRootPath(const QString &userName)
 {
     QSettings  userSettings;

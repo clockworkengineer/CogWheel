@@ -37,8 +37,8 @@ public slots:
     void abortedConnection(qint64 handle);
 
 private:
-    QMap<qint64, CogWheelControlChannel *> m_connections;
-    CogWheelServerSettings m_serverSettings;
+    QMap<qint64, CogWheelControlChannel *> m_connections;   // Socket Handle connection mapping
+    CogWheelServerSettings m_serverSettings;                // Server settings
 
 };
 

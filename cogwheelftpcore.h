@@ -77,9 +77,9 @@ public slots:
 
 public:
 
-    static QHash<QString, FTPCommandFunction> m_unauthCommandTable;
-    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;
-    static QHash<quint16, QString> m_ftpServerResponse;
+    static QHash<QString, FTPCommandFunction> m_unauthCommandTable; // Unauthorised user command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;    // Authorised user command table
+    static QHash<quint16, QString> m_ftpServerResponse;             // Server response table
 
 };
 

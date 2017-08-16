@@ -20,10 +20,10 @@ public:
     void setServerPort(const qint64 &serverPort);
 
 private:
-    QString m_serverName;
-    QString m_serverVersion;
-    bool m_allowSMNT=false;
-    qint64 m_serverPort;
+    QString m_serverName;       // Server Name
+    QString m_serverVersion;    // Server Version
+    bool m_allowSMNT=false;     // ==true allow SMNT command
+    qint64 m_serverPort;        // Server connection port
 
 };
 #endif // COGWHEELSERVERSETTINGS_H

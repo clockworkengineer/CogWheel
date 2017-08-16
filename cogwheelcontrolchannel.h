@@ -118,34 +118,34 @@ public slots:
 
 private:
 
-    QString m_userName;
-    QString m_password;
-    QString m_currentWorkingDirectory;
-    bool m_connected=false;
-    bool m_passive=false;
-    bool m_authorized=false;
-    bool m_anonymous=false;
-    QString m_rootDirectory;
-    QString m_accountName;
-    QString m_clientHostIP;
-    QString m_serverIP;
-    QChar m_transferMode = 'S';
-    QChar m_fileStructure = 'F';
-    QChar m_transferType = 'A';
-    QChar m_transferTypeFormat = 'N';
-    qint16 m_transTypeByteSize = 8;
-    qint64 m_restoreFilePostion=0;
-    QString m_renameFromFileName;
+    QString m_userName;                 // Login user name
+    QString m_password;                 // User password
+    QString m_currentWorkingDirectory;  // Current working directory
+    bool m_connected=false;             // == true then control channel connected
+    bool m_passive=false;               // == true then passive data connection
+    bool m_authorized=false;            // == true then user has been authorised
+    bool m_anonymous=false;             // == true then anonymous login
+    QString m_rootDirectory;            // Root directory
+    QString m_accountName;              // Account name
+    QString m_clientHostIP;             // Client host IP Address
+    QString m_serverIP;                 // Server IP Address
+    QChar m_transferMode = 'S';         // Transfrer mode
+    QChar m_fileStructure = 'F';        // File Structure
+    QChar m_transferType = 'A';         // Transfer type
+    QChar m_transferTypeFormat = 'N';   // Transfer format
+    qint16 m_transTypeByteSize = 8;     // Transfer byte size
+    qint64 m_restoreFilePostion=0;      // File restore position in bytes
+    QString m_renameFromFileName;       // RNFR/RNTO file name
 
-    QString m_serverName;
-    QString m_serverVersion;
-    bool m_allowSMNT=false;
+    QString m_serverName;               // Server name
+    QString m_serverVersion;            // Server version
+    bool m_allowSMNT=false;             // == true allow SMNT command
 
-    QThread *m_connectionThread=nullptr;
-    QTcpSocket *m_controlChannelSocket=nullptr;
-    CogWheelDataChannel *m_dataChannel=nullptr;
-    QString m_readBufer;
-    qintptr m_socketHandle;
+    QThread *m_connectionThread=nullptr;            // Connection thread
+    QTcpSocket *m_controlChannelSocket=nullptr;     // Control channel socket
+    CogWheelDataChannel *m_dataChannel=nullptr;     // Data channel
+    QString m_readBufer;                            // Control channel read buffer
+    qintptr m_socketHandle;                         // Control channel socket handle
 
 };
 

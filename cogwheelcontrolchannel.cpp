@@ -475,7 +475,7 @@ void CogWheelControlChannel::sendOnDataChannel(const QByteArray &dataToSend)
 /**
  * @brief CogWheelControlChannel::connected
  *
- * Any control channel connected slot function.
+ * Control channel connected slot function.
  *
  */
 void CogWheelControlChannel::connected()
@@ -525,6 +525,8 @@ void CogWheelControlChannel::readyRead()
  */
 void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 {
+
+    Q_UNUSED(numberOfBytes);
 
 }
 

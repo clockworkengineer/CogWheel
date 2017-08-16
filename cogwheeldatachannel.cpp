@@ -12,7 +12,10 @@
 //
 // Class: CogWheelDataChannel
 //
-// Description:
+// Description: Class to provide FTP server data channel functionality.
+// The channel to created and destroyed on an as needed basis and can operative
+// in the default active mode where the server creates it or in passive mode
+// where the server waits for a connection from the client on a specified port.
 //
 //
 
@@ -26,8 +29,14 @@
 #include <QtCore>
 #include <QAbstractSocket>
 
+/**
+ * @brief CogWheelDataChannel::CogWheelDataChannel
+ * @param parent
+ */
 CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 {
+    Q_UNUSED(parent);
+
     qDebug() << "Data channel created.";
 
     m_dataChannelSocket = new QTcpSocket();
@@ -43,6 +52,11 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 
 }
 
+/**
+ * @brief CogWheelDataChannel::connectToClient
+ * @param connection
+ * @return
+ */
 bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 {
 
@@ -85,6 +99,10 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
 }
 
+/**
+ * @brief CogWheelDataChannel::disconnectFromClient
+ * @param connection
+ */
 void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connection)
 {
 
@@ -98,12 +116,20 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
     m_connected=false;
 }
 
+/**
+ * @brief CogWheelDataChannel::setClientHostIP
+ * @param clientIP
+ */
 void CogWheelDataChannel::setClientHostIP(QString clientIP)
 {
     qDebug() << "Data channel client IP " << clientIP;
     m_clientHostIP.setAddress(clientIP);
 }
 
+/**
+ * @brief CogWheelDataChannel::setClientHostPort
+ * @param clientPort
+ */
 void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
 {
 
@@ -111,6 +137,10 @@ void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
     m_clientHostPort = clientPort;
 }
 
+/**
+ * @brief CogWheelDataChannel::listenForConnection
+ * @param serverIP
+ */
 void CogWheelDataChannel::listenForConnection(QString serverIP)
 {
     try
@@ -134,6 +164,11 @@ void CogWheelDataChannel::listenForConnection(QString serverIP)
     }
 }
 
+/**
+ * @brief CogWheelDataChannel::downloadFile
+ * @param connection
+ * @param fileName
+ */
 void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QString fileName)
 {
 
@@ -181,6 +216,11 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
     }
 }
 
+/**
+ * @brief CogWheelDataChannel::uploadFile
+ * @param connection
+ * @param fileName
+ */
 void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString fileName)
 {
 
@@ -198,6 +238,10 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString
 
 }
 
+/**
+ * @brief CogWheelDataChannel::incomingConnection
+ * @param handle
+ */
 void CogWheelDataChannel::incomingConnection(qintptr handle)
 {
 
@@ -214,11 +258,17 @@ void CogWheelDataChannel::incomingConnection(qintptr handle)
 
 }
 
+/**
+ * @brief CogWheelDataChannel::connected
+ */
 void CogWheelDataChannel::connected()
 {
     qDebug() << "CogWheelDataChannel::connected()";
 }
 
+/**
+ * @brief CogWheelDataChannel::disconnected
+ */
 void CogWheelDataChannel::disconnected()
 {
     qDebug() << "CogWheelDataChannel::disconnected()";
@@ -232,16 +282,31 @@ void CogWheelDataChannel::disconnected()
 
 }
 
+/**
+ * @brief CogWheelDataChannel::stateChanged
+ * @param socketState
+ */
 void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 {
 
+    Q_UNUSED(socketState);
+
 }
 
+/**
+ * @brief CogWheelDataChannel::bytesWritten
+ * @param numBytes
+ */
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
 
+    Q_UNUSED(numBytes);
+
 }
 
+/**
+ * @brief CogWheelDataChannel::readyRead
+ */
 void CogWheelDataChannel::readyRead()
 {
     qDebug() << "CogWheelDataChannel::readyRead()";
@@ -263,59 +328,102 @@ void CogWheelDataChannel::readyRead()
     }
 }
 
+/**
+ * @brief CogWheelDataChannel::socketError
+ * @param socketError
+ */
 void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 {
     qDebug() << "dataChannelSocketError" << socketError;
 
 }
 
+/**
+ * @brief CogWheelDataChannel::transferFileName
+ * @return
+ */
 QString CogWheelDataChannel::transferFileName() const
 {
     return m_transferFileName;
 }
 
+/**
+ * @brief CogWheelDataChannel::setTransferFileName
+ * @param transferFileName
+ */
 void CogWheelDataChannel::setTransferFileName(const QString &transferFileName)
 {
     m_transferFileName = transferFileName;
 }
 
+/**
+ * @brief CogWheelDataChannel::isFileBeingUploaded
+ * @return
+ */
 bool CogWheelDataChannel::isFileBeingUploaded() const
 {
     return m_fileBeingUploaded;
 }
 
+/**
+ * @brief CogWheelDataChannel::setFileBeingUploaded
+ * @param fileBeingUploaded
+ */
 void CogWheelDataChannel::setFileBeingUploaded(bool fileBeingUploaded)
 {
     m_fileBeingUploaded = fileBeingUploaded;
 }
 
+/**
+ * @brief CogWheelDataChannel::isConnected
+ * @return
+ */
 bool CogWheelDataChannel::isConnected() const
 {
     return m_connected;
 }
 
+/**
+ * @brief CogWheelDataChannel::setConnected
+ * @param connected
+ */
 void CogWheelDataChannel::setConnected(bool connected)
 {
     m_connected = connected;
 }
 
+/**
+ * @brief CogWheelDataChannel::isListening
+ * @return
+ */
 bool CogWheelDataChannel::isListening() const
 {
     return m_listening;
 }
 
+/**
+ * @brief CogWheelDataChannel::setListening
+ * @param listening
+ */
 void CogWheelDataChannel::setListening(bool listening)
 {
     m_listening = listening;
 }
 
+/**
+ * @brief CogWheelDataChannel::clientHostIP
+ * @return
+ */
 QHostAddress CogWheelDataChannel::clientHostIP() const
 {
     return m_clientHostIP;
 }
 
+/**
+ * @brief CogWheelDataChannel::clientHostPort
+ * @return
+ */
 quint16 CogWheelDataChannel::clientHostPort() const
 {
     return m_clientHostPort;
 }
-
