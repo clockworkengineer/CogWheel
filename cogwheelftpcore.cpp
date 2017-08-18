@@ -13,9 +13,9 @@
 // Class: CogWheelFTPCore
 //
 // Description: Class to provide core FTP command processing. It supports all
-// the commands in the rfc959 standard. Functions are static and  pass
-// in a pointer to the control channel on thich the command was recieved as a paramater
-// a string which is the commands arguments.
+// the commands in the rfc959 standard. The command functions are static and have
+// two parameters the first which is a pointer to the control channel instance and
+// the second a string containing the commands arguments.
 //
 // Note: Two tables exist that are indexed by command string onto the relevant
 // command. The first tabel contains the commands that maybe used in an unauthorised
@@ -240,7 +240,7 @@ QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, cons
         }
     }
 
-    qDebug() << "Mapping local " << path << " to " << mappedPath;
+    connection->info("Mapping local "+path+" to "+mappedPath);
 
     return(mappedPath);
 }
@@ -256,7 +256,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
 
     QString mappedPath { QFileInfo(path).absoluteFilePath()};
 
-    qDebug() << "mapped path : " << mappedPath;
+    connection->info("mapped path : "+mappedPath);
 
     // Strip off root path
 
@@ -266,11 +266,11 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
         // If trying to go above root then reset to root
 
     } else if (mappedPath.length() < connection->rootDirectory().length()){
-        qDebug() << "Have gone above root so reset.";
+        connection->error("Have gone above root so reset.");
         mappedPath = "";
     }
 
-    qDebug() << "Mapping local from " << path << " to " << mappedPath;
+    connection->info("Mapping local from "+path+" to "+mappedPath);
 
     return(mappedPath);
 }
@@ -287,7 +287,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
     try {
 
-        qDebug() << "COMMAND : [" << command << "]  ARGUMENT [" << arguments << "]";
+        connection->info("COMMAND : ["+command+"]  ARGUMENT ["+arguments+"]");
 
         if (m_ftpCommandTable.contains(command)) {
 
@@ -302,7 +302,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             }
 
         } else {
-            qWarning() << "Unsupported FTP command [" << command << "]";
+            connection->error("Unsupported FTP command ["+command+"]");
             connection->sendReplyCode(500);
         }
 
@@ -434,7 +434,7 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arg
 
     Q_UNUSED(arguments);
 
-    qDebug() << "PWD " << connection->currentWorkingDirectory();
+    connection->info("PWD "+connection->currentWorkingDirectory());
 
     connection->sendReplyCode (257, "\""+connection->currentWorkingDirectory()+"\"");
 
@@ -789,8 +789,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
     QString path { mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
 
-    if(file.exists())
-    {
+    if(file.exists()) {
         connection->sendReplyCode(551, "File already exists.");
         return;
     }

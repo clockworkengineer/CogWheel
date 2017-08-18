@@ -14,7 +14,7 @@
 //
 // Description: Class to provide FTP server control channel functionality
 // for the receiving of commands to be processed and the sending of any reponses.
-// It passes any commands to the FTP Core object to be processed and also
+// It passes any commands to the FTP core object to be processed and also
 // creates/destroys the data channel as and when it is needed.
 //
 //
@@ -58,7 +58,7 @@ void CogWheelControlChannel::createDataChannel()
     // Channel already exists
 
     if ( m_dataChannel != nullptr) {
-        qDebug() << "Data channel already exists.";
+        error("Data channel already exists.");;
         return;
     }
 
@@ -67,7 +67,7 @@ void CogWheelControlChannel::createDataChannel()
     m_dataChannel = new CogWheelDataChannel();
 
     if (m_dataChannel == nullptr) {
-        qDebug() << "Failure to create data channel.";
+        error("Failure to create data channel.");
         return;
     }
 
@@ -90,12 +90,12 @@ void CogWheelControlChannel::tearDownDataChannel()
 {
 
     if ( m_dataChannel == nullptr) {
-        qDebug() << "Failure to destroy data channel as it does not exist.";
+        error("Failure to destroy data channel as it does not exist.");
         return;
     }
 
     if ( m_dataChannel->m_dataChannelSocket == nullptr) {
-        qDebug() << "Data channel socket does not exist.";
+        error("Data channel socket does not exist.");
         m_dataChannel->deleteLater();
         m_dataChannel = nullptr;
         return;
@@ -124,7 +124,7 @@ bool CogWheelControlChannel::connectDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return(false);
     }
 
@@ -142,7 +142,7 @@ bool CogWheelControlChannel::connectDataChannel()
 void CogWheelControlChannel::uploadFileToDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return;
     }
 
@@ -160,7 +160,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 {
 
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return;
     }
 
@@ -187,7 +187,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return;
     }
 
@@ -206,7 +206,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
 void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return;
     }
 
@@ -228,7 +228,7 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        qDebug() << "Error: Data channel not active.";
+        error("Error: Data channel not active.");
         return;
     }
 
@@ -295,14 +295,14 @@ void CogWheelControlChannel::processFTPCommand(QString commandLine)
 void CogWheelControlChannel::openConnection(qint64 socketHandle)
 {
 
-    qDebug() << "Open control channel on thread " << QThread::currentThreadId();
+    info("Open control channel on thread "+QString::number(socketHandle));
 
     // Create control channel socket
 
     m_controlChannelSocket = new QTcpSocket();
 
     if (m_controlChannelSocket == nullptr) {
-        qDebug() << "Error: Failure to create control channel socket.";
+        error("Failure to create control channel socket.");
         return;
     }
 
@@ -310,7 +310,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     m_socketHandle = socketHandle;
     if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
-        qWarning () << "Error: Setting up socket for control channel.";
+        error("Error setting up socket for control channel.");
         m_controlChannelSocket->deleteLater();
         return;
     }
@@ -325,8 +325,8 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
     m_serverIP = host.toString();
     m_serverIP.remove(0,QString("::ffff:").length());
 
-    qDebug() << "Opened control channel from " << m_clientHostIP;
-    qDebug() << "Opened control channel to " << m_serverIP;
+    info("Opened control channel from "+m_clientHostIP);
+    info("Opened control channel to "+m_serverIP);
 
     // Setup control channel signals/slots.
 
@@ -351,10 +351,10 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
  */
 void CogWheelControlChannel::closeConnection()
 {
-    qDebug() << "Closing control on socket : " << m_socketHandle;
+    info ("Closing control on socket : "+ QString::number(m_socketHandle));
 
     if (!isConnected() || m_controlChannelSocket == nullptr) {
-        qDebug() << "Control Channel already disconnected.";
+        error("Control Channel already disconnected.");
         return;
     }
 
@@ -422,7 +422,7 @@ void CogWheelControlChannel::passiveConnection()
     passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()&0xFF));
     sendReplyCode(227,"Entering Passive Mode (" + passiveChannelAddress + ").");
 
-    qDebug() << "Entering Passive Mode (" + passiveChannelAddress + ").";
+    info("Entering Passive Mode (" + passiveChannelAddress + ").");
 
 }
 
@@ -493,7 +493,7 @@ void CogWheelControlChannel::sendOnDataChannel(const QByteArray &dataToSend)
  */
 void CogWheelControlChannel::connected()
 {
-    qDebug() << "Control channel connected...";
+    info("Control channel connected...");
 }
 
 /**
@@ -503,7 +503,7 @@ void CogWheelControlChannel::connected()
  */
 void CogWheelControlChannel::disconnected()
 {
-    qDebug() << "Control channel disconnected.";
+    info("Control channel disconnected.");
 
     // Close control channel.
 

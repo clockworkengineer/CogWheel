@@ -92,6 +92,7 @@ private:
 signals:
 
     void error(const QString &errorMessage);
+    void info(const QString &message);
 
 public slots:
 

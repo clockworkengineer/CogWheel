@@ -382,6 +382,7 @@ void CogWheelDataChannel::readyRead()
         file.write(m_dataChannelSocket->readAll());
 
         file.close();
+
     }
 
 }
