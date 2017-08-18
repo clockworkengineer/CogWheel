@@ -18,7 +18,6 @@ class CogWheelUserSettings
 {
 
 public:
-  //  static void defaultSettings();
     static bool checkUserName(const QString& userName);
     static bool checkUserPassword(const QString& userName, const QString& password);
     static QString getRootPath(const QString& userName);

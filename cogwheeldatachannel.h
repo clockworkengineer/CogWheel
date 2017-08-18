@@ -66,6 +66,7 @@ protected:
 signals:
     void uploadFinished();              // File upload finished
     void error(QString errorNessage);   // Data channel error
+    void info(QString message);         // Information message
     void passiveConnection();           // Passive connection
     void downloadFinished();            // File download finished
 

@@ -91,6 +91,8 @@ private:
 
 signals:
 
+    void error(QString errorMessage);
+
 public slots:
 
 public:

@@ -71,10 +71,11 @@ void CogWheelControlChannel::createDataChannel()
         return;
     }
 
-    // Setup signalsand slots for channel
+    // Setup signals and slots for channel
 
     connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
 
 }
@@ -391,7 +392,19 @@ void CogWheelControlChannel::uploadFinished()
  */
 void CogWheelControlChannel::error(QString errorNessage)
 {
-    qDebug() << "Control channel error: " << errorNessage;
+    qDebug() << "[" << errorNessage.toStdString().c_str() << "]";
+}
+
+/**
+ * @brief CogWheelControlChannel::info
+ *
+ * Produce informational trace message.
+ *
+ * @param message
+ */
+void CogWheelControlChannel::info(QString message)
+{
+    qDebug() << message.toStdString().c_str();
 }
 
 /**

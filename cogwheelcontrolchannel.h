@@ -127,8 +127,13 @@ public slots:
     // Data channel
 
     void uploadFinished();              // File upload finished
-    void error(QString errorNessage);   // Channel error
+
     void passiveConnection();           // Passive connection
+
+    // Errors & information message
+
+    void error(QString errorNessage);   // Channel error
+    void info(QString message);         // Information message
 
     // Control channel socket
 

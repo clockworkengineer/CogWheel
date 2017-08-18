@@ -37,7 +37,7 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 {
     Q_UNUSED(parent);
 
-    qDebug() << "Data channel created.";
+    emit info("Data channel created.");
 
     m_dataChannelSocket = new QTcpSocket();
 
@@ -61,13 +61,13 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 {
 
     if (m_connected) {
-        qDebug() << "Data channel already connected.";
+        emit error("Data channel already connected.");
         return(m_connected);
     }
 
     if (!connection->isPassive()) {
 
-        qDebug() << "Active Mode. Connecting data channel to client ....";
+        emit info("Active Mode. Connecting data channel to client ....");
 
         m_dataChannelSocket->connectToHost(m_clientHostIP, m_clientHostPort);
         m_dataChannelSocket->waitForConnected(-1);
@@ -75,7 +75,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     } else {
 
-        qDebug() << "Passive Mode. Waiting to connect to data channel ....";
+        emit info("Passive Mode. Waiting to connect to data channel ....");
 
         if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
             waitForNewConnection(-1);
@@ -85,14 +85,12 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     }
 
-    qDebug() << "connected.";
+    emit info("connected.");
 
     m_connected=true;
 
-    qDebug() << "-- Datat channel State --" << m_dataChannelSocket->state();
-
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-        qDebug() << "-- Data channel socket Error String --" << m_dataChannelSocket->errorString();
+        emit error("Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
     }
 
     return(m_connected);
@@ -111,7 +109,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
         m_dataChannelSocket->waitForDisconnected(-1);
         connection->sendReplyCode(226);
     } else {
-        qDebug() << "Data channel socket not connected.";
+        emit error("Data channel socket not connected.");
     }
     m_connected=false;
 }
@@ -122,7 +120,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
  */
 void CogWheelDataChannel::setClientHostIP(QString clientIP)
 {
-    qDebug() << "Data channel client IP " << clientIP;
+    emit info("Data channel client IP "+clientIP);
     m_clientHostIP.setAddress(clientIP);
 }
 
@@ -133,7 +131,7 @@ void CogWheelDataChannel::setClientHostIP(QString clientIP)
 void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
 {
 
-    qDebug() << "Data channel client Port " << clientPort;
+    emit info("Data channel client Port "+QString::number(clientPort));
     m_clientHostPort = clientPort;
 }
 
@@ -147,20 +145,16 @@ void CogWheelDataChannel::listenForConnection(QString serverIP)
     {
         //Pick a random port and start listening
         if(listen(QHostAddress::Any)) {
-            qDebug() << "Listening....";
+            emit info ("Listening for passive connect....");
             setClientHostIP(serverIP);
             setClientHostPort(serverPort());
-            emit passiveConnection();
-            m_listening=true;
-        }//else {
-        //    emit passiveConnection();
-       // }
+        }
+        emit passiveConnection();
+        m_listening=true;
     }catch(QString err) {
         emit error(err);
-    }
-    catch(...)
-    {
-        emit error("Unknown error in listenForConnection");
+    }catch(...) {
+        emit error("Unknown error in listenForConnection().");
     }
 }
 
@@ -183,37 +177,43 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
         QFile file(fileName);
 
         if(!file.open(QFile::ReadOnly)) {
-            emit error("Could not open file!");
+            emit error("Error: File "+fileName+" could not be opened.");
             return;
         }
 
-        qDebug() << "*** FileSocket *** " << fileName;
+        emit info("Downloading file "+fileName+".");
 
-        //Move to the requested position
+        // Move to the requested position
         if(connection->restoreFilePostion() > 0) {
+            emit info("Restoring previous position.");
             file.seek(connection->restoreFilePostion());
         }
 
-        //Send the contents of the file
+        // Send the contents of the file
+
         while (!file.atEnd()) {
             QByteArray buffer = file.read(1024 * 8);
             connection->sendOnDataChannel(buffer);
         }
 
-        //Close the file
+        // Close the file
+
         file.close();
 
-        //Tell connected objects we are done
+        // Tell connected objects we are done
+
         emit downloadFinished();
 
         //Close the socket once we are done
+
         disconnectFromClient(connection);
 
     } catch(QString err) {
         emit error(err);
     } catch(...) {
-        emit error("Unknown error in file downloadFile().");
+        emit error("Unknown error in downloadFile().");
     }
+
 }
 
 /**
@@ -227,11 +227,12 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString
     m_transferFileName = fileName;
     m_fileBeingUploaded = true;
 
-    //Truncate the file if needed
+    // Truncate the file if needed
+
     if(connection->restoreFilePostion() > 0) {
         QFile file(fileName);
         if(!file.resize(connection->restoreFilePostion()))  {
-            emit error("File could not be truncated!");
+            emit error("File "+fileName+" could not be truncated.");
             return;
         }
     }
@@ -245,15 +246,12 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString
 void CogWheelDataChannel::incomingConnection(qintptr handle)
 {
 
-    qDebug() << "--- CogWheelDataChannel incomingConnection ---" << handle;
-
+    emit info("--- Incoming connection for data channel --- "+QString::number(handle));
 
     if(!m_dataChannelSocket->setSocketDescriptor(handle)){
-        qDebug() << "-- File Socket --" << handle << " Error binding socket: " << m_dataChannelSocket->errorString();
-        emit error("Error binding socket.");
-
+        emit error( "Error binding socket: "+m_dataChannelSocket->errorString());
     } else {
-        qDebug() << "-- File Socket --" << handle << " session Connected";
+        emit info("Data channel socket connected for handle : "+QString::number(handle));
     }
 
 }
@@ -263,7 +261,7 @@ void CogWheelDataChannel::incomingConnection(qintptr handle)
  */
 void CogWheelDataChannel::connected()
 {
-    qDebug() << "CogWheelDataChannel::connected()";
+    emit info("Data channel connected.");
 }
 
 /**
@@ -271,7 +269,8 @@ void CogWheelDataChannel::connected()
  */
 void CogWheelDataChannel::disconnected()
 {
-    qDebug() << "CogWheelDataChannel::disconnected()";
+
+    emit info("Data channel disconnected.");
 
     if (m_fileBeingUploaded) {
         m_fileBeingUploaded=false;
@@ -309,18 +308,17 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
  */
 void CogWheelDataChannel::readyRead()
 {
-    qDebug() << "CogWheelDataChannel::readyRead()";
 
     if(m_fileBeingUploaded  && m_transferFileName != "") {
 
         QFile file(m_transferFileName);
 
         if(!file.open(QFile::Append)) {
-            emit error("Could not open file!");
+            emit error("File "+m_transferFileName+" could not be opened.");
             return;
         }
 
-        qDebug() << "STATE =" << m_dataChannelSocket->state();
+        emit info("Uploading file "+m_transferFileName+"...");
 
         QByteArray buffer = m_dataChannelSocket->readAll();
         file.write(buffer);
@@ -334,8 +332,7 @@ void CogWheelDataChannel::readyRead()
  */
 void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 {
-    qDebug() << "dataChannelSocketError" << socketError;
-
+    emit error("Data channel socket error: "+QString::number(socketError));
 }
 
 // ============================
