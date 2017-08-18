@@ -23,24 +23,7 @@
 
 #include "cogwheelusersettings.h"
 
-/**
- * @brief CogWheelUserSettings::defaultSettings
- */
-//void CogWheelUserSettings::defaultSettings()
-//{
-//   QSettings  defaultSettings;
-
-//   defaultSettings.beginGroup("UserList");
-//   defaultSettings.setValue("users","guest");
-//   defaultSettings.endGroup();
-
-//   defaultSettings.beginGroup("guest");
-//   defaultSettings.setValue("password","password");
-//   defaultSettings.setValue("root", "/home/robt");
-//   defaultSettings.setValue("passive", "false");
-//   defaultSettings.endGroup();
-
-//}
+#include <QCryptographicHash>
 
 /**
  * @brief CogWheelUserSettings::checkUserName
@@ -70,13 +53,15 @@ bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QStr
 {
 
     QSettings  userSettings;
-    QString encryptedPassword;
+    QString hashedPassword;
+    QByteArray paswordHash;
 
     userSettings.beginGroup(userName);
-    encryptedPassword = userSettings.value("password").toString();
+    paswordHash = QCryptographicHash::hash(password.toUtf8(),QCryptographicHash::Sha1 );
+    hashedPassword = userSettings.value("password").toString();
     userSettings.endGroup();
 
-    return(encryptedPassword==password);
+    return(hashedPassword==paswordHash.toHex());
 
 }
 

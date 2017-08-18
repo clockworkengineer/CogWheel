@@ -31,7 +31,11 @@
 
 /**
  * @brief CogWheelDataChannel::CogWheelDataChannel
- * @param parent
+ *
+ * Create data channel instance. Create a socket and
+ * connect up its signals and slots.
+ *
+ * @param parent    parent object (not used).
  */
 CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 {
@@ -40,6 +44,11 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
     emit info("Data channel created.");
 
     m_dataChannelSocket = new QTcpSocket();
+
+    if (m_dataChannelSocket==nullptr) {
+        emit error("Error trying to create data channel socket.");
+        return;
+    }
 
     connect(m_dataChannelSocket, &QTcpSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
     connect(m_dataChannelSocket, &QTcpSocket::disconnected, this, &CogWheelDataChannel::disconnected, Qt::DirectConnection);
@@ -50,12 +59,18 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
     connect(m_dataChannelSocket, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
             this, &CogWheelDataChannel::socketError, Qt::DirectConnection);
 
+
 }
 
 /**
  * @brief CogWheelDataChannel::connectToClient
- * @param connection
- * @return
+ *
+ * Connect up data channel; either from server (active)
+ * or from client (passive).
+ *
+ * @param connection    Pointer to control channel instance.
+ *
+ * @return  true on sucessful connection
  */
 bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 {
@@ -99,7 +114,10 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
 /**
  * @brief CogWheelDataChannel::disconnectFromClient
- * @param connection
+ *
+ * Disconnect data channel.
+ *
+ * @param connection    Pointer to control channel instance.
  */
 void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connection)
 {
@@ -116,7 +134,10 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
 
 /**
  * @brief CogWheelDataChannel::setClientHostIP
- * @param clientIP
+ *
+ * Set client IP address for data channel connection.
+ *
+ * @param clientIP  Client IP Address.
  */
 void CogWheelDataChannel::setClientHostIP(QString clientIP)
 {
@@ -126,7 +147,10 @@ void CogWheelDataChannel::setClientHostIP(QString clientIP)
 
 /**
  * @brief CogWheelDataChannel::setClientHostPort
- * @param clientPort
+ *
+ * Set client port number for data channel connection.
+ *
+ * @param clientPort    Client port number.
  */
 void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
 {
@@ -137,13 +161,16 @@ void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
 
 /**
  * @brief CogWheelDataChannel::listenForConnection
- * @param serverIP
+ *
+ * Listen for connection from client (passive mode).
+ *
+ * @param serverIP  Server IP address.
  */
 void CogWheelDataChannel::listenForConnection(const QString &serverIP)
 {
     try
     {
-        //Pick a random port and start listening
+        // Pick a random port and start listening
         if(listen(QHostAddress::Any)) {
             emit info ("Listening for passive connect....");
             setClientHostIP(serverIP);
@@ -160,8 +187,11 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
 
 /**
  * @brief CogWheelDataChannel::downloadFile
- * @param connection
- * @param fileName
+ *
+ * Download a given local file over data channel to client.
+ *
+ * @param connection    Pointer to control channel instance.
+ * @param fileName      Local file name.
  */
 void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
@@ -192,8 +222,8 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
         // Send the contents of the file
 
         while (!file.atEnd()) {
-            QByteArray buffer = file.read(1024 * 8);
-            connection->sendOnDataChannel(buffer);
+          //  QByteArray buffer = file.read(1024 * 8);
+            connection->sendOnDataChannel(file.read(1024 * 8)); // This should be a parameter somewhere.
         }
 
         // Close the file
@@ -218,8 +248,13 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
 
 /**
  * @brief CogWheelDataChannel::uploadFile
- * @param connection
- * @param fileName
+ *
+ * Start upload of a given remote file to server over data channel.
+ * The actual upload takes place using the sockets readyRead() slot
+ * function.
+ *
+ * @param connection    Pointer to control channel instance.
+ * @param fileName      Local destination file name.
  */
 void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
@@ -241,7 +276,11 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
 
 /**
  * @brief CogWheelDataChannel::incomingConnection
- * @param handle
+ *
+ * Handle connection from client to server for data channel
+ * for passive mode.
+ *
+ * @param handle    Handle to socket.
  */
 void CogWheelDataChannel::incomingConnection(qintptr handle)
 {
@@ -258,6 +297,9 @@ void CogWheelDataChannel::incomingConnection(qintptr handle)
 
 /**
  * @brief CogWheelDataChannel::connected
+ *
+ * Data channel socket connected slot function.
+ *
  */
 void CogWheelDataChannel::connected()
 {
@@ -266,6 +308,10 @@ void CogWheelDataChannel::connected()
 
 /**
  * @brief CogWheelDataChannel::disconnected
+ *
+ * Data channel socket disconnect slot function. If a
+ * file is being uploaded then reset any related variables
+ *
  */
 void CogWheelDataChannel::disconnected()
 {
@@ -283,7 +329,10 @@ void CogWheelDataChannel::disconnected()
 
 /**
  * @brief CogWheelDataChannel::stateChanged
- * @param socketState
+ *
+ * Data channel socket state changed slot function.
+ *
+ * @param socketState   New socket state.
  */
 void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 {
@@ -294,7 +343,10 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 
 /**
  * @brief CogWheelDataChannel::bytesWritten
- * @param numBytes
+ *
+ * Data channel socket bytes written slot function.
+ *
+ * @param numBytes  Number of bytes written (unused).
  */
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
@@ -305,6 +357,11 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 
 /**
  * @brief CogWheelDataChannel::readyRead
+ *
+ * Data channel socket readyRead slot function. Used to
+ * perform the uploading of a file to server once it has
+ * been kicked off.
+ *
  */
 void CogWheelDataChannel::readyRead()
 {
@@ -320,15 +377,21 @@ void CogWheelDataChannel::readyRead()
 
         emit info("Uploading file "+m_transferFileName+"...");
 
-        QByteArray buffer = m_dataChannelSocket->readAll();
-        file.write(buffer);
+       // QByteArray buffer = m_dataChannelSocket->readAll();
+
+        file.write(m_dataChannelSocket->readAll());
+
         file.close();
     }
+
 }
 
 /**
  * @brief CogWheelDataChannel::socketError
- * @param socketError
+ *
+ * ata channel socket error slot function.
+ *
+ * @param socketError   Socket error.
  */
 void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 {
