@@ -37,9 +37,9 @@ public:
 
     // Channel action
 
-    void listenForConnection(QString serverIP);
-    void downloadFile(CogWheelControlChannel *connection, QString fileName);
-    void uploadFile(CogWheelControlChannel *connection, QString fileName);
+    void listenForConnection(const QString &serverIP);
+    void downloadFile(CogWheelControlChannel *connection, const QString &fileName);
+    void uploadFile(CogWheelControlChannel *connection, const QString &fileName);
 
     // Private data accessors
 
@@ -64,11 +64,11 @@ protected:
     void OnConnected();
 
 signals:
-    void uploadFinished();              // File upload finished
-    void error(QString errorNessage);   // Data channel error
-    void info(QString message);         // Information message
-    void passiveConnection();           // Passive connection
-    void downloadFinished();            // File download finished
+    void uploadFinished();                     // File upload finished
+    void error(const QString &errorNessage);   // Data channel error
+    void info(const QString &message);         // Information message
+    void passiveConnection();                  // Passive connection
+    void downloadFinished();                   // File download finished
 
 public slots:
 

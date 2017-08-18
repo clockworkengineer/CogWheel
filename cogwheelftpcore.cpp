@@ -320,7 +320,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::USER(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     // Anonymous login
@@ -365,7 +365,7 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) } ;
@@ -401,7 +401,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -415,7 +415,7 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -429,7 +429,7 @@ void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -445,7 +445,7 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, QString arguments)
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, const QString &arguments)
 {
     connection->setTransferType(arguments[0]);  // Just keep first character for the record
     connection->sendReplyCode(200);
@@ -456,7 +456,7 @@ void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     connection->setHostPortForDataChannel(arguments.split(','));
@@ -469,7 +469,7 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QString cwdPath = mapPathToLocal(connection, arguments);
@@ -489,7 +489,7 @@ void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, QString arguments)
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     // For non-anonymous check users password
@@ -513,7 +513,7 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QDir path  { mapPathToLocal(connection, arguments) };
@@ -532,7 +532,7 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QFile file { mapPathToLocal(connection, arguments) } ;
@@ -554,7 +554,7 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -567,7 +567,7 @@ void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     connection->setTransferMode(arguments[0]);
@@ -579,7 +579,7 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QFile file { mapPathToLocal(connection,arguments) } ;
@@ -603,7 +603,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -618,7 +618,7 @@ void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -646,7 +646,7 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -659,7 +659,7 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -690,7 +690,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -709,7 +709,7 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, QString arguments)
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -733,7 +733,7 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, QString arguments)
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -748,7 +748,7 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     QFile fileToDelete { mapPathToLocal(connection, arguments) };
@@ -771,7 +771,7 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     connection->setAccountName(arguments);
@@ -784,7 +784,7 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
@@ -806,7 +806,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     if(connection->isAllowSMNT()) {
@@ -830,7 +830,7 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, const QString &arguments)
 {
     connection->setFileStructure(arguments[0]);
     connection->sendReplyCode(200);
@@ -841,7 +841,7 @@ void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -854,7 +854,7 @@ void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &arguments)
 {
     QString path { mapPathToLocal(connection, arguments) };
 
@@ -875,7 +875,7 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -899,7 +899,7 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::REST(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     if(connection->renameFromFileName() == "") {
@@ -925,7 +925,7 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -940,7 +940,7 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
@@ -968,7 +968,7 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     if (connection->connectDataChannel()) {
@@ -982,7 +982,7 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, QString arguments
  * @param connection
  * @param arguments
  */
-void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, QString arguments)
+void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     if(!arguments.isEmpty()) {

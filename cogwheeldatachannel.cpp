@@ -13,7 +13,7 @@
 // Class: CogWheelDataChannel
 //
 // Description: Class to provide FTP server data channel functionality.
-// The channel to created and destroyed on an as needed basis and can operative
+// The channel to created and destroyed on an as needed basis and can operate
 // in the default active mode where the server creates it or in passive mode
 // where the server waits for a connection from the client on a specified port.
 //
@@ -139,7 +139,7 @@ void CogWheelDataChannel::setClientHostPort(quint16 clientPort)
  * @brief CogWheelDataChannel::listenForConnection
  * @param serverIP
  */
-void CogWheelDataChannel::listenForConnection(QString serverIP)
+void CogWheelDataChannel::listenForConnection(const QString &serverIP)
 {
     try
     {
@@ -163,7 +163,7 @@ void CogWheelDataChannel::listenForConnection(QString serverIP)
  * @param connection
  * @param fileName
  */
-void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QString fileName)
+void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
 
     try
@@ -172,7 +172,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
         m_fileBeingUploaded = false;
         m_transferFileName = fileName;
 
-        //Open the file
+        // Open the file
 
         QFile file(fileName);
 
@@ -221,7 +221,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, QStri
  * @param connection
  * @param fileName
  */
-void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, QString fileName)
+void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
 
     m_transferFileName = fileName;

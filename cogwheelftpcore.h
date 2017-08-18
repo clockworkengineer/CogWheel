@@ -25,7 +25,7 @@ class CogWheelFTPCore : public QObject
 
     // FTP command function pointer
 
-    typedef std::function<void (CogWheelControlChannel *, QString) > FTPCommandFunction;
+    typedef std::function<void (CogWheelControlChannel *, const QString &) > FTPCommandFunction;
 
 public:
 
@@ -54,44 +54,44 @@ private:
 
     // FTP commands
 
-    static void USER(CogWheelControlChannel *connection, QString arguments);
-    static void LIST(CogWheelControlChannel *connection, QString arguments);
-    static void FEAT(CogWheelControlChannel *connection, QString arguments);
-    static void SYST(CogWheelControlChannel *connection, QString arguments);
-    static void PWD(CogWheelControlChannel *connection, QString arguments);
-    static void TYPE(CogWheelControlChannel *connection, QString arguments);
-    static void PORT(CogWheelControlChannel *connection, QString arguments);
-    static void CWD(CogWheelControlChannel *connection, QString arguments);
-    static void PASS(CogWheelControlChannel *connection, QString arguments);
-    static void CDUP(CogWheelControlChannel *connection, QString arguments);
-    static void RETR(CogWheelControlChannel *connection, QString arguments);
-    static void NOOP(CogWheelControlChannel *connection, QString arguments);
-    static void MODE(CogWheelControlChannel *connection, QString arguments);
-    static void STOR(CogWheelControlChannel *connection, QString arguments);
-    static void PASV(CogWheelControlChannel *connection, QString arguments);
-    static void HELP(CogWheelControlChannel *connection, QString arguments);
-    static void STAT(CogWheelControlChannel *connection, QString arguments);
-    static void SITE(CogWheelControlChannel *connection, QString arguments);
-    static void NLST(CogWheelControlChannel *connection, QString arguments);
-    static void MKD(CogWheelControlChannel *connection, QString arguments);
-    static void RMD(CogWheelControlChannel *connection, QString arguments);
-    static void DELE(CogWheelControlChannel *connection, QString arguments);
-    static void ACCT(CogWheelControlChannel *connection, QString arguments);
-    static void SMNT(CogWheelControlChannel *connection, QString arguments);
-    static void QUIT(CogWheelControlChannel *connection, QString arguments);
-    static void REIN(CogWheelControlChannel *connection, QString arguments);
-    static void STRU(CogWheelControlChannel *connection, QString arguments);
-    static void STOU(CogWheelControlChannel *connection, QString arguments);
-    static void APPE(CogWheelControlChannel *connection, QString arguments);
-    static void ALLO(CogWheelControlChannel *connection, QString arguments);
-    static void REST(CogWheelControlChannel *connection, QString arguments);
-    static void RNFR(CogWheelControlChannel *connection, QString arguments);
-    static void RNTO(CogWheelControlChannel *connection, QString arguments);
-    static void ABOR(CogWheelControlChannel *connection, QString arguments);
+    static void USER(CogWheelControlChannel *connection, const QString &arguments);
+    static void LIST(CogWheelControlChannel *connection, const QString &arguments);
+    static void FEAT(CogWheelControlChannel *connection, const QString &arguments);
+    static void SYST(CogWheelControlChannel *connection, const QString &arguments);
+    static void PWD(CogWheelControlChannel *connection, const QString &arguments);
+    static void TYPE(CogWheelControlChannel *connection, const QString &arguments);
+    static void PORT(CogWheelControlChannel *connection, const QString &arguments);
+    static void CWD(CogWheelControlChannel *connection, const QString &arguments);
+    static void PASS(CogWheelControlChannel *connection, const QString &arguments);
+    static void CDUP(CogWheelControlChannel *connection, const QString &arguments);
+    static void RETR(CogWheelControlChannel *connection, const QString &arguments);
+    static void NOOP(CogWheelControlChannel *connection, const QString &arguments);
+    static void MODE(CogWheelControlChannel *connection, const QString &arguments);
+    static void STOR(CogWheelControlChannel *connection, const QString &arguments);
+    static void PASV(CogWheelControlChannel *connection, const QString &arguments);
+    static void HELP(CogWheelControlChannel *connection, const QString &arguments);
+    static void STAT(CogWheelControlChannel *connection, const QString &arguments);
+    static void SITE(CogWheelControlChannel *connection, const QString &arguments);
+    static void NLST(CogWheelControlChannel *connection, const QString &arguments);
+    static void MKD(CogWheelControlChannel *connection, const QString &arguments);
+    static void RMD(CogWheelControlChannel *connection, const QString &arguments);
+    static void DELE(CogWheelControlChannel *connection, const QString &arguments);
+    static void ACCT(CogWheelControlChannel *connection, const QString &arguments);
+    static void SMNT(CogWheelControlChannel *connection, const QString &arguments);
+    static void QUIT(CogWheelControlChannel *connection, const QString &arguments);
+    static void REIN(CogWheelControlChannel *connection, const QString &arguments);
+    static void STRU(CogWheelControlChannel *connection, const QString &arguments);
+    static void STOU(CogWheelControlChannel *connection, const QString &arguments);
+    static void APPE(CogWheelControlChannel *connection, const QString &arguments);
+    static void ALLO(CogWheelControlChannel *connection, const QString &arguments);
+    static void REST(CogWheelControlChannel *connection, const QString &arguments);
+    static void RNFR(CogWheelControlChannel *connection, const QString &arguments);
+    static void RNTO(CogWheelControlChannel *connection, const QString &arguments);
+    static void ABOR(CogWheelControlChannel *connection, const QString &arguments);
 
 signals:
 
-    void error(QString errorMessage);
+    void error(const QString &errorMessage);
 
 public slots:
 

@@ -179,7 +179,7 @@ void CogWheelControlChannel::disconnectDataChannel()
  *
  * @param ipAddressAndPort  IP Address and port as list of 6 strings.
  */
-void CogWheelControlChannel::setHostPortForDataChannel(QStringList ipAddressAndPort)
+void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddressAndPort)
 {
 
     // Create data channel
@@ -390,9 +390,9 @@ void CogWheelControlChannel::uploadFinished()
  *
  * @param errorNessage  Error message string.
  */
-void CogWheelControlChannel::error(QString errorNessage)
+void CogWheelControlChannel::error(const QString &errorNessage)
 {
-    qDebug() << "[" << errorNessage.toStdString().c_str() << "]";
+    qDebug() << errorNessage.toStdString().c_str();
 }
 
 /**
@@ -402,7 +402,7 @@ void CogWheelControlChannel::error(QString errorNessage)
  *
  * @param message
  */
-void CogWheelControlChannel::info(QString message)
+void CogWheelControlChannel::info(const QString &message)
 {
     qDebug() << message.toStdString().c_str();
 }

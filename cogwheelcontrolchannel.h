@@ -39,7 +39,7 @@ public:
     bool connectDataChannel();
     void uploadFileToDataChannel(const QString &file);
     void disconnectDataChannel();
-    void setHostPortForDataChannel(QStringList ipAddressAndPort);
+    void setHostPortForDataChannel(const QStringList &ipAddressAndPort);
     void downloadFileFromDataChannel(const QString &file);
     void listenForConnectionOnDataChannel();
     void abortOnDataChannel();
@@ -130,10 +130,10 @@ public slots:
 
     void passiveConnection();           // Passive connection
 
-    // Errors & information message
+    // Errors & information messages
 
-    void error(QString errorNessage);   // Channel error
-    void info(QString message);         // Information message
+    void error(const QString &errorNessage);  // Channel error
+    void info(const QString &message);        // Information message
 
     // Control channel socket
 
