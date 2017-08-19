@@ -127,7 +127,7 @@ public slots:
     // Data channel
 
     void uploadFinished();              // File upload finished
-
+    void downloadFinished();              // File upload finished
     void passiveConnection();           // Passive connection
 
     // Errors & information messages

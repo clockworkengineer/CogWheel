@@ -63,7 +63,7 @@ void CogWheelServer::startServer()
     info("CogWheel FTP Server started.");
 
     if (listen(QHostAddress::Any, m_serverSettings.serverPort())) {
-        info("CogWheel Server listening on port "+m_serverSettings.serverPort());
+        info("CogWheel Server listening on port "+QString::number(m_serverSettings.serverPort()));
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
     } else {
        error("CogWheel Server listen failure.");

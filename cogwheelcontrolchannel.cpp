@@ -74,6 +74,7 @@ void CogWheelControlChannel::createDataChannel()
     // Setup signals and slots for channel
 
     connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
+    connect(m_dataChannel,&CogWheelDataChannel::downloadFinished, this,&CogWheelControlChannel::downloadFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
@@ -211,6 +212,7 @@ void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
     }
 
     m_dataChannel->downloadFile(this, file);
+
 }
 
 /**
@@ -384,6 +386,17 @@ void CogWheelControlChannel::uploadFinished()
 }
 
 /**
+ * @brief CogWheelControlChannel::downloadFinished
+ *
+ * File download finished so send response to server.
+ *
+ */
+void CogWheelControlChannel::downloadFinished()
+{
+    sendReplyCode(226);
+}
+
+/**
  * @brief CogWheelControlChannel::error
  *
  * Control channel error.
@@ -468,6 +481,7 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
  */
 void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
 {
+
     sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
 }
 

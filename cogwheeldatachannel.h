@@ -85,12 +85,14 @@ public:
     QTcpSocket *m_dataChannelSocket;
 
 private:
-    QHostAddress m_clientHostIP;    // Address of client
-    quint16 m_clientHostPort;       // Port used on client
-    bool m_connected=false;         // == true data channel connected
-    bool m_listening=false;         // == true listening on data channel
-    bool m_fileBeingUploaded=false; // == true file being uploaed
-    QString m_transferFileName;     // == upload/download file name
+    QHostAddress m_clientHostIP;        // Address of client
+    quint16 m_clientHostPort;           // Port used on client
+    bool m_connected=false;             // == true data channel connected
+    bool m_listening=false;             // == true listening on data channel
+    QString m_transferFileName;         // Upload/download file name
+    bool m_fileBeingUploaded=false;     // == true file being uploaed
+    bool m_fileBeingDownloaded=false;   // == true downloading file
+    quint64 m_downloadFileSize=0;       // Downloading file size
 
 };
 

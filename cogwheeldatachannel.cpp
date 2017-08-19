@@ -84,8 +84,11 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
         emit info("Active Mode. Connecting data channel to client ....");
 
+        //connection->sendReplyCode(150);
+
         m_dataChannelSocket->connectToHost(m_clientHostIP, m_clientHostPort);
         m_dataChannelSocket->waitForConnected(-1);
+
         connection->sendReplyCode(150);
 
     } else {
@@ -130,6 +133,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
         emit error("Data channel socket not connected.");
     }
     m_connected=false;
+
 }
 
 /**
@@ -199,6 +203,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
     try
     {
 
+        m_fileBeingDownloaded =true;
         m_fileBeingUploaded = false;
         m_transferFileName = fileName;
 
@@ -207,6 +212,8 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
         QFile file(fileName);
 
         if(!file.open(QFile::ReadOnly)) {
+            m_fileBeingDownloaded = false;
+            m_transferFileName = "";
             emit error("Error: File "+fileName+" could not be opened.");
             return;
         }
@@ -219,24 +226,18 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
             file.seek(connection->restoreFilePostion());
         }
 
+        m_downloadFileSize = file.size();
+
         // Send the contents of the file
 
         while (!file.atEnd()) {
-          //  QByteArray buffer = file.read(1024 * 8);
-            connection->sendOnDataChannel(file.read(1024 * 8)); // This should be a parameter somewhere.
+            QByteArray buffer = file.read(1024 * 8);
+            connection->sendOnDataChannel(buffer); // This should be a parameter somewhere.
         }
 
         // Close the file
 
         file.close();
-
-        // Tell connected objects we are done
-
-        emit downloadFinished();
-
-        //Close the socket once we are done
-
-        disconnectFromClient(connection);
 
     } catch(QString err) {
         emit error(err);
@@ -261,6 +262,7 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
 
     m_transferFileName = fileName;
     m_fileBeingUploaded = true;
+    m_fileBeingDownloaded =false;
 
     // Truncate the file if needed
 
@@ -268,6 +270,8 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
         QFile file(fileName);
         if(!file.resize(connection->restoreFilePostion()))  {
             emit error("File "+fileName+" could not be truncated.");
+            m_transferFileName = "";
+            m_fileBeingUploaded = false;
             return;
         }
     }
@@ -323,6 +327,11 @@ void CogWheelDataChannel::disconnected()
         m_transferFileName="";
         m_connected=false;
         emit uploadFinished();
+    } else if (m_fileBeingDownloaded) {
+        m_fileBeingDownloaded=false;
+        m_transferFileName="";
+        m_connected=false;
+        m_downloadFileSize=0;
     }
 
 }
@@ -344,15 +353,22 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 /**
  * @brief CogWheelDataChannel::bytesWritten
  *
- * Data channel socket bytes written slot function.
+ * Data channel socket bytes written slot function. If file
+ * is being downloaded subtract bytes from file size and
+ * when reaches zero disconnect and signal complete.
  *
  * @param numBytes  Number of bytes written (unused).
  */
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
 
-    Q_UNUSED(numBytes);
-
+    if (m_fileBeingDownloaded && m_transferFileName != "") {
+        m_downloadFileSize -= numBytes;
+        if (m_downloadFileSize==0) {
+            m_dataChannelSocket->disconnectFromHost();
+            emit downloadFinished();
+        }
+    }
 }
 
 /**
@@ -376,8 +392,6 @@ void CogWheelDataChannel::readyRead()
         }
 
         emit info("Uploading file "+m_transferFileName+"...");
-
-       // QByteArray buffer = m_dataChannelSocket->readAll();
 
         file.write(m_dataChannelSocket->readAll());
 

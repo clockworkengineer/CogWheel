@@ -544,7 +544,7 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
         connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
-        connection->sendReplyCode(226);
+  //      connection->sendReplyCode(226);
     }
 
 }
@@ -930,7 +930,7 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &ar
     Q_UNUSED(arguments);
 
     connection->abortOnDataChannel();
-    connection->sendReplyCode(226);
+  //  connection->sendReplyCode(226);
 
 }
 
