@@ -52,7 +52,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 {
 
     if (m_connections.contains(handle)) {
-        qDebug() << "Connection already being used";
+        emit error("Connection already being used");
         return;
     }
 
@@ -62,12 +62,12 @@ void CogWheelConnections::acceptConnection(qint64 handle)
     QScopedPointer<QThread> connectionThread { new QThread() };
 
     if (connection==nullptr) {
-        qDebug() << "Failed to create connection.";
+        emit error("Failed to create connection.");
         return;
     }
 
     if (connectionThread==nullptr) {
-        qDebug() << "Failed to create connection thread.";
+        emit error("Failed to create connection thread.");
         return;
     }
 
@@ -99,7 +99,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     emit openConnection(handle);
 
-    qDebug() << "NUMBER OF CONNECTIONS: " << m_connections.size();
+    emit info("NUMBER OF CONNECTIONS: "+QString::number(m_connections.size()));
 
 }
 
@@ -114,10 +114,10 @@ void CogWheelConnections::acceptConnection(qint64 handle)
  */
 void CogWheelConnections::finishedConnection(qint64 handle)
 {
-    qDebug() << "CogWheelConnections::finishedConnection: removing connection";
+    emit info("Removing connection for handle : "+QString::number(handle));
 
     if (!m_connections.contains(handle)) {
-        qWarning() << "CogWheelConnections::close() : connection not present.";
+        emit error("Connection not present for handle: "+QString::number(handle));
         return;
     }
 
@@ -137,7 +137,7 @@ void CogWheelConnections::finishedConnection(qint64 handle)
  */
 void CogWheelConnections::abortedConnection(qint64 handle)
 {
-    qDebug() << "CogWheelConnections::abortedConnection: aborting connection";
+    emit error("Aborting connection for handle: "+QString::number(handle));
     finishedConnection(handle);
 }
 

@@ -34,7 +34,9 @@ protected:
 signals:
     void accept(qint64 handle);
 
-public slots:
+public slots: 
+    void error(const QString &errorMessage);
+    void info(const QString &message);
 
 private:
 

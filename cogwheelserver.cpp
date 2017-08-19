@@ -39,6 +39,9 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
+    connect(&m_connections, &CogWheelConnections::error, this, &CogWheelServer::error);
+    connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);
+
     m_serverSettings.load();
     m_connections.setServerSettings (m_serverSettings);
 
@@ -57,13 +60,13 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
  */
 void CogWheelServer::startServer()
 {
-    qDebug() << "CogWheel FTP Server started on thread " << QThread::currentThreadId();
+    info("CogWheel FTP Server started.");
 
     if (listen(QHostAddress::Any, m_serverSettings.serverPort())) {
-        qDebug() << "CogWheel Server listening on port " << m_serverSettings.serverPort();
+        info("CogWheel Server listening on port "+m_serverSettings.serverPort());
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
     } else {
-        qDebug() << "CogWheel Server listen failure.";
+       error("CogWheel Server listen failure.");
     }
 
 }
@@ -76,7 +79,7 @@ void CogWheelServer::startServer()
  */
 void CogWheelServer::stopServer()
 {
-    qDebug() << "CogWheel Server stopped.";
+    info("CogWheel Server stopped.");
 }
 
 /**
@@ -89,8 +92,32 @@ void CogWheelServer::stopServer()
  */
 void CogWheelServer::incomingConnection(qintptr handle)
 {
-    qDebug() << "--- CogWheel Server incoming connection ---" << handle;
+    info("--- CogWheel Server incoming connection --- "+QString::number(handle));
 
     emit accept(handle);
 
+}
+
+/**
+ * @brief CogWheelServer::error
+ *
+ * Control channel error.
+ *
+ * @param errorNessage  Error message string.
+ */
+void CogWheelServer::error(const QString &errorNessage)
+{
+    qDebug() << errorNessage.toStdString().c_str();
+}
+
+/**
+ * @brief CogWheelServer::info
+ *
+ * Produce informational trace message.
+ *
+ * @param message
+ */
+void CogWheelServer::info(const QString &message)
+{
+    qDebug() << message.toStdString().c_str();
 }

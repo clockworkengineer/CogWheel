@@ -74,9 +74,9 @@ void CogWheelControlChannel::createDataChannel()
     // Setup signals and slots for channel
 
     connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
 
 }
 
