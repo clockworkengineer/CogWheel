@@ -334,7 +334,6 @@ void CogWheelDataChannel::disconnected()
     m_connected=false;
 
     if (m_fileBeingTransferred) {
-        qDebug() << "Clean UUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPP";
         emit transferFinished();
     }
 
@@ -369,9 +368,7 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
     if (m_fileBeingTransferred) {
         m_downloadFileSize -= numBytes;
         if (m_downloadFileSize==0) {
-       //     fileTransferCleanup();
             m_dataChannelSocket->disconnectFromHost();
-        //    emit downloadFinished();
             return;
         }
         if (!m_fileBeingTransferred->atEnd()) {
