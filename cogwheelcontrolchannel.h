@@ -106,6 +106,8 @@ public:
     void setServerName(const QString &serverName);
     QString serverVersion() const;
     void setServerVersion(const QString &serverVersion);
+    qint64 writeBytesSize() const;
+    void setWriteBytesSize(const qint64 &writeBytesSize);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command
@@ -126,8 +128,7 @@ public slots:
 
     // Data channel
 
-    void uploadFinished();              // File upload finished
-    void downloadFinished();              // File upload finished
+    void transferFinished();            // File transfer finished
     void passiveConnection();           // Passive connection
 
     // Errors & information messages
@@ -166,6 +167,7 @@ private:
     QString m_serverName;               // Server name
     QString m_serverVersion;            // Server version
     bool m_allowSMNT=false;             // == true allow SMNT command
+    qint64 m_writeBytesSize=0;          // No of bytes per write
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QTcpSocket *m_controlChannelSocket=nullptr;     // Control channel socket

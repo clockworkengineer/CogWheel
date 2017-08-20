@@ -18,12 +18,15 @@ public:
     void setAllowSMNT(bool allowSMNT);
     qint64 serverPort() const;
     void setServerPort(const qint64 &serverPort);
+    qint64 writeBytesSize() const;
+    void setWriteBytesSize(const qint64 &writeBytesSize);
 
 private:
-    QString m_serverName;       // Server Name
-    QString m_serverVersion;    // Server Version
-    bool m_allowSMNT=false;     // ==true allow SMNT command
-    qint64 m_serverPort;        // Server connection port
+    QString m_serverName;            // Server Name
+    QString m_serverVersion;         // Server Version
+    bool m_allowSMNT=false;          // ==true allow SMNT command
+    qint64 m_serverPort;             // Server connection port
+    qint64 m_writeBytesSize=1024*32; // No of bytes per write
 
 };
 #endif // COGWHEELSERVERSETTINGS_H

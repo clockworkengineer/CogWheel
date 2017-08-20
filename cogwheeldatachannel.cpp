@@ -105,6 +105,8 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     m_connected=true;
 
+    m_writeBytesSize = connection->writeBytesSize();
+
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
         emit error("Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
     }
@@ -229,10 +231,10 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
         // Send initial block of file
 
         if (m_fileBeingTransferred->size()) {
-            QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
+            QByteArray buffer = m_fileBeingTransferred->read(m_writeBytesSize);
             m_dataChannelSocket->write(buffer);
         } else {
-            bytesWritten(0);
+            bytesWritten(0);   // File is zero length (close connection/signal success)
         }
 
 
@@ -271,6 +273,7 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
         fileTransferCleanup();
         return;
     }
+
     // Truncate the file if needed
 
     if(connection->restoreFilePostion() > 0) {
@@ -331,7 +334,8 @@ void CogWheelDataChannel::disconnected()
     m_connected=false;
 
     if (m_fileBeingTransferred) {
-        emit uploadFinished();
+        qDebug() << "Clean UUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPP";
+        emit transferFinished();
     }
 
     fileTransferCleanup();
@@ -365,13 +369,13 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
     if (m_fileBeingTransferred) {
         m_downloadFileSize -= numBytes;
         if (m_downloadFileSize==0) {
-            fileTransferCleanup();
+       //     fileTransferCleanup();
             m_dataChannelSocket->disconnectFromHost();
-            emit downloadFinished();
+        //    emit downloadFinished();
             return;
         }
         if (!m_fileBeingTransferred->atEnd()) {
-            QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
+            QByteArray buffer = m_fileBeingTransferred->read(m_writeBytesSize);
             m_dataChannelSocket->write(buffer);
         }
     }
@@ -407,7 +411,6 @@ void CogWheelDataChannel::readyRead()
 {
 
     if(m_fileBeingTransferred) {
-        emit info("Uploading file ...");
         m_fileBeingTransferred->write(m_dataChannelSocket->readAll());
     }
 

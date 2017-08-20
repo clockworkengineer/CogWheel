@@ -138,3 +138,13 @@ void CogWheelServerSettings::setServerPort(const qint64 &serverPort)
 {
     m_serverPort = serverPort;
 }
+
+qint64 CogWheelServerSettings::writeBytesSize() const
+{
+    return m_writeBytesSize;
+}
+
+void CogWheelServerSettings::setWriteBytesSize(const qint64 &writeBytesSize)
+{
+    m_writeBytesSize = writeBytesSize;
+}

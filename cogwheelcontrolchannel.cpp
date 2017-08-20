@@ -36,14 +36,15 @@
  * @param severSettings     Server Settings
  * @param parent            Object parent (should be null).
  */
-CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings severSettings, QObject *parent) : QObject(parent)
+CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSettings, QObject *parent) : QObject(parent)
 {
 
     // Setup any control channel server settings
 
-    setServerName(severSettings.serverName());
-    setServerVersion(severSettings.serverVersion());
-    setAllowSMNT(severSettings.allowSMNT());
+    setServerName(serverSettings.serverName());
+    setServerVersion(serverSettings.serverVersion());
+    setAllowSMNT(serverSettings.allowSMNT());
+    setWriteBytesSize(serverSettings.writeBytesSize());
 
 }
 
@@ -73,8 +74,7 @@ void CogWheelControlChannel::createDataChannel()
 
     // Setup signals and slots for channel
 
-    connect(m_dataChannel,&CogWheelDataChannel::uploadFinished, this,&CogWheelControlChannel::uploadFinished, Qt::DirectConnection);
-    connect(m_dataChannel,&CogWheelDataChannel::downloadFinished, this,&CogWheelControlChannel::downloadFinished, Qt::DirectConnection);
+    connect(m_dataChannel,&CogWheelDataChannel::transferFinished, this,&CogWheelControlChannel::transferFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
@@ -375,23 +375,12 @@ void CogWheelControlChannel::closeConnection()
 }
 
 /**
- * @brief CogWheelControlChannel::uploadFinished
+ * @brief CogWheelControlChannel::transferFinished
  *
- * File upload finished so send response to server.
- *
- */
-void CogWheelControlChannel::uploadFinished()
-{
-    sendReplyCode(226);
-}
-
-/**
- * @brief CogWheelControlChannel::downloadFinished
- *
- * File download finished so send response to server.
+ * File transfer finished so send response to server.
  *
  */
-void CogWheelControlChannel::downloadFinished()
+void CogWheelControlChannel::transferFinished()
 {
     sendReplyCode(226);
 }
@@ -555,6 +544,16 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 
     Q_UNUSED(numberOfBytes);
 
+}
+
+qint64 CogWheelControlChannel::writeBytesSize() const
+{
+    return m_writeBytesSize;
+}
+
+void CogWheelControlChannel::setWriteBytesSize(const qint64 &writeBytesSize)
+{
+    m_writeBytesSize = writeBytesSize;
 }
 
 // ============================

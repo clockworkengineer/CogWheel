@@ -382,6 +382,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
+            listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
                 listing.append(buildListLine(item));
             }
@@ -732,6 +733,7 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
     } else{
         connection->sendReplyCode(550,"Directory not found!");
     }
+
 }
 
 /**

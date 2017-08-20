@@ -67,11 +67,10 @@ protected:
     void OnConnected();
 
 signals:
-    void uploadFinished();                     // File upload finished
+    void transferFinished();                   // File transfer finished
     void error(const QString &errorNessage);   // Data channel error
     void info(const QString &message);         // Information message
     void passiveConnection();                  // Passive connection
-    void downloadFinished();                   // File download finished
 
 public slots:
 
@@ -95,6 +94,7 @@ private:
     bool m_listening=false;               // == true listening on data channel
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
     quint64 m_downloadFileSize=0;         // Downloading file size
+    qint64 m_writeBytesSize=0;          // No of bytes per write
 
 };
 
