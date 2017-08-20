@@ -542,9 +542,15 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
         return;
     }
 
+    QFileInfo fileInfo { file };
+
+    if(fileInfo.isDir()){
+        connection->sendReplyCode(450, "Requested file is a directory.");
+        return;
+    }
+
     if (connection->connectDataChannel()) {
         connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
-  //      connection->sendReplyCode(226);
     }
 
 }

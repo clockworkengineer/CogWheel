@@ -228,8 +228,12 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
 
         // Send initial block of file
 
-        QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
-        m_dataChannelSocket->write(buffer);
+        if (m_fileBeingTransferred->size()) {
+            QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
+            m_dataChannelSocket->write(buffer);
+        } else {
+            bytesWritten(0);
+        }
 
 
     } catch(QString err) {
@@ -382,7 +386,7 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 void CogWheelDataChannel::fileTransferCleanup()
 {
     if (m_fileBeingTransferred) {
-        if (m_fileBeingTransferred->open()) {
+        if (m_fileBeingTransferred->isOpen()) {
             m_fileBeingTransferred->close();
         }
         m_fileBeingTransferred->deleteLater();
