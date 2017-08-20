@@ -17,6 +17,7 @@
 #include <QString>
 #include <QHostAddress>
 #include <QTcpServer>
+#include <QFile>
 
 class CogWheelControlChannel;
 
@@ -53,8 +54,10 @@ public:
     void setConnected(bool isConnected);
     bool isFileBeingUploaded() const;
     void setFileBeingUploaded(bool isFileBeingUploaded);
-    QString transferFileName() const;
-    void setTransferFileName(const QString &transferFileName);
+
+private:
+
+    void fileTransferCleanup();
 
 protected:
 
@@ -85,14 +88,15 @@ public:
     QTcpSocket *m_dataChannelSocket;
 
 private:
-    QHostAddress m_clientHostIP;        // Address of client
-    quint16 m_clientHostPort;           // Port used on client
-    bool m_connected=false;             // == true data channel connected
-    bool m_listening=false;             // == true listening on data channel
-    QString m_transferFileName;         // Upload/download file name
-    bool m_fileBeingUploaded=false;     // == true file being uploaed
-    bool m_fileBeingDownloaded=false;   // == true downloading file
-    quint64 m_downloadFileSize=0;       // Downloading file size
+
+    QHostAddress m_clientHostIP;          // Address of client
+    quint16 m_clientHostPort;             // Port used on client
+    bool m_connected=false;               // == true data channel connected
+    bool m_listening=false;               // == true listening on data channel
+    QFile *m_fileBeingTransferred=nullptr;// Upload/download file
+    bool m_fileBeingUploaded=false;       // == true file being uploaed
+    bool m_fileBeingDownloaded=false;     // == true downloading file
+    quint64 m_downloadFileSize=0;         // Downloading file size
 
 };
 

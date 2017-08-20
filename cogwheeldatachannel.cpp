@@ -84,8 +84,6 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
         emit info("Active Mode. Connecting data channel to client ....");
 
-        //connection->sendReplyCode(150);
-
         m_dataChannelSocket->connectToHost(m_clientHostIP, m_clientHostPort);
         m_dataChannelSocket->waitForConnected(-1);
 
@@ -200,20 +198,22 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
 void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
 
-    try
-    {
+    try {
 
         m_fileBeingDownloaded =true;
         m_fileBeingUploaded = false;
-        m_transferFileName = fileName;
+
+        m_fileBeingTransferred = new QFile(fileName);
+
+        if (m_fileBeingTransferred==nullptr) {
+            emit error("QFile instance for "+fileName+" could not be created.");
+            return;
+        }
 
         // Open the file
 
-        QFile file(fileName);
-
-        if(!file.open(QFile::ReadOnly)) {
-            m_fileBeingDownloaded = false;
-            m_transferFileName = "";
+        if(!m_fileBeingTransferred->open(QFile::ReadOnly)) {
+            fileTransferCleanup();
             emit error("Error: File "+fileName+" could not be opened.");
             return;
         }
@@ -221,27 +221,25 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
         emit info("Downloading file "+fileName+".");
 
         // Move to the requested position
+
         if(connection->restoreFilePostion() > 0) {
             emit info("Restoring previous position.");
-            file.seek(connection->restoreFilePostion());
+            m_fileBeingTransferred->seek(connection->restoreFilePostion());
         }
 
-        m_downloadFileSize = file.size();
+        m_downloadFileSize = m_fileBeingTransferred->size()-connection->restoreFilePostion();
 
-        // Send the contents of the file
+        // Send initial block of file
 
-        while (!file.atEnd()) {
-            QByteArray buffer = file.read(1024 * 8);
-            connection->sendOnDataChannel(buffer); // This should be a parameter somewhere.
-        }
+        QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
+        m_dataChannelSocket->write(buffer);
 
-        // Close the file
-
-        file.close();
 
     } catch(QString err) {
+        fileTransferCleanup();
         emit error(err);
     } catch(...) {
+        fileTransferCleanup();
         emit error("Unknown error in downloadFile().");
     }
 
@@ -260,18 +258,27 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
 void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
 
-    m_transferFileName = fileName;
     m_fileBeingUploaded = true;
     m_fileBeingDownloaded =false;
 
+    m_fileBeingTransferred = new QFile(fileName);
+
+    if (m_fileBeingTransferred==nullptr) {
+        emit error("QFile instance for "+fileName+" could not be cretaed.");
+        return;
+    }
+
+    if(!m_fileBeingTransferred->open(QFile::Append)) {
+        emit error("File "+fileName+" could not be opened.");
+        fileTransferCleanup();
+        return;
+    }
     // Truncate the file if needed
 
     if(connection->restoreFilePostion() > 0) {
-        QFile file(fileName);
-        if(!file.resize(connection->restoreFilePostion()))  {
+        if(!m_fileBeingTransferred->resize(connection->restoreFilePostion()))  {
             emit error("File "+fileName+" could not be truncated.");
-            m_transferFileName = "";
-            m_fileBeingUploaded = false;
+            fileTransferCleanup();
             return;
         }
     }
@@ -314,7 +321,8 @@ void CogWheelDataChannel::connected()
  * @brief CogWheelDataChannel::disconnected
  *
  * Data channel socket disconnect slot function. If a
- * file is being uploaded then reset any related variables
+ * file is being uploaded/downloaded then reset any
+ * related variables
  *
  */
 void CogWheelDataChannel::disconnected()
@@ -322,17 +330,13 @@ void CogWheelDataChannel::disconnected()
 
     emit info("Data channel disconnected.");
 
+    m_connected=false;
+
     if (m_fileBeingUploaded) {
-        m_fileBeingUploaded=false;
-        m_transferFileName="";
-        m_connected=false;
         emit uploadFinished();
-    } else if (m_fileBeingDownloaded) {
-        m_fileBeingDownloaded=false;
-        m_transferFileName="";
-        m_connected=false;
-        m_downloadFileSize=0;
     }
+
+    fileTransferCleanup();
 
 }
 
@@ -353,7 +357,7 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 /**
  * @brief CogWheelDataChannel::bytesWritten
  *
- * Data channel socket bytes written slot function. If file
+ * Data channel socket bytes written slot function. If a file
  * is being downloaded subtract bytes from file size and
  * when reaches zero disconnect and signal complete.
  *
@@ -361,13 +365,31 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
  */
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
-
-    if (m_fileBeingDownloaded && m_transferFileName != "") {
+    qDebug() << "BYTES BEING TRANSFERRED" << numBytes;
+    if (m_fileBeingTransferred) {
         m_downloadFileSize -= numBytes;
         if (m_downloadFileSize==0) {
+            fileTransferCleanup();
             m_dataChannelSocket->disconnectFromHost();
             emit downloadFinished();
+            return;
         }
+        if (!m_fileBeingTransferred->atEnd()) {
+            QByteArray buffer = m_fileBeingTransferred->read(1024 * 8);
+            m_dataChannelSocket->write(buffer);
+        }
+    }
+}
+
+void CogWheelDataChannel::fileTransferCleanup()
+{
+    if (m_fileBeingTransferred) {
+        m_fileBeingTransferred->close();
+        m_fileBeingTransferred->deleteLater();
+        m_fileBeingTransferred=nullptr;
+        m_fileBeingUploaded = false;
+        m_fileBeingDownloaded = false;
+        m_downloadFileSize=0;
     }
 }
 
@@ -382,20 +404,11 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 void CogWheelDataChannel::readyRead()
 {
 
-    if(m_fileBeingUploaded  && m_transferFileName != "") {
+    if(m_fileBeingUploaded  && m_fileBeingTransferred) {
 
-        QFile file(m_transferFileName);
+        emit info("Uploading file ...");
 
-        if(!file.open(QFile::Append)) {
-            emit error("File "+m_transferFileName+" could not be opened.");
-            return;
-        }
-
-        emit info("Uploading file "+m_transferFileName+"...");
-
-        file.write(m_dataChannelSocket->readAll());
-
-        file.close();
+        m_fileBeingTransferred->write(m_dataChannelSocket->readAll());
 
     }
 
@@ -416,24 +429,6 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
-
-/**
- * @brief CogWheelDataChannel::transferFileName
- * @return
- */
-QString CogWheelDataChannel::transferFileName() const
-{
-    return m_transferFileName;
-}
-
-/**
- * @brief CogWheelDataChannel::setTransferFileName
- * @param transferFileName
- */
-void CogWheelDataChannel::setTransferFileName(const QString &transferFileName)
-{
-    m_transferFileName = transferFileName;
-}
 
 /**
  * @brief CogWheelDataChannel::isFileBeingUploaded

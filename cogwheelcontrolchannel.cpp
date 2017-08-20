@@ -125,7 +125,7 @@ bool CogWheelControlChannel::connectDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return(false);
     }
 
@@ -143,7 +143,7 @@ bool CogWheelControlChannel::connectDataChannel()
 void CogWheelControlChannel::uploadFileToDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return;
     }
 
@@ -161,7 +161,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 {
 
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return;
     }
 
@@ -188,7 +188,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return;
     }
 
@@ -207,7 +207,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
 void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return;
     }
 
@@ -230,7 +230,7 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Error: Data channel not active.");
+        error("Data channel not active.");
         return;
     }
 
