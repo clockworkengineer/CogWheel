@@ -200,9 +200,6 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
 
     try {
 
-        m_fileBeingDownloaded =true;
-        m_fileBeingUploaded = false;
-
         m_fileBeingTransferred = new QFile(fileName);
 
         if (m_fileBeingTransferred==nullptr) {
@@ -257,9 +254,6 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
  */
 void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const QString &fileName)
 {
-
-    m_fileBeingUploaded = true;
-    m_fileBeingDownloaded =false;
 
     m_fileBeingTransferred = new QFile(fileName);
 
@@ -332,7 +326,7 @@ void CogWheelDataChannel::disconnected()
 
     m_connected=false;
 
-    if (m_fileBeingUploaded) {
+    if (m_fileBeingTransferred) {
         emit uploadFinished();
     }
 
@@ -349,9 +343,7 @@ void CogWheelDataChannel::disconnected()
  */
 void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
 {
-
     Q_UNUSED(socketState);
-
 }
 
 /**
@@ -365,7 +357,7 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
  */
 void CogWheelDataChannel::bytesWritten(qint64 numBytes)
 {
-    qDebug() << "BYTES BEING TRANSFERRED" << numBytes;
+
     if (m_fileBeingTransferred) {
         m_downloadFileSize -= numBytes;
         if (m_downloadFileSize==0) {
@@ -381,14 +373,20 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
     }
 }
 
+/**
+ * @brief CogWheelDataChannel::fileTransferCleanup
+ *
+ * File upload/download cleanup code. This includes
+ * closing any file and deleting its data.
+ */
 void CogWheelDataChannel::fileTransferCleanup()
 {
     if (m_fileBeingTransferred) {
-        m_fileBeingTransferred->close();
+        if (m_fileBeingTransferred->open()) {
+            m_fileBeingTransferred->close();
+        }
         m_fileBeingTransferred->deleteLater();
         m_fileBeingTransferred=nullptr;
-        m_fileBeingUploaded = false;
-        m_fileBeingDownloaded = false;
         m_downloadFileSize=0;
     }
 }
@@ -404,12 +402,9 @@ void CogWheelDataChannel::fileTransferCleanup()
 void CogWheelDataChannel::readyRead()
 {
 
-    if(m_fileBeingUploaded  && m_fileBeingTransferred) {
-
+    if(m_fileBeingTransferred) {
         emit info("Uploading file ...");
-
         m_fileBeingTransferred->write(m_dataChannelSocket->readAll());
-
     }
 
 }
@@ -429,24 +424,6 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
-
-/**
- * @brief CogWheelDataChannel::isFileBeingUploaded
- * @return
- */
-bool CogWheelDataChannel::isFileBeingUploaded() const
-{
-    return m_fileBeingUploaded;
-}
-
-/**
- * @brief CogWheelDataChannel::setFileBeingUploaded
- * @param fileBeingUploaded
- */
-void CogWheelDataChannel::setFileBeingUploaded(bool fileBeingUploaded)
-{
-    m_fileBeingUploaded = fileBeingUploaded;
-}
 
 /**
  * @brief CogWheelDataChannel::isConnected

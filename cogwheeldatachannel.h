@@ -94,8 +94,6 @@ private:
     bool m_connected=false;               // == true data channel connected
     bool m_listening=false;               // == true listening on data channel
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
-    bool m_fileBeingUploaded=false;       // == true file being uploaed
-    bool m_fileBeingDownloaded=false;     // == true downloading file
     quint64 m_downloadFileSize=0;         // Downloading file size
 
 };
