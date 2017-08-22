@@ -7,8 +7,13 @@ class CogWheelServerSettings
 {
 
 public:
+
+    // Load and save settings
+
     void load();
     void save();
+
+    // Private data accessors
 
     QString serverName() const;
     void setServerName(const QString &serverName);
@@ -27,6 +32,7 @@ private:
     bool m_allowSMNT=false;          // ==true allow SMNT command
     qint64 m_serverPort;             // Server connection port
     qint64 m_writeBytesSize=1024*32; // No of bytes per write
+    bool m_active=false;             // Server active
 
 };
 #endif // COGWHEELSERVERSETTINGS_H

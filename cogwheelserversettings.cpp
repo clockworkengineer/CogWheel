@@ -29,7 +29,7 @@
  * before loading them.
  *
  */
-void CogWheelServerSettings::load()
+void CogWheelServerSettings::loadServerSettings()
 {
 
     QSettings server;
@@ -58,7 +58,7 @@ void CogWheelServerSettings::load()
  * Save server settings (TO BE IMLEMENTED).
  *
  */
-void CogWheelServerSettings::save()
+void CogWheelServerSettings::saveServerSettings()
 {
 
 }

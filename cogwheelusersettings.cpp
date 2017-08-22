@@ -12,8 +12,8 @@
 //
 // Class: CogWheelUserSettings
 //
-// Description: Class to validate users and to read in their settings
-// if they exist.
+// Description: Class to load and save the user settings. It also
+// validates a user exists and authenticates their password.
 //
 //
 
@@ -45,40 +45,108 @@ bool CogWheelUserSettings::checkUserName(const QString& userName)
 
 /**
  * @brief CogWheelUserSettings::checkUserPassword
- * @param userName
+ * @param hashedPasswords
  * @param password
  * @return
  */
-bool CogWheelUserSettings::checkUserPassword(const QString& userName, const QString& password)
+bool CogWheelUserSettings::checkUserPassword(const QString& hashedPassword, const QString& password)
 {
 
-    QSettings  userSettings;
-    QString hashedPassword;
     QByteArray paswordHash;
-
-    userSettings.beginGroup(userName);
     paswordHash = QCryptographicHash::hash(password.toUtf8(),QCryptographicHash::Sha1 );
-    hashedPassword = userSettings.value("password").toString();
-    userSettings.endGroup();
-
     return(hashedPassword==paswordHash.toHex());
 
 }
 
 /**
- * @brief CogWheelUserSettings::getRootPath
+ * @brief CogWheelUserSettings::loadUserSettings
  * @param userName
- * @return
  */
-QString CogWheelUserSettings::getRootPath(const QString &userName)
+void CogWheelUserSettings::load(QString userName)
 {
+
     QSettings  userSettings;
-    QString rootPath;
 
     userSettings.beginGroup(userName);
-    rootPath = userSettings.value("root").toString();
+    m_userName = userName;
+    m_userPassword = userSettings.value("password").toString();
+    m_rootPath = userSettings.value("root").toString();
+    m_accountName = userSettings.value("account").toString();
+    m_enabled=userSettings.value("enabled").toBool();
+    m_writeAccess=userSettings.value("writeaccess").toBool();
     userSettings.endGroup();
 
-    return(rootPath);
+}
 
+/**
+ * @brief CogWheelUserSettings::saveUserSettings
+ * @param userName
+ */
+void CogWheelUserSettings::save(QString userName)
+{
+    Q_UNUSED(userName);
+}
+
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
+
+QString CogWheelUserSettings::getUserName() const
+{
+    return m_userName;
+}
+
+void CogWheelUserSettings::setUserName(const QString &userName)
+{
+    m_userName = userName;
+}
+
+QString CogWheelUserSettings::getUserPassword() const
+{
+    return m_userPassword;
+}
+
+void CogWheelUserSettings::setUserPassword(const QString &userPassword)
+{
+    m_userPassword = userPassword;
+}
+
+QString CogWheelUserSettings::getAccountName() const
+{
+    return m_accountName;
+}
+
+void CogWheelUserSettings::setAccountName(const QString &accountName)
+{
+    m_accountName = accountName;
+}
+
+bool CogWheelUserSettings::getEnabled() const
+{
+    return m_enabled;
+}
+
+void CogWheelUserSettings::setEnabled(bool enabled)
+{
+    m_enabled = enabled;
+}
+
+bool CogWheelUserSettings::getWriteAccess() const
+{
+    return m_writeAccess;
+}
+
+void CogWheelUserSettings::setWriteAccess(bool writeAccess)
+{
+    m_writeAccess = writeAccess;
+}
+
+QString CogWheelUserSettings::getRootPath() const
+{
+    return m_rootPath;
+}
+
+void CogWheelUserSettings::setRootPath(const QString &rootPath)
+{
+    m_rootPath = rootPath;
 }

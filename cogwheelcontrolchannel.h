@@ -167,7 +167,7 @@ private:
     QString m_serverName;               // Server name
     QString m_serverVersion;            // Server version
     bool m_allowSMNT=false;             // == true allow SMNT command
-    qint64 m_writeBytesSize=0;          // No of bytes per write
+    qint64 m_writeBytesSize=0;          // Number of bytes per write
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QTcpSocket *m_controlChannelSocket=nullptr;     // Control channel socket

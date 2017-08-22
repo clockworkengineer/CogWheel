@@ -99,7 +99,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     emit openConnection(handle);
 
-    emit info("NUMBER OF CONNECTIONS: "+QString::number(m_connections.size()));
+    emit info("Number of active connections: "+QString::number(m_connections.size()));
 
 }
 
@@ -125,6 +125,8 @@ void CogWheelConnections::finishedConnection(qint64 handle)
 
     m_connections.remove(handle);
     connection->deleteLater();
+
+    emit info("Number of active connections: "+QString::number(m_connections.size()));
 
 }
 

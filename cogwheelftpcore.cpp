@@ -323,6 +323,8 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    CogWheelUserSettings    userSettings;
+
     // Anonymous login
 
     if (arguments=="anonymous") {
@@ -338,14 +340,17 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 
     }
 
+    userSettings.loadUserSettings(arguments);
+
     // Set user name
 
-    connection->setUserName(arguments);
+    connection->setUserName(userSettings.getUserName());
+    connection->setPassword(userSettings.getUserPassword());
 
     // Set intial workign directory
 
     if (!connection->isAnonymous()) {
-        connection->setRootDirectory(CogWheelUserSettings::getRootPath(connection->userName()));
+        connection->setRootDirectory(userSettings.getRootPath());
     } else {
         connection->setRootDirectory("/tmp");
     }
@@ -496,7 +501,7 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &ar
     // For non-anonymous check users password
 
     if (!connection->isAnonymous()) {
-        if (!CogWheelUserSettings::checkUserPassword(connection->userName(), arguments)) {
+        if (!CogWheelUserSettings::checkUserPassword(connection->password(), arguments)) {
             connection->sendReplyCode(530); // Failure
             return;
         }

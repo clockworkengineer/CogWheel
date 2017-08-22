@@ -42,7 +42,7 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
     connect(&m_connections, &CogWheelConnections::error, this, &CogWheelServer::error);
     connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);
 
-    m_serverSettings.load();
+    m_serverSettings.loadServerSettings();
     m_connections.setServerSettings (m_serverSettings);
 
     if (autoStart) {
