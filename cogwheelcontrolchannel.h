@@ -108,6 +108,8 @@ public:
     void setServerVersion(const QString &serverVersion);
     qint64 writeBytesSize() const;
     void setWriteBytesSize(const qint64 &writeBytesSize);
+    bool writeAccess() const;
+    void setWriteAccess(bool writeAccess);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command
@@ -152,6 +154,7 @@ private:
     bool m_passive=false;               // == true then passive data connection
     bool m_authorized=false;            // == true then user has been authorised
     bool m_anonymous=false;             // == true then anonymous login
+    bool m_writeAccess=false;           // == true then user has write access
     QString m_rootDirectory;            // Root directory
     QString m_accountName;              // Account name
     QString m_clientHostIP;             // Client host IP Address

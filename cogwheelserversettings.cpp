@@ -29,17 +29,29 @@
  * before loading them.
  *
  */
-void CogWheelServerSettings::loadServerSettings()
+void CogWheelServerSettings::load()
 {
 
     QSettings server;
 
     server.beginGroup("Server");
-    if (server.childKeys().isEmpty()) {
+    if (!server.childKeys().contains("name")) {
         server.setValue("name", "CogWheel");
+    }
+    if (!server.childKeys().contains("version")) {
         server.setValue("version", "0.5");
+    }
+    if (!server.childKeys().contains("port")) {
         server.setValue("port", 2221);
+    }
+    if (!server.childKeys().contains("allowSMNT")) {
         server.setValue("allowSMNT", false);
+    }
+    if (!server.childKeys().contains("writesize")) {
+        server.setValue("writesize", 32*1024);
+    }
+    if (!server.childKeys().contains("active")) {
+        server.setValue("active", true);
     }
     server.endGroup();
 
@@ -48,6 +60,8 @@ void CogWheelServerSettings::loadServerSettings()
     setServerVersion(server.value("version").toString());
     setServerPort(server.value("port").toInt());
     setAllowSMNT(server.value("allowSMNT").toBool());
+    setWriteBytesSize(server.value("writesize").toInt());
+    setActive(server.value("active").toBool());
     server.endGroup();
 
 }
@@ -58,7 +72,7 @@ void CogWheelServerSettings::loadServerSettings()
  * Save server settings (TO BE IMLEMENTED).
  *
  */
-void CogWheelServerSettings::saveServerSettings()
+void CogWheelServerSettings::save()
 {
 
 }
@@ -147,4 +161,14 @@ qint64 CogWheelServerSettings::writeBytesSize() const
 void CogWheelServerSettings::setWriteBytesSize(const qint64 &writeBytesSize)
 {
     m_writeBytesSize = writeBytesSize;
+}
+
+bool CogWheelServerSettings::active() const
+{
+    return m_active;
+}
+
+void CogWheelServerSettings::setActive(bool active)
+{
+    m_active = active;
 }

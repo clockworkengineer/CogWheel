@@ -340,12 +340,13 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 
     }
 
-    userSettings.loadUserSettings(arguments);
+    userSettings.load(arguments);
 
     // Set user name
 
     connection->setUserName(userSettings.getUserName());
     connection->setPassword(userSettings.getUserPassword());
+    connection->setWriteAccess(userSettings.getWriteAccess());
 
     // Set intial workign directory
 
@@ -594,6 +595,11 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
+
     QFile file { mapPathToLocal(connection,arguments) } ;
 
     if(file.exists()) {
@@ -705,6 +711,11 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
+
     QString path { mapPathToLocal(connection, arguments) };
     QDir newDirectory { path };
 
@@ -723,6 +734,11 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
  */
 void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
 
     QString path { mapPathToLocal(connection, arguments) };
     QDir directoryToDelete { path  };
@@ -764,6 +780,11 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
+
     QFile fileToDelete { mapPathToLocal(connection, arguments) };
 
     if(fileToDelete.exists()){
@@ -799,6 +820,12 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
+
     QString path { mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
 
@@ -868,6 +895,12 @@ void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
+
     QString path { mapPathToLocal(connection, arguments) };
 
     connection->setRenameFromFileName("");
@@ -889,6 +922,11 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
 
     if(connection->renameFromFileName() == "") {
         connection->sendReplyCode(503);
@@ -943,7 +981,6 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &ar
     Q_UNUSED(arguments);
 
     connection->abortOnDataChannel();
-  //  connection->sendReplyCode(226);
 
 }
 
@@ -982,6 +1019,11 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    if (!connection->writeAccess()) {
+        connection->sendReplyCode(550,"User needs write access to perform command");
+        return;
+    }
 
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel(mapPathToLocal(connection,arguments) );

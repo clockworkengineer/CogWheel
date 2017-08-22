@@ -25,6 +25,8 @@ public:
     void setServerPort(const qint64 &serverPort);
     qint64 writeBytesSize() const;
     void setWriteBytesSize(const qint64 &writeBytesSize);
+    bool active() const;
+    void setActive(bool active);
 
 private:
     QString m_serverName;            // Server Name
