@@ -15,7 +15,6 @@
 // Description: Class to load and save the user settings. It also
 // validates a user exists and authenticates their password.
 //
-//
 
 // =============
 // INCLUDE FILES
@@ -91,61 +90,109 @@ void CogWheelUserSettings::save(QString userName)
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
 
+/**
+ * @brief CogWheelUserSettings::getUserName
+ * @return
+ */
 QString CogWheelUserSettings::getUserName() const
 {
     return m_userName;
 }
 
+/**
+ * @brief CogWheelUserSettings::setUserName
+ * @param userName
+ */
 void CogWheelUserSettings::setUserName(const QString &userName)
 {
     m_userName = userName;
 }
 
+/**
+ * @brief CogWheelUserSettings::getUserPassword
+ * @return
+ */
 QString CogWheelUserSettings::getUserPassword() const
 {
     return m_userPassword;
 }
 
+/**
+ * @brief CogWheelUserSettings::setUserPassword
+ * @param userPassword
+ */
 void CogWheelUserSettings::setUserPassword(const QString &userPassword)
 {
     m_userPassword = userPassword;
 }
 
+/**
+ * @brief CogWheelUserSettings::getAccountName
+ * @return
+ */
 QString CogWheelUserSettings::getAccountName() const
 {
     return m_accountName;
 }
 
+/**
+ * @brief CogWheelUserSettings::setAccountName
+ * @param accountName
+ */
 void CogWheelUserSettings::setAccountName(const QString &accountName)
 {
     m_accountName = accountName;
 }
 
+/**
+ * @brief CogWheelUserSettings::getEnabled
+ * @return
+ */
 bool CogWheelUserSettings::getEnabled() const
 {
     return m_enabled;
 }
 
+/**
+ * @brief CogWheelUserSettings::setEnabled
+ * @param enabled
+ */
 void CogWheelUserSettings::setEnabled(bool enabled)
 {
     m_enabled = enabled;
 }
 
+/**
+ * @brief CogWheelUserSettings::getWriteAccess
+ * @return
+ */
 bool CogWheelUserSettings::getWriteAccess() const
 {
     return m_writeAccess;
 }
 
+/**
+ * @brief CogWheelUserSettings::setWriteAccess
+ * @param writeAccess
+ */
 void CogWheelUserSettings::setWriteAccess(bool writeAccess)
 {
     m_writeAccess = writeAccess;
 }
 
+/**
+ * @brief CogWheelUserSettings::getRootPath
+ * @return
+ */
 QString CogWheelUserSettings::getRootPath() const
 {
     return m_rootPath;
 }
 
+/**
+ * @brief CogWheelUserSettings::setRootPath
+ * @param rootPath
+ */
 void CogWheelUserSettings::setRootPath(const QString &rootPath)
 {
     m_rootPath = rootPath;

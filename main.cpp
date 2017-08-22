@@ -24,9 +24,10 @@
 // INCLUDE FILES
 // =============
 
-#include <QCoreApplication>
 #include "cogwheelserver.h"
 #include "cogwheelusersettings.h"
+
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {

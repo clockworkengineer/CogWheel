@@ -54,8 +54,12 @@ public:
     void setConnected(bool isConnected);
     bool isFileBeingUploaded() const;
     void setFileBeingUploaded(bool isFileBeingUploaded);
+    QTcpSocket *dataChannelSocket() const;
+    void setDataChannelSocket(QTcpSocket *dataChannelSocket);
 
 private:
+
+    // Cleanup after file transfer
 
     void fileTransferCleanup();
 
@@ -83,18 +87,15 @@ public slots:
     void readyRead();
     void socketError(QAbstractSocket::SocketError socketError);
 
-public:
-    QTcpSocket *m_dataChannelSocket;
-
 private:
-
+    QTcpSocket *m_dataChannelSocket;      // Data channel socket
     QHostAddress m_clientHostIP;          // Address of client
     quint16 m_clientHostPort;             // Port used on client
     bool m_connected=false;               // == true data channel connected
     bool m_listening=false;               // == true listening on data channel
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
     quint64 m_downloadFileSize=0;         // Downloading file size
-    qint64 m_writeBytesSize=0;          // No of bytes per write
+    qint64 m_writeBytesSize=0;            // No of bytes per write
 
 };
 

@@ -34,7 +34,7 @@ public:
     void createDataChannel();
     void tearDownDataChannel();
 
-    // Data channel control
+    // Data channel access
 
     bool connectDataChannel();
     void uploadFileToDataChannel(const QString &file);
@@ -43,9 +43,6 @@ public:
     void downloadFileFromDataChannel(const QString &file);
     void listenForConnectionOnDataChannel();
     void abortOnDataChannel();
-
-    // Data channel send data
-
     void sendOnDataChannel(const QByteArray &dataToSend);
 
     // Control channel send response and data
@@ -133,7 +130,7 @@ public slots:
     void transferFinished();            // File transfer finished
     void passiveConnection();           // Passive connection
 
-    // Errors & information messages
+    // Error & information messages
 
     void error(const QString &errorNessage);  // Channel error
     void info(const QString &message);        // Information message

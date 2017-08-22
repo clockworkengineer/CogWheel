@@ -34,7 +34,10 @@ public:
 
 
 signals:
-    void openConnection(qint64 handle); // Open connection
+
+    // Open connection
+
+    void openConnection(qint64 handle);
 
     // Error and information messages
 

@@ -44,10 +44,6 @@ public:
     QString getRootPath() const;
     void setRootPath(const QString &rootPath);
 
-signals:
-
-public slots:
-
 private:
     QString m_userName;         // User name
     QString m_userPassword;     // User password

@@ -17,7 +17,6 @@
 // in the default active mode where the server creates it or in passive mode
 // where the server waits for a connection from the client on a specified port.
 //
-//
 
 // =============
 // INCLUDE FILES
@@ -25,9 +24,6 @@
 
 #include "cogwheeldatachannel.h"
 #include "cogwheelcontrolchannel.h"
-
-#include <QtCore>
-#include <QAbstractSocket>
 
 /**
  * @brief CogWheelDataChannel::CogWheelDataChannel
@@ -58,7 +54,6 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 
     connect(m_dataChannelSocket, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
             this, &CogWheelDataChannel::socketError, Qt::DirectConnection);
-
 
 }
 
@@ -237,7 +232,6 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
             bytesWritten(0);   // File is zero length (close connection/signal success)
         }
 
-
     } catch(QString err) {
         fileTransferCleanup();
         emit error(err);
@@ -335,9 +329,8 @@ void CogWheelDataChannel::disconnected()
 
     if (m_fileBeingTransferred) {
         emit transferFinished();
+        fileTransferCleanup();
     }
-
-    fileTransferCleanup();
 
 }
 
@@ -358,7 +351,7 @@ void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
  *
  * Data channel socket bytes written slot function. If a file
  * is being downloaded subtract bytes from file size and
- * when reaches zero disconnect and signal complete.
+ * when reaches zero disconnect.
  *
  * @param numBytes  Number of bytes written (unused).
  */
@@ -428,6 +421,24 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
+
+/**
+ * @brief CogWheelDataChannel::dataChannelSocket
+ * @return
+ */
+QTcpSocket *CogWheelDataChannel::dataChannelSocket() const
+{
+    return m_dataChannelSocket;
+}
+
+/**
+ * @brief CogWheelDataChannel::setDataChannelSocket
+ * @param dataChannelSocket
+ */
+void CogWheelDataChannel::setDataChannelSocket(QTcpSocket *dataChannelSocket)
+{
+    m_dataChannelSocket = dataChannelSocket;
+}
 
 /**
  * @brief CogWheelDataChannel::isConnected

@@ -17,7 +17,6 @@
 // It passes any commands to the FTP core object to be processed and also
 // creates/destroys the data channel as and when it is needed.
 //
-//
 
 // =============
 // INCLUDE FILES
@@ -25,8 +24,6 @@
 
 #include "cogwheelcontrolchannel.h"
 #include "cogwheelftpcore.h"
-
-#include <QCoreApplication>
 
 /**
  * @brief CogWheelControlChannel::CogWheelControlChannel
@@ -95,15 +92,15 @@ void CogWheelControlChannel::tearDownDataChannel()
         return;
     }
 
-    if ( m_dataChannel->m_dataChannelSocket == nullptr) {
+    if ( m_dataChannel->dataChannelSocket() == nullptr) {
         error("Data channel socket does not exist.");
         m_dataChannel->deleteLater();
         m_dataChannel = nullptr;
         return;
     }
 
-    m_dataChannel->m_dataChannelSocket->close();
-    m_dataChannel->m_dataChannelSocket->deleteLater();
+    m_dataChannel->dataChannelSocket()->close();
+    m_dataChannel->dataChannelSocket()->deleteLater();
 
     m_dataChannel->deleteLater();
     m_dataChannel = nullptr;
@@ -297,7 +294,7 @@ void CogWheelControlChannel::processFTPCommand(QString commandLine)
 void CogWheelControlChannel::openConnection(qint64 socketHandle)
 {
 
-    info("Open control channel on thread "+QString::number(socketHandle));
+    info("Open control channel for socket "+QString::number(socketHandle));
 
     // Create control channel socket
 
@@ -484,7 +481,7 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
 void CogWheelControlChannel::sendOnDataChannel(const QByteArray &dataToSend)
 {
 
-    m_dataChannel->m_dataChannelSocket->write(dataToSend);
+    m_dataChannel->dataChannelSocket()->write(dataToSend);
 
 }
 
@@ -546,29 +543,46 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 
 }
 
+
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
+
+/**
+ * @brief CogWheelControlChannel::writeAccess
+ * @return
+ */
 bool CogWheelControlChannel::writeAccess() const
 {
     return m_writeAccess;
 }
 
+/**
+ * @brief CogWheelControlChannel::setWriteAccess
+ * @param writeAccess
+ */
 void CogWheelControlChannel::setWriteAccess(bool writeAccess)
 {
     m_writeAccess = writeAccess;
 }
 
+/**
+ * @brief CogWheelControlChannel::writeBytesSize
+ * @return
+ */
 qint64 CogWheelControlChannel::writeBytesSize() const
 {
     return m_writeBytesSize;
 }
 
+/**
+ * @brief CogWheelControlChannel::setWriteBytesSize
+ * @param writeBytesSize
+ */
 void CogWheelControlChannel::setWriteBytesSize(const qint64 &writeBytesSize)
 {
     m_writeBytesSize = writeBytesSize;
 }
-
-// ============================
-// CLASS PRIVATE DATA ACCESSORS
-// ============================
 
 /**
  * @brief CogWheelControlChannel::serverName

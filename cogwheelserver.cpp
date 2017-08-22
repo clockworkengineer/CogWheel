@@ -15,7 +15,6 @@
 // Description: Base server class that loads any settings, listens for
 // connections and passes them to the connections handler class.
 //
-//
 
 // =============
 // INCLUDE FILES

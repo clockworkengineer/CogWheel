@@ -23,18 +23,32 @@ class CogWheelServer : public QTcpServer
     Q_OBJECT
 
 public:
+
+    // Constructor
+
     explicit CogWheelServer(bool autoStart = false, QObject *parent = nullptr);
+
+    // Server control
 
     void startServer(void);
     void stopServer(void);
 
 protected:
+
+    // QTcpServer overrides
+
     void incomingConnection(qintptr handle);
 
 signals:
+
+    // Accept connection
+
     void accept(qint64 handle);
 
-public slots: 
+public slots:
+
+    // Error & information messages
+
     void error(const QString &errorMessage);
     void info(const QString &message);
 

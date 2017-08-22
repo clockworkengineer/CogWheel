@@ -14,7 +14,6 @@
 //
 // Description: Class to load and save the server settings.
 //
-//
 
 // =============
 // INCLUDE FILES
@@ -153,21 +152,37 @@ void CogWheelServerSettings::setServerPort(const qint64 &serverPort)
     m_serverPort = serverPort;
 }
 
+/**
+ * @brief CogWheelServerSettings::writeBytesSize
+ * @return
+ */
 qint64 CogWheelServerSettings::writeBytesSize() const
 {
     return m_writeBytesSize;
 }
 
+/**
+ * @brief CogWheelServerSettings::setWriteBytesSize
+ * @param writeBytesSize
+ */
 void CogWheelServerSettings::setWriteBytesSize(const qint64 &writeBytesSize)
 {
     m_writeBytesSize = writeBytesSize;
 }
 
+/**
+ * @brief CogWheelServerSettings::active
+ * @return
+ */
 bool CogWheelServerSettings::active() const
 {
     return m_active;
 }
 
+/**
+ * @brief CogWheelServerSettings::setActive
+ * @param active
+ */
 void CogWheelServerSettings::setActive(bool active)
 {
     m_active = active;
