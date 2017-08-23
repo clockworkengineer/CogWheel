@@ -56,7 +56,7 @@ private:
     static QString mapPathToLocal(CogWheelControlChannel *connection, const QString& path);
     static QString mapPathFromLocal(CogWheelControlChannel *connection, const QString& path);
 
-    // FTP commands
+    // FTP commands (RFC959)
 
     static void USER(CogWheelControlChannel *connection, const QString &arguments);
     static void LIST(CogWheelControlChannel *connection, const QString &arguments);
@@ -93,6 +93,12 @@ private:
     static void RNTO(CogWheelControlChannel *connection, const QString &arguments);
     static void ABOR(CogWheelControlChannel *connection, const QString &arguments);
 
+    // FTP commands (RFC3659)
+
+    static void MDTM(CogWheelControlChannel *connection, const QString &arguments);
+    static void SIZE(CogWheelControlChannel *connection, const QString &arguments);
+
+
 signals:
 
     void error(const QString &errorMessage);
@@ -102,8 +108,10 @@ public slots:
 
 private:
 
-    static QHash<QString, FTPCommandFunction> m_unauthCommandTable; // Unauthorised user command table
-    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;    // Authorised user command table
+    static QHash<QString, FTPCommandFunction> m_unauthCommandTable;     // Unauthorised user command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;        // Authorised user command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable3659;    // rfc3659 command table
+
     static QHash<quint16, QString> m_ftpServerResponse;             // Server response table
 
 };

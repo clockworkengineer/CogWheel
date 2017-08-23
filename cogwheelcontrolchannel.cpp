@@ -436,7 +436,7 @@ void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
 
     // Convert QString to bytes
 
-    m_controlChannelSocket->write(dataToSend.toLatin1().data());
+    m_controlChannelSocket->write(dataToSend.toUtf8().data());
 }
 
 /**
@@ -454,7 +454,7 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
 
     QString reply { QString::number(replyCode) + " " + message + "\r\n"};
 
-    m_controlChannelSocket->write(reply.toLatin1().data());
+    m_controlChannelSocket->write(reply.toUtf8().data());
 
 }
 
@@ -542,7 +542,6 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
     Q_UNUSED(numberOfBytes);
 
 }
-
 
 // ============================
 // CLASS PRIVATE DATA ACCESSORS

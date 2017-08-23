@@ -42,9 +42,14 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCom
 
 QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable;
 
+// rfc3659 commands
+
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable3659;
+
 // Command code message responses (taken from rfc959)
 
 QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
+
 
 /**
  * @brief CogWheelFTPCore::CogWheelFTPCore
@@ -114,6 +119,22 @@ void CogWheelFTPCore::initialiseTables()
         CogWheelFTPCore::m_ftpCommandTable.insert("REIN", CogWheelFTPCore::REIN);
         CogWheelFTPCore::m_ftpCommandTable.insert("APPE", CogWheelFTPCore::APPE);
         CogWheelFTPCore::m_ftpCommandTable.insert("STAT", CogWheelFTPCore::STAT);
+    }
+
+    // Add rfc3659 commands to main table
+
+    if (CogWheelFTPCore::m_ftpCommandTable3659.isEmpty()) {
+
+        CogWheelFTPCore::m_ftpCommandTable3659.insert("MDTM", CogWheelFTPCore::MDTM);
+        CogWheelFTPCore::m_ftpCommandTable3659.insert("SIZE", CogWheelFTPCore::SIZE);
+
+        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable3659);
+
+        while(command.hasNext()) {
+            command.next();
+            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
+        }
+
     }
 
     // Server reponse codes and text
@@ -446,7 +467,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             listing.append(buildListLine(fileInfo));
         }
 
-        connection->sendOnDataChannel(listing.toLatin1().data());
+        connection->sendOnDataChannel(listing.toUtf8().data());
         connection->disconnectDataChannel();
 
     }
@@ -464,7 +485,18 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     Q_UNUSED(arguments);
 
-    connection->sendReplyCode (500);
+    QString featReply;
+
+    featReply.append("211-Extensions supported: \r\n");
+
+    for( auto key :  m_ftpCommandTable3659.keys() ) {
+        featReply.append(" "+key+"\r\n");
+
+    }
+
+    connection->sendOnControlChannel(featReply);
+
+    connection->sendReplyCode(211, "END.");
 
 }
 
@@ -762,7 +794,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
             listing.append(item+"\r\n");
         }
 
-        connection->sendOnDataChannel(listing.toLatin1().data());
+        connection->sendOnDataChannel(listing.toUtf8().data());
         connection->disconnectDataChannel();
 
     }
@@ -1040,7 +1072,7 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &ar
     connection->setRestoreFilePostion(arguments.toInt(&validInteger));
 
     if(validInteger){
-        connection->sendReplyCode(350);
+        connection->sendReplyCode(350,"Restarting at "+arguments+". Send STORE or RETRIEVE");
     } else{
         connection->setRestoreFilePostion(0);
         connection->sendReplyCode(500);
@@ -1062,6 +1094,7 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &ar
     connection->abortOnDataChannel();
 
 }
+
 
 /**
  * @brief CogWheelFTPCore::REIN
@@ -1168,6 +1201,53 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
 }
 
+/**
+ * @brief CogWheelFTPCore::MDTM
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
+void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    QString file { mapPathToLocal(connection, arguments) } ;
+    QFileInfo fileInfo { file };
+
+    if (!fileInfo.exists()) {
+        connection->sendReplyCode(550, "Requested file not found.");
+        return;
+    }
+
+    if (!fileInfo.lastModified().toString("zzz").isEmpty()){
+        connection->sendReplyCode(213, fileInfo.lastModified().toString("yyyyMMddhhmmss.zzz"));
+    } else {
+        connection->sendReplyCode(213, fileInfo.lastModified().toString("yyyyMMddhhmmss"));
+    }
+
+
+}
+
+/**
+ * @brief CogWheelFTPCore::SIZE
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
+void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &arguments)
+{
+    QString file { mapPathToLocal(connection, arguments) } ;
+    QFileInfo fileInfo { file };
+
+    if (!fileInfo.exists()) {
+        connection->sendReplyCode(550, "Requested file not found.");
+        return;
+    }
+
+    qDebug() << "File [" << file << "] Size [" << QString::number(fileInfo.size()) << "]";
+
+    connection->sendReplyCode(213, QString::number(fileInfo.size()));
+
+}
 
 
 
