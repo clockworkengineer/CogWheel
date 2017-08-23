@@ -656,6 +656,8 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::CDUP
  *
+ * Change the current working directory to the currents parent in the file structure (ie. cd ..).
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -676,6 +678,9 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::RETR
  *
+ * Download a specified file from the server. Returns an error response
+ * to client if the file does not exist or is not a file.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -691,8 +696,8 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
 
     QFileInfo fileInfo { file };
 
-    if(fileInfo.isDir()){
-        connection->sendReplyCode(450, "Requested file is a directory.");
+    if(!fileInfo.isFile()){
+        connection->sendReplyCode(450, "Requested object is not a file.");
         return;
     }
 
@@ -704,6 +709,8 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::NOOP
+ *
+ * Do nothing command (used to keep control channel open).
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -719,6 +726,9 @@ void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::MODE
  *
+ * Set file send/receive transter mode. This server uses stream which is the default
+ * and cannot be changed. The value passed in is just stored away for reference.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -732,16 +742,23 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::STOR
  *
+ * Upload the specified from client to server. An error is sent to client if the user
+ * does not have write access (user setting) or the desination fiel already exists.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    // User does not have write access to server
+
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
         return;
     }
+
+    // Check destination does not exist
 
     QFile file { mapPathToLocal(connection,arguments) } ;
 
@@ -753,6 +770,8 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
         }
     }
 
+    // Open data channel and upload file.
+
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel( mapPathToLocal(connection,arguments) );
     }
@@ -761,6 +780,9 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::PASV
+ *
+ * Data channel is going to be used in passive mode so make data channel listen for
+ * connections from client.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -777,6 +799,9 @@ void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::HELP
+ *
+ * List all commands that the server supports. At present the variant that passes in an argument
+ * specifying help and an individual command is not supported.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -798,7 +823,7 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &ar
             column=0;
         }
     }
-    helpReply.append("\r\n");
+    if (column!=0)helpReply.append("\r\n");
     connection->sendOnControlChannel(helpReply);
 
     connection->sendReplyCode(214, "Help OK.");
@@ -806,6 +831,8 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::SITE
+ *
+ * No Site specific commands (so not implemented).
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -821,6 +848,10 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::NLST
  *
+ * Produce  a list of files from the passed in path and send over data channel.
+ * An error is returned to the client of the passed in path is not a directory
+ * or does not exist,
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -830,9 +861,13 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
     QString path { mapPathToLocal(connection, arguments) };
     QFileInfo fileInfo { path };
 
+    // Check for directory that exists
+
     if (!fileInfo.exists() || !fileInfo.isDir()) {
         connection->sendReplyCode(550, "Requested path not found.");
     }
+
+    // Open data channel and send down file list
 
     if (connection->connectDataChannel()) {
 
@@ -853,11 +888,16 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::MKD
  *
+ * Make a directory on server. An error is returned if the user does not have write access
+ * or the mkdir command fails for some reason.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // User does not have write access to server
 
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
@@ -878,11 +918,16 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
 /**
  * @brief CogWheelFTPCore::RMD
  *
+ * Reomove a directory from server. An error is returned if the user does not have write access
+ * or the rmdir command fails for some reason.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // User does not have write access to server
 
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
@@ -909,6 +954,8 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
 /**
  * @brief CogWheelFTPCore::QUIT
  *
+ * Close down control channel connection to server.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -930,6 +977,8 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // User does not have write access to server
 
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
@@ -973,6 +1022,8 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // User does not have write access to server
 
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
@@ -1053,6 +1104,8 @@ void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    // User does not have write access to server
+
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
         return;
@@ -1080,6 +1133,8 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // User does not have write access to server
 
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
@@ -1183,6 +1238,8 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &arguments)
 {
 
+    // User does not have write access to server
+
     if (!connection->writeAccess()) {
         connection->sendReplyCode(550,"User needs write access to perform command");
         return;
@@ -1271,7 +1328,6 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     for( auto key :  m_ftpCommandTable3659.keys() ) {
         featReply.append(" "+key+"\r\n");
-
     }
 
     connection->sendOnControlChannel(featReply);
