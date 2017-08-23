@@ -22,6 +22,9 @@
 // mode (minimum) and the second which contains all commands (full) for when a user
 // has been authorised either through USER/PASSWORD or logging on anonymously.
 //
+// Extra tables have been added for extensions and kept separate but they are copied
+// to the main table on initialistion.
+//
 //
 
 // =============
@@ -41,6 +44,10 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCom
 // Authorised command table (full)
 
 QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable;
+
+// rfc2389 commands
+
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable2389;
 
 // rfc3659 commands
 
@@ -88,7 +95,6 @@ void CogWheelFTPCore::initialiseTables()
         CogWheelFTPCore::m_ftpCommandTable.insert("USER", CogWheelFTPCore::USER);
         CogWheelFTPCore::m_ftpCommandTable.insert("PASS", CogWheelFTPCore::PASS);
         CogWheelFTPCore::m_ftpCommandTable.insert("LIST", CogWheelFTPCore::LIST);
-        CogWheelFTPCore::m_ftpCommandTable.insert("FEAT", CogWheelFTPCore::FEAT);
         CogWheelFTPCore::m_ftpCommandTable.insert("SYST", CogWheelFTPCore::SYST);
         CogWheelFTPCore::m_ftpCommandTable.insert("PWD", CogWheelFTPCore::PWD);
         CogWheelFTPCore::m_ftpCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
@@ -119,6 +125,21 @@ void CogWheelFTPCore::initialiseTables()
         CogWheelFTPCore::m_ftpCommandTable.insert("REIN", CogWheelFTPCore::REIN);
         CogWheelFTPCore::m_ftpCommandTable.insert("APPE", CogWheelFTPCore::APPE);
         CogWheelFTPCore::m_ftpCommandTable.insert("STAT", CogWheelFTPCore::STAT);
+    }
+
+    // Add rfc2389 commands to main table
+
+    if (CogWheelFTPCore::m_ftpCommandTable2389.isEmpty()) {
+
+        CogWheelFTPCore::m_ftpCommandTable2389.insert("FEAT", CogWheelFTPCore::FEAT);
+
+        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable2389);
+
+        while(command.hasNext()) {
+            command.next();
+            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
+        }
+
     }
 
     // Add rfc3659 commands to main table
@@ -384,8 +405,18 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
 }
 
+// ======
+// RFC959
+// ======
+
 /**
  * @brief CogWheelFTPCore::USER
+ *
+ * Login to server with a given user name. If the user is anonymous then the login set
+ * is set to anonymous. If the user name does not exist on the server then and error
+ * response wil be returned otherwise a password required response (331). The standard
+ * indicates that this command may be used at any time by the client to change user but
+ * this server does not support this action.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -394,6 +425,12 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 {
 
     CogWheelUserSettings    userSettings;
+
+    // We asre already logged in
+
+    if (connection->isAuthorized()) {
+        connection->sendReplyCode(530, "User already logged in.");
+    }
 
     // Anonymous login
 
@@ -439,6 +476,12 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::LIST
  *
+ * Obtain a directory listing of the current working directory or
+ * file or directory passed as a parameter and send it over the data chanel.
+ * The listng is in a format that is similar to the Linux shell command
+ * 'ls -l'. An error (550) is sent to the client if any path or file passed
+ * in as argument does not exist.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -448,14 +491,20 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
     QString path { mapPathToLocal(connection, arguments) } ;
     QFileInfo fileInfo { path };
 
+    // Argument does not exist
+
     if (!fileInfo.exists()) {
         connection->sendReplyCode(550, "Requested path not found.");
         return;
     }
 
+    // Connect up data channel
+
     if (connection->connectDataChannel()) {
 
         QString listing;
+
+        // List files for directory
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
@@ -463,9 +512,14 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             for (QFileInfo &item : listDirectory.entryInfoList()) {
                 listing.append(buildListLine(item));
             }
+
+        // List a single file
+
         } else {
             listing.append(buildListLine(fileInfo));
         }
+
+        // Send listing to client and close data channel
 
         connection->sendOnDataChannel(listing.toUtf8().data());
         connection->disconnectDataChannel();
@@ -475,33 +529,10 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
 }
 
 /**
- * @brief CogWheelFTPCore::FEAT
- *
- * @param connection   Pointer to control channel instance.
- * @param arguments    Command arguments.
- */
-void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &arguments)
-{
-
-    Q_UNUSED(arguments);
-
-    QString featReply;
-
-    featReply.append("211-Extensions supported: \r\n");
-
-    for( auto key :  m_ftpCommandTable3659.keys() ) {
-        featReply.append(" "+key+"\r\n");
-
-    }
-
-    connection->sendOnControlChannel(featReply);
-
-    connection->sendReplyCode(211, "END.");
-
-}
-
-/**
  * @brief CogWheelFTPCore::SYST
+ *
+ * Return a reply that indicates the host system on which the server runs. This is currently
+ * Unix but may change in th future.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -511,12 +542,14 @@ void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, const QString &ar
 
     Q_UNUSED(arguments);
 
-    connection->sendReplyCode(215, "UNIX Type: CogWheel");
+    connection->sendReplyCode(215, "UNIX Type: CogWheel");  // MAY NEED TO CHANGE FOR NEW HOSTS
 
 }
 
 /**
  * @brief CogWheelFTPCore::PWD
+ *
+ * Return to the client the current woring directory.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -535,6 +568,9 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arg
 /**
  * @brief CogWheelFTPCore::TYPE
  *
+ * Specify the data type that is be be transfered. At present this parameter is ignored as
+ * the server will only do binary (image). This may change in the future.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -547,11 +583,17 @@ void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::PORT
  *
+ * Command sent by client to indicate that the data channel is going to be used in active mode.
+ * The host ip and port are specified by the argument h1,h2,h3,h4,p1,p2 which is split into a
+ * string list of length 6.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &arguments)
 {
+
+    // Signal to data channel mode to be used
 
     connection->setHostPortForDataChannel(arguments.split(','));
     connection->sendReplyCode(200);
@@ -560,6 +602,9 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::CWD
+ *
+ * Set the current working directory. Returning an error (550) if it does not
+ * exist on the local filesystem.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -581,6 +626,10 @@ void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arg
 
 /**
  * @brief CogWheelFTPCore::PASS
+ *
+ * Validate a users password. If the login is not anonymous and the password is not the
+ * the same as the user specified in the last USER command then return an error otherwise
+ * set conenction status to authorised.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1200,6 +1249,40 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
     }
 
 }
+
+// ========
+// RFC 2389
+// ========
+
+/**
+ * @brief CogWheelFTPCore::FEAT
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
+void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    Q_UNUSED(arguments);
+
+    QString featReply;
+
+    featReply.append("211-Extensions supported: \r\n");
+
+    for( auto key :  m_ftpCommandTable3659.keys() ) {
+        featReply.append(" "+key+"\r\n");
+
+    }
+
+    connection->sendOnControlChannel(featReply);
+
+    connection->sendReplyCode(211, "END.");
+
+}
+
+// =======
+// RFC3659
+// =======
 
 /**
  * @brief CogWheelFTPCore::MDTM

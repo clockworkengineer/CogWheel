@@ -111,6 +111,7 @@ private:
     static QHash<QString, FTPCommandFunction> m_unauthCommandTable;     // Unauthorised user command table
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable;        // Authorised user command table
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable3659;    // rfc3659 command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable2389;    // rfc2389 command table
 
     static QHash<quint16, QString> m_ftpServerResponse;             // Server response table
 
