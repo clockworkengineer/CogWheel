@@ -19,8 +19,8 @@
 //
 // Note: Two tables exist that are indexed by command string onto the relevant
 // command. The first tabel contains the commands that maybe used in an unauthorised
-// mode and the second which contains all commands for when a user has been authorised
-// either through USER/PASSWORD or logging on anonymously.
+// mode (minimum) and the second which contains all commands (full) for when a user
+// has been authorised either through USER/PASSWORD or logging on anonymously.
 //
 //
 
@@ -34,110 +34,142 @@
 #include <QDir>
 #include <QDateTime>
 
-// Unathorised command table
+// Unathorised command table (minimum)
 
-QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCommandTable = {
-    {"USER", CogWheelFTPCore::USER },
-    {"PASS", CogWheelFTPCore::PASS },
-    {"TYPE", CogWheelFTPCore::TYPE },
-};
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCommandTable;
 
-// Authorised command table
+// Authorised command table (full)
 
-QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable = {
-    {"USER", CogWheelFTPCore::USER },
-    {"PASS", CogWheelFTPCore::PASS },
-    {"LIST", CogWheelFTPCore::LIST },
-    {"FEAT", CogWheelFTPCore::FEAT },
-    {"SYST", CogWheelFTPCore::SYST },
-    {"PWD", CogWheelFTPCore::PWD },
-    {"TYPE", CogWheelFTPCore::TYPE },
-    {"PORT", CogWheelFTPCore::PORT },
-    {"CWD", CogWheelFTPCore::CWD},
-    {"CDUP", CogWheelFTPCore::CDUP},
-    {"RETR", CogWheelFTPCore::RETR},
-    {"MODE", CogWheelFTPCore::MODE},
-    {"NOOP", CogWheelFTPCore::NOOP},
-    {"STOR", CogWheelFTPCore::STOR},
-    {"PASV", CogWheelFTPCore::PASV},
-    {"HELP", CogWheelFTPCore::HELP},
-    {"SITE", CogWheelFTPCore::SITE},
-    {"NLST", CogWheelFTPCore::NLST},
-    {"MKD", CogWheelFTPCore::MKD},
-    {"RMD", CogWheelFTPCore::RMD},
-    {"QUIT", CogWheelFTPCore::QUIT},
-    {"DELE", CogWheelFTPCore::DELE},
-    {"ACCT", CogWheelFTPCore::ACCT},
-    {"STOU", CogWheelFTPCore::STOU},
-    {"STRU", CogWheelFTPCore::STRU},
-    {"SMNT", CogWheelFTPCore::SMNT},
-    {"ALLO", CogWheelFTPCore::ALLO},
-    {"RNFR", CogWheelFTPCore::RNFR},
-    {"RNTO", CogWheelFTPCore::RNTO},
-    {"REST", CogWheelFTPCore::REST},
-    {"ABOR", CogWheelFTPCore::ABOR},
-    {"REIN", CogWheelFTPCore::REIN},
-    {"APPE", CogWheelFTPCore::APPE},
-    {"STAT", CogWheelFTPCore::STAT},
-};
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable;
 
 // Command code message responses (taken from rfc959)
 
-QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse = {
-    {110,"Restart marker reply."},
-    {120,"Service ready in nnn minutes."},
-    {125,"Data connection already open; transfer starting."},
-    {150,"File status okay; about to open data connection."},
-    {200,"Command okay."},
-    {202,"Command not implemented, superfluous at this site."},
-    {211,"System status, nothing to report."},
-    {212,"Directory status."},
-    {213,"End of status."},
-    {214,"Help command successful."},
-    {215,"NAME system type."},
-    {220,"Service ready for new user."},
-    {221,"Service closing control connection."},
-    {225,"Data connection open; no transfer in progress."},
-    {226,"Closing data connection."},
-    {227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2)."},
-    {230,"User logged in, proceed."},
-    {250,"Requested file action okay, completed."},
-    {257,"Path was created."},
-    {331,"Password required."},
-    {332,"Need account for login."},
-    {350,"Requested file action pending further information."},
-    {421,"Service not available, closing control connection."},
-    {425,"Can't open data connection."},
-    {426,"Connection closed; transfer aborted."},
-    {450,"Requested file action not taken."},
-    {451,"Requested action aborted: local error in processing."},
-    {452,"Requested action not taken."},
-    {500,"Syntax error, command unrecognized."},
-    {501,"Syntax error in parameters or arguments."},
-    {502,"Command not implemented."},
-    {503,"Bad sequence of commands."},
-    {504,"Command not implemented for that parameter."},
-    {530,"Not logged in."},
-    {532,"Need account for storing files."},
-    {550,"Requested action not taken."},
-    {551,"Requested action aborted: page type unknown."},
-    {552,"Requested file action aborted."},
-    {553,"Requested action not taken."},
-};
+QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
 
 /**
  * @brief CogWheelFTPCore::CogWheelFTPCore
- * @param parent
+ *
+ * Initialise static tables if not empty.
+ *
+ * @param parent    Parent object (should be null).
  */
 CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
 {
 
+   initialiseTables();
+
+}
+
+/**
+ * @brief CogWheelFTPCore::initialisation
+ *
+ * Setup FTP internal static tables.
+ *
+ */
+void CogWheelFTPCore::initialiseTables()
+{
+
+    // Miniumum command table
+
+    if (CogWheelFTPCore::m_unauthCommandTable.isEmpty()) {
+        CogWheelFTPCore::m_unauthCommandTable.insert("USER", CogWheelFTPCore::USER);
+        CogWheelFTPCore::m_unauthCommandTable.insert("PASS", CogWheelFTPCore::PASS);
+        CogWheelFTPCore::m_unauthCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
+    }
+
+    // Full command table
+
+    if (CogWheelFTPCore::m_ftpCommandTable.isEmpty()) {
+        CogWheelFTPCore::m_ftpCommandTable.insert("USER", CogWheelFTPCore::USER);
+        CogWheelFTPCore::m_ftpCommandTable.insert("PASS", CogWheelFTPCore::PASS);
+        CogWheelFTPCore::m_ftpCommandTable.insert("LIST", CogWheelFTPCore::LIST);
+        CogWheelFTPCore::m_ftpCommandTable.insert("FEAT", CogWheelFTPCore::FEAT);
+        CogWheelFTPCore::m_ftpCommandTable.insert("SYST", CogWheelFTPCore::SYST);
+        CogWheelFTPCore::m_ftpCommandTable.insert("PWD", CogWheelFTPCore::PWD);
+        CogWheelFTPCore::m_ftpCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
+        CogWheelFTPCore::m_ftpCommandTable.insert("PORT", CogWheelFTPCore::PORT);
+        CogWheelFTPCore::m_ftpCommandTable.insert("CWD", CogWheelFTPCore::CWD);
+        CogWheelFTPCore::m_ftpCommandTable.insert("CDUP", CogWheelFTPCore::CDUP);
+        CogWheelFTPCore::m_ftpCommandTable.insert("RETR", CogWheelFTPCore::RETR);
+        CogWheelFTPCore::m_ftpCommandTable.insert("MODE", CogWheelFTPCore::MODE);
+        CogWheelFTPCore::m_ftpCommandTable.insert("NOOP", CogWheelFTPCore::NOOP);
+        CogWheelFTPCore::m_ftpCommandTable.insert("STOR", CogWheelFTPCore::STOR);
+        CogWheelFTPCore::m_ftpCommandTable.insert("PASV", CogWheelFTPCore::PASV);
+        CogWheelFTPCore::m_ftpCommandTable.insert("HELP", CogWheelFTPCore::HELP);
+        CogWheelFTPCore::m_ftpCommandTable.insert("SITE", CogWheelFTPCore::SITE);
+        CogWheelFTPCore::m_ftpCommandTable.insert("NLST", CogWheelFTPCore::NLST);
+        CogWheelFTPCore::m_ftpCommandTable.insert("MKD", CogWheelFTPCore::MKD);
+        CogWheelFTPCore::m_ftpCommandTable.insert("RMD", CogWheelFTPCore::RMD);
+        CogWheelFTPCore::m_ftpCommandTable.insert("QUIT", CogWheelFTPCore::QUIT);
+        CogWheelFTPCore::m_ftpCommandTable.insert("DELE", CogWheelFTPCore::DELE);
+        CogWheelFTPCore::m_ftpCommandTable.insert("ACCT", CogWheelFTPCore::ACCT);
+        CogWheelFTPCore::m_ftpCommandTable.insert("STOU", CogWheelFTPCore::STOU);
+        CogWheelFTPCore::m_ftpCommandTable.insert("STRU", CogWheelFTPCore::STRU);
+        CogWheelFTPCore::m_ftpCommandTable.insert("SMNT", CogWheelFTPCore::SMNT);
+        CogWheelFTPCore::m_ftpCommandTable.insert("ALLO", CogWheelFTPCore::ALLO);
+        CogWheelFTPCore::m_ftpCommandTable.insert("RNFR", CogWheelFTPCore::RNFR);
+        CogWheelFTPCore::m_ftpCommandTable.insert("RNTO", CogWheelFTPCore::RNTO);
+        CogWheelFTPCore::m_ftpCommandTable.insert("REST", CogWheelFTPCore::REST);
+        CogWheelFTPCore::m_ftpCommandTable.insert("ABOR", CogWheelFTPCore::ABOR);
+        CogWheelFTPCore::m_ftpCommandTable.insert("REIN", CogWheelFTPCore::REIN);
+        CogWheelFTPCore::m_ftpCommandTable.insert("APPE", CogWheelFTPCore::APPE);
+        CogWheelFTPCore::m_ftpCommandTable.insert("STAT", CogWheelFTPCore::STAT);
+    }
+
+    // Server reponse codes and text
+
+    if (CogWheelFTPCore::m_ftpServerResponse.isEmpty()) {
+        CogWheelFTPCore::m_ftpServerResponse.insert(110,"Restart marker reply.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(120,"Service ready in nnn minutes.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(125,"Data connection already open; transfer starting.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(150,"File status okay; about to open data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(200,"Command okay.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(202,"Command not implemented, superfluous at this site.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(211,"System status, nothing to report.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(212,"Directory status.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(213,"End of status.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(214,"Help command successful.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(215,"NAME system type.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(220,"Service ready for new user.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(221,"Service closing control connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(225,"Data connection open; no transfer in progress.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(226,"Closing data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2).");
+        CogWheelFTPCore::m_ftpServerResponse.insert(230,"User logged in, proceed.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(250,"Requested file action okay, completed.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(257,"Path was created.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(331,"Password required.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(332,"Need account for login.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(350,"Requested file action pending further information.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(421,"Service not available, closing control connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(425,"Can't open data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(426,"Connection closed; transfer aborted.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(450,"Requested file action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(451,"Requested action aborted: local error in processing.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(452,"Requested action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(500,"Syntax error, command unrecognized.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(501,"Syntax error in parameters or arguments.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(502,"Command not implemented.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(503,"Bad sequence of commands.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(504,"Command not implemented for that parameter.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(530,"Not logged in.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(532,"Need account for storing files.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(550,"Requested action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(551,"Requested action aborted: page type unknown.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(552,"Requested file action aborted.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(553,"Requested action not taken.");
+    }
 }
 
 /**
  * @brief CogWheelFTPCore::buildListLine
- * @param file
- * @return
+ *
+ * Build list line for passed in QFileInfo. The format of which
+ * is the same as given for the Linux 'ls -l' command.
+ *
+ * @param file  File to produce list line for.
+ *
+ * @return List line string.
  */
 QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 {
@@ -206,8 +238,12 @@ QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 
 /**
  * @brief CogWheelFTPCore::getResponseText
- * @param responseCode
- * @return
+ *
+ * Get string for a given reponse code or "" if one does not exist.
+ *
+ * @param responseCode   Server response code.
+ *
+ * @return Reponse code string.
  */
 QString CogWheelFTPCore::getResponseText(quint16 responseCode)
 {
@@ -220,9 +256,13 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
 
 /**
  * @brief CogWheelFTPCore::mapPathToLocal
- * @param connection
- * @param path
- * @return
+ *
+ * Map a FTP root relative path to local filesystem.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param path         Path to map to local filesystem.
+ *
+ * @return Local file system path string,
  */
 QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
 {
@@ -247,9 +287,13 @@ QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, cons
 
 /**
  * @brief CogWheelFTPCore::mapPathFromLocal
- * @param connection
- * @param path
- * @return
+ *
+ * Map a given local filesystem path to a FTP root path.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param path         Path to map from local filesystem.
+ *
+ * @return  FTP root path.
  */
 QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, const QString &path)
 {
@@ -275,12 +319,16 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
     return(mappedPath);
 }
 
-
 /**
  * @brief CogWheelFTPCore::performCommand
- * @param connection
- * @param command
- * @param arguments
+ *
+ * Execute FTP command. If the user has been authenicated then then they
+ * get a full command list otherwise only a small subset. Note: This is
+ * where all command exceptions are handled.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param command      FTP command.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments)
 {
@@ -317,8 +365,9 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
 /**
  * @brief CogWheelFTPCore::USER
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -342,7 +391,7 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 
     userSettings.load(arguments);
 
-    // Set user name
+    // Set user name, password and write access
 
     connection->setUserName(userSettings.getUserName());
     connection->setPassword(userSettings.getUserPassword());
@@ -368,8 +417,9 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::LIST
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -396,7 +446,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             listing.append(buildListLine(fileInfo));
         }
 
-        connection->sendOnDataChannel(listing.toUtf8().data());
+        connection->sendOnDataChannel(listing.toLatin1().data());
         connection->disconnectDataChannel();
 
     }
@@ -405,8 +455,9 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::FEAT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -419,22 +470,24 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::SYST
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
     Q_UNUSED(arguments);
 
-    connection->sendReplyCode(215, "UNIX Type: L8");
+    connection->sendReplyCode(215, "UNIX Type: CogWheel");
 
 }
 
 /**
  * @brief CogWheelFTPCore::PWD
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -449,8 +502,9 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arg
 
 /**
  * @brief CogWheelFTPCore::TYPE
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -460,8 +514,9 @@ void CogWheelFTPCore::TYPE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::PORT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -473,8 +528,9 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::CWD
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -493,8 +549,9 @@ void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arg
 
 /**
  * @brief CogWheelFTPCore::PASS
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -517,8 +574,9 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::CDUP
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -536,8 +594,9 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::RETR
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -564,8 +623,9 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::NOOP
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -577,8 +637,9 @@ void CogWheelFTPCore::NOOP(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::MODE
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -589,8 +650,9 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STOR
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -618,8 +680,9 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::PASV
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -633,8 +696,9 @@ void CogWheelFTPCore::PASV(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::HELP
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -661,8 +725,9 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::SITE
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -674,8 +739,9 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::NLST
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -696,7 +762,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
             listing.append(item+"\r\n");
         }
 
-        connection->sendOnDataChannel(listing.toUtf8().data());
+        connection->sendOnDataChannel(listing.toLatin1().data());
         connection->disconnectDataChannel();
 
     }
@@ -705,8 +771,9 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::MKD
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -729,8 +796,9 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
 
 /**
  * @brief CogWheelFTPCore::RMD
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -759,8 +827,9 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
 
 /**
  * @brief CogWheelFTPCore::QUIT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -774,8 +843,9 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::DELE
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -802,8 +872,9 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::ACCT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -815,8 +886,9 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STOU
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -842,8 +914,9 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::SMNT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -866,8 +939,9 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STRU
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -877,8 +951,9 @@ void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::ALLO
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -890,8 +965,9 @@ void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::RNFR
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -917,8 +993,9 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::RNTO
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -946,8 +1023,9 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::REST
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -972,8 +1050,9 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::ABOR
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -986,8 +1065,9 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::REIN
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -1014,8 +1094,9 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::APPE
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &arguments)
 {
@@ -1033,8 +1114,9 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STAT
- * @param connection
- * @param arguments
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
  */
 void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &arguments)
 {

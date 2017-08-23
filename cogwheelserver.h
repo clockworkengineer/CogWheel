@@ -14,6 +14,7 @@
 
 #include "cogwheelconnections.h"
 #include "cogwheelserversettings.h"
+#include "cogwheelftpcore.h"
 
 #include <QObject>
 #include <QTcpServer>
@@ -56,6 +57,7 @@ private:
 
     CogWheelConnections m_connections;          // Connections handler
     CogWheelServerSettings m_serverSettings;    // Server settings
+    CogWheelFTPCore m_ftpServer;                // FTP server core
 
 };
 

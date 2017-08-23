@@ -34,7 +34,7 @@ public:
     void createDataChannel();
     void tearDownDataChannel();
 
-    // Data channel access
+    // Data channel
 
     bool connectDataChannel();
     void uploadFileToDataChannel(const QString &file);
@@ -130,7 +130,7 @@ public slots:
     void transferFinished();            // File transfer finished
     void passiveConnection();           // Passive connection
 
-    // Error & information messages
+    // Errors & information messages
 
     void error(const QString &errorNessage);  // Channel error
     void info(const QString &message);        // Information message

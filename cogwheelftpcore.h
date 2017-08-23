@@ -43,6 +43,10 @@ public:
 
 private:
 
+    // Setup tables
+
+    void initialiseTables();
+
     // Build list file line
 
     static QString buildListLine(QFileInfo &file);
@@ -96,7 +100,7 @@ signals:
 
 public slots:
 
-public:
+private:
 
     static QHash<QString, FTPCommandFunction> m_unauthCommandTable; // Unauthorised user command table
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable;    // Authorised user command table
