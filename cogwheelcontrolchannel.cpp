@@ -73,8 +73,10 @@ void CogWheelControlChannel::createDataChannel()
 
     connect(m_dataChannel,&CogWheelDataChannel::transferFinished, this,&CogWheelControlChannel::transferFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
+
     connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
+    connect(m_dataChannel, &CogWheelDataChannel::warning, this, &CogWheelControlChannel::warning, Qt::DirectConnection);
 
 }
 
@@ -294,6 +296,8 @@ void CogWheelControlChannel::processFTPCommand(QString commandLine)
 void CogWheelControlChannel::openConnection(qint64 socketHandle)
 {
 
+    m_socketHandle = socketHandle; // Inialise here as used logging
+
     info("Open control channel for socket "+QString::number(socketHandle));
 
     // Create control channel socket
@@ -307,7 +311,6 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     // Initialise socket from socket handle
 
-    m_socketHandle = socketHandle;
     if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
         error("Error setting up socket for control channel.");
         m_controlChannelSocket->deleteLater();
@@ -350,6 +353,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
  */
 void CogWheelControlChannel::closeConnection()
 {
+
     info ("Closing control on socket : "+ QString::number(m_socketHandle));
 
     if (!isConnected() || m_controlChannelSocket == nullptr) {
@@ -385,13 +389,13 @@ void CogWheelControlChannel::transferFinished()
 /**
  * @brief CogWheelControlChannel::error
  *
- * Control channel error.
+ * Produce error trace message.
  *
- * @param errorNessage  Error message string.
+ * @param message   Message string.
  */
-void CogWheelControlChannel::error(const QString &errorNessage)
+void CogWheelControlChannel::error(const QString &message)
 {
-    qDebug() << errorNessage.toStdString().c_str();
+     qDebug() << QString("CONT[%1]E: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**
@@ -399,11 +403,23 @@ void CogWheelControlChannel::error(const QString &errorNessage)
  *
  * Produce informational trace message.
  *
- * @param message
+ * @param message   Message string.
  */
 void CogWheelControlChannel::info(const QString &message)
 {
-    qDebug() << message.toStdString().c_str();
+    qDebug() << QString("CONT[%1]I: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
+}
+
+/**
+ * @brief CogWheelControlChannel::warning
+ *
+ * Produce warning trace message.
+ *
+ * @param message   Message string.
+ */
+void CogWheelControlChannel::warning(const QString &message)
+{
+     qDebug() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**

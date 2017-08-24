@@ -48,16 +48,18 @@ signals:
 
 public slots:
 
-    // Error & information messages
+    // Error, information and warning messages
 
-    void error(const QString &errorMessage);
+    void error(const QString &message);
     void info(const QString &message);
+    void warning(const QString &message);
 
 private:
 
     CogWheelConnections m_connections;          // Connections handler
     CogWheelServerSettings m_serverSettings;    // Server settings
     CogWheelFTPCore m_ftpServer;                // FTP server core
+
 
 };
 

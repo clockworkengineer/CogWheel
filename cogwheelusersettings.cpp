@@ -58,7 +58,7 @@ bool CogWheelUserSettings::checkUserPassword(const QString& hashedPassword, cons
 }
 
 /**
- * @brief CogWheelUserSettings::loadUserSettings
+ * @brief CogWheelUserSettings::load
  * @param userName
  */
 void CogWheelUserSettings::load(QString userName)
@@ -78,7 +78,7 @@ void CogWheelUserSettings::load(QString userName)
 }
 
 /**
- * @brief CogWheelUserSettings::saveUserSettings
+ * @brief CogWheelUserSettings::save
  * @param userName
  */
 void CogWheelUserSettings::save(QString userName)

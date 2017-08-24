@@ -62,26 +62,11 @@ QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
  *
  * Initialise static tables if not empty.
  *
- * @param parent    Parent object (should be null).
  */
-CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
-{
-
-    initialiseTables();
-
-}
-
-/**
- * @brief CogWheelFTPCore::initialisation
- *
- * Setup FTP internal static tables.
- *
- */
-void CogWheelFTPCore::initialiseTables()
+CogWheelFTPCore::CogWheelFTPCore()
 {
 
     loadFTPCommandTables();
-
     loadServerReponseTable();
 
 }
@@ -875,7 +860,7 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
  *
  * Produce  a list of files from the passed in path and send over data channel.
  * An error is returned to the client of the passed in path is not a directory
- * or does not exist,
+ * or does not exist.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.

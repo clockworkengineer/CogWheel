@@ -130,10 +130,11 @@ public slots:
     void transferFinished();            // File transfer finished
     void passiveConnection();           // Passive connection
 
-    // Errors & information messages
+    // Error, information and warning messages
 
-    void error(const QString &errorNessage);  // Channel error
-    void info(const QString &message);        // Information message
+    void error(const QString &message);
+    void info(const QString &message);
+    void warning(const QString &message);
 
     // Control channel socket
 

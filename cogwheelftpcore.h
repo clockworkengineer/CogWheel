@@ -14,14 +14,12 @@
 
 #include <cogwheelcontrolchannel.h>
 
-#include <QObject>
 #include <QMap>
 #include <QString>
 #include <QFileInfo>
 
-class CogWheelFTPCore : public QObject
+class CogWheelFTPCore
 {
-    Q_OBJECT
 
     // FTP command function pointer
 
@@ -31,7 +29,7 @@ public:
 
     // Constructor
 
-    explicit CogWheelFTPCore(QObject *parent = nullptr);
+    explicit CogWheelFTPCore(/*QObject *parent = nullptr*/);
 
     // Response table accessor
 
@@ -45,7 +43,6 @@ private:
 
     // Setup tables
 
-    void initialiseTables();
     void loadServerReponseTable();
     void loadFTPCommandTables();
 
@@ -101,13 +98,6 @@ private:
     static void SIZE(CogWheelControlChannel *connection, const QString &arguments);
 
 
-signals:
-
-    void error(const QString &errorMessage);
-    void info(const QString &message);
-
-public slots:
-
 private:
 
     static QHash<QString, FTPCommandFunction> m_unauthCommandTable;     // Unauthorised user command table
@@ -115,7 +105,7 @@ private:
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable3659;    // rfc3659 command table
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable2389;    // rfc2389 command table
 
-    static QHash<quint16, QString> m_ftpServerResponse;             // Server response table
+    static QHash<quint16, QString> m_ftpServerResponse;   // Server response table
 
 };
 

@@ -39,10 +39,11 @@ signals:
 
     void openConnection(qint64 handle);
 
-    // Error and information messages
+    // Error, information and warning messages
 
-    void error(const QString &errorMessage);
+    void error(const QString &message);
     void info(const QString &message);
+    void warning(const QString &message);
 
 public slots:
     void acceptConnection(qint64 handle);   // Accept client connection

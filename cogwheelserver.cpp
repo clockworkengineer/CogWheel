@@ -40,6 +40,7 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
 
     connect(&m_connections, &CogWheelConnections::error, this, &CogWheelServer::error);
     connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);
+    connect(&m_connections, &CogWheelConnections::warning, this, &CogWheelServer::warning);
 
     m_serverSettings.load();
     m_connections.setServerSettings (m_serverSettings);
@@ -65,7 +66,7 @@ void CogWheelServer::startServer()
         info("CogWheel Server listening on port "+QString::number(m_serverSettings.serverPort()));
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
     } else {
-       error("CogWheel Server listen failure.");
+        error("CogWheel Server listen failure.");
     }
 
 }
@@ -100,13 +101,13 @@ void CogWheelServer::incomingConnection(qintptr handle)
 /**
  * @brief CogWheelServer::error
  *
- * Control channel error.
+ * Produce error trace message.
  *
- * @param errorNessage  Error message string.
+ * @param message  Message string.
  */
-void CogWheelServer::error(const QString &errorNessage)
+void CogWheelServer::error(const QString &message)
 {
-    qDebug() << errorNessage.toStdString().c_str();
+    qDebug() << message.toStdString().c_str();
 }
 
 /**
@@ -114,9 +115,21 @@ void CogWheelServer::error(const QString &errorNessage)
  *
  * Produce informational trace message.
  *
- * @param message
+ * @param message  Message string.
  */
 void CogWheelServer::info(const QString &message)
+{
+    qDebug() << message.toStdString().c_str();
+}
+
+/**
+ * @brief CogWheelServer::warning
+ *
+ * Produce warning trace message.
+ *
+ * @param message  Message string.
+ */
+void CogWheelServer::warning(const QString &message)
 {
     qDebug() << message.toStdString().c_str();
 }

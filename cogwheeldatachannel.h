@@ -71,10 +71,17 @@ protected:
     void OnConnected();
 
 signals:
+
+    // Channel notification
+
     void transferFinished();                   // File transfer finished
-    void error(const QString &errorNessage);   // Data channel error
-    void info(const QString &message);         // Information message
     void passiveConnection();                  // Passive connection
+
+    // Error, information and warning messages
+
+    void error(const QString &message);
+    void info(const QString &message);
+    void warning(const QString &message);
 
 public slots:
 
