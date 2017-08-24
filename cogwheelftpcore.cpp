@@ -57,7 +57,6 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpComman
 
 QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
 
-
 /**
  * @brief CogWheelFTPCore::CogWheelFTPCore
  *
@@ -68,7 +67,7 @@ QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
 CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
 {
 
-   initialiseTables();
+    initialiseTables();
 
 }
 
@@ -79,6 +78,75 @@ CogWheelFTPCore::CogWheelFTPCore(QObject *parent) : QObject(parent)
  *
  */
 void CogWheelFTPCore::initialiseTables()
+{
+
+    loadFTPCommandTables();
+
+    loadServerReponseTable();
+
+}
+
+/**
+ * @brief CogWheelFTPCore::loadServerReponseTable
+ *
+ * Load server response table.
+ *
+ */
+void CogWheelFTPCore::loadServerReponseTable()
+{
+
+    // Server reponse codes and text
+
+    if (CogWheelFTPCore::m_ftpServerResponse.isEmpty()) {
+        CogWheelFTPCore::m_ftpServerResponse.insert(110,"Restart marker reply.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(120,"Service ready in nnn minutes.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(125,"Data connection already open; transfer starting.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(150,"File status okay; about to open data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(200,"Command okay.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(202,"Command not implemented, superfluous at this site.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(211,"System status, nothing to report.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(212,"Directory status.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(213,"End of status.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(214,"Help command successful.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(215,"NAME system type.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(220,"Service ready for new user.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(221,"Service closing control connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(225,"Data connection open; no transfer in progress.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(226,"Closing data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2).");
+        CogWheelFTPCore::m_ftpServerResponse.insert(230,"User logged in, proceed.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(250,"Requested file action okay, completed.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(257,"Path was created.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(331,"Password required.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(332,"Need account for login.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(350,"Requested file action pending further information.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(421,"Service not available, closing control connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(425,"Can't open data connection.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(426,"Connection closed; transfer aborted.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(450,"Requested file action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(451,"Requested action aborted: local error in processing.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(452,"Requested action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(500,"Syntax error, command unrecognized.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(501,"Syntax error in parameters or arguments.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(502,"Command not implemented.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(503,"Bad sequence of commands.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(504,"Command not implemented for that parameter.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(530,"Not logged in.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(532,"Need account for storing files.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(550,"Requested action not taken.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(551,"Requested action aborted: page type unknown.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(552,"Requested file action aborted.");
+        CogWheelFTPCore::m_ftpServerResponse.insert(553,"Requested action not taken.");
+    }
+}
+
+/**
+ * @brief CogWheelFTPCore::loadFTPCommandTable
+ *
+ * Load main FTP command table.
+ *
+ */
+void CogWheelFTPCore::loadFTPCommandTables()
 {
 
     // Miniumum command table
@@ -134,7 +202,6 @@ void CogWheelFTPCore::initialiseTables()
         CogWheelFTPCore::m_ftpCommandTable2389.insert("FEAT", CogWheelFTPCore::FEAT);
 
         QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable2389);
-
         while(command.hasNext()) {
             command.next();
             CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
@@ -150,7 +217,6 @@ void CogWheelFTPCore::initialiseTables()
         CogWheelFTPCore::m_ftpCommandTable3659.insert("SIZE", CogWheelFTPCore::SIZE);
 
         QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable3659);
-
         while(command.hasNext()) {
             command.next();
             CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
@@ -158,49 +224,6 @@ void CogWheelFTPCore::initialiseTables()
 
     }
 
-    // Server reponse codes and text
-
-    if (CogWheelFTPCore::m_ftpServerResponse.isEmpty()) {
-        CogWheelFTPCore::m_ftpServerResponse.insert(110,"Restart marker reply.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(120,"Service ready in nnn minutes.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(125,"Data connection already open; transfer starting.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(150,"File status okay; about to open data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(200,"Command okay.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(202,"Command not implemented, superfluous at this site.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(211,"System status, nothing to report.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(212,"Directory status.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(213,"End of status.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(214,"Help command successful.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(215,"NAME system type.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(220,"Service ready for new user.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(221,"Service closing control connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(225,"Data connection open; no transfer in progress.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(226,"Closing data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2).");
-        CogWheelFTPCore::m_ftpServerResponse.insert(230,"User logged in, proceed.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(250,"Requested file action okay, completed.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(257,"Path was created.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(331,"Password required.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(332,"Need account for login.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(350,"Requested file action pending further information.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(421,"Service not available, closing control connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(425,"Can't open data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(426,"Connection closed; transfer aborted.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(450,"Requested file action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(451,"Requested action aborted: local error in processing.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(452,"Requested action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(500,"Syntax error, command unrecognized.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(501,"Syntax error in parameters or arguments.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(502,"Command not implemented.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(503,"Bad sequence of commands.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(504,"Command not implemented for that parameter.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(530,"Not logged in.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(532,"Need account for storing files.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(550,"Requested action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(551,"Requested action aborted: page type unknown.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(552,"Requested file action aborted.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(553,"Requested action not taken.");
-    }
 }
 
 /**
@@ -513,7 +536,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
                 listing.append(buildListLine(item));
             }
 
-        // List a single file
+            // List a single file
 
         } else {
             listing.append(buildListLine(fileInfo));
@@ -762,6 +785,8 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     QFile file { mapPathToLocal(connection,arguments) } ;
 
+    // Remove file if exists
+
     if(file.exists()) {
         if(!file.remove()) {
             connection->sendReplyCode(551, "File could not be overwritten");
@@ -972,6 +997,10 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::DELE
  *
+ * Delete a specified fiel from the server. An error is returned to the client
+ * if the user does not have write access, the files does not exist or if remove()
+ * fails to delete the file.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1003,6 +1032,8 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::ACCT
  *
+ * Set account name. Not currently used by server so just kept for reference.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1016,6 +1047,9 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STOU
+ *
+ * Same as STOR except that an error is passed back to the client
+ * if the file already exists on the server.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1047,6 +1081,9 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::SMNT
  *
+ * Change a users root directory. This command has serious security implications
+ * and can be switched on/off through a server setting (default off).
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1072,6 +1109,9 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::STRU
  *
+ * Set the server file structure. This is "file" which is the default and any sent
+ * parameter is only filed away for reference.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1083,6 +1123,8 @@ void CogWheelFTPCore::STRU(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::ALLO
+ *
+ * Resevrse file space on server. Not impelemented.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1097,6 +1139,10 @@ void CogWheelFTPCore::ALLO(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::RNFR
+ *
+ * Rename file from. Name of source passed and it must immnediately be followed by a RNTO.
+ * An error is returned to the client if the user does not have write access or the source
+ * file does not exist.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1115,6 +1161,8 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
 
     connection->setRenameFromFileName("");
 
+    // Set source file name
+
     QFileInfo fileToRename { path };
     if(!fileToRename.exists()){
         connection->sendReplyCode(550, "Could not find '" + arguments + "'");
@@ -1127,6 +1175,10 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::RNTO
+ *
+ * Rename a file to passed in destination. This command must come straight after a sucessful
+ * RNFR command. ANy error is returned to the client if the user does not have write access
+ * to the filesystem, no source has been setup, or there was a problem renaming the file.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1141,10 +1193,14 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
         return;
     }
 
+    // No source set
+
     if(connection->renameFromFileName() == "") {
         connection->sendReplyCode(503);
         return;
     }
+
+    // Rename file
 
     QFile sourceName(connection->renameFromFileName());
 
@@ -1154,11 +1210,16 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
         connection->sendReplyCode(553);
     }
 
+    // Reset stored source
+
     connection->setRenameFromFileName("");
+
 }
 
 /**
  * @brief CogWheelFTPCore::REST
+ *
+ * Set restore point for an interrupted RETR/STOR command.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1166,10 +1227,10 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    if(connection->renameFromFileName() == "") {
-        connection->sendReplyCode(550);
-        return;
-    }
+    //    if(connection->renameFromFileName() == "") {  // NEED TO RESTORE old QFile?
+    //        connection->sendReplyCode(550);
+    //        return;
+    //    }
 
     bool validInteger;
 
@@ -1187,6 +1248,8 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::ABOR
  *
+ * Abort any transfer taking place on the data chanel.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1202,6 +1265,9 @@ void CogWheelFTPCore::ABOR(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::REIN
+ *
+ * Reinitialise control channel state. The channel is left in a connected but unauthorised
+ * state.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1232,6 +1298,9 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::APPE
  *
+ * Transfer file to server. If the file alreayd exists then the data is appended on to
+ * it end. Returns an error to client if the user does not have write access.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1253,6 +1322,8 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::STAT
+ *
+ * Send connect status reply back to client.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1314,6 +1385,8 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::FEAT
  *
+ * Return a list of extended features (commands) supported by the client.
+ *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
  */
@@ -1332,7 +1405,7 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     connection->sendOnControlChannel(featReply);
 
-    connection->sendReplyCode(211, "END.");
+    connection->sendReplyCode(211, "End.");
 
 }
 
@@ -1342,6 +1415,9 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::MDTM
+ *
+ * Return last modified date/time of a file. An error is returned to the client
+ * if the file does not exist.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1368,6 +1444,9 @@ void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::SIZE
+ *
+ * Return the size in bytes of a file. An error is returned to the client
+ * if the file does not exist.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.

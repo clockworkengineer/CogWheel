@@ -46,6 +46,8 @@ private:
     // Setup tables
 
     void initialiseTables();
+    void loadServerReponseTable();
+    void loadFTPCommandTables();
 
     // Build list file line
 
