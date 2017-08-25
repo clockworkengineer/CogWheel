@@ -13,6 +13,7 @@
 #define COGWHEELFTPCORE_H
 
 #include <cogwheelcontrolchannel.h>
+#include <stdexcept>
 
 #include <QMap>
 #include <QString>
@@ -20,6 +21,28 @@
 
 class CogWheelFTPCore
 {
+
+      //
+      // Used to signal a program error and to trigger a reply to server. Three constructors
+      // are provided for object creation with the default code of 550 being used if none is supplied
+      // and a message taken from the built in response table if that isn't passed.
+      //
+
+      struct FtpServerErrorReply : public std::exception {
+
+          FtpServerErrorReply (int responseCode) noexcept : responseCode(responseCode) { message = getResponseText(responseCode); }
+          FtpServerErrorReply (int responseCode, QString const& message) noexcept :  message(message), responseCode(responseCode) { }
+          FtpServerErrorReply (QString const& message) noexcept  :  message(message)  { }
+
+      public:
+          QString getMessage() const { return message; }
+          int getResponseCode() const { return responseCode; }
+
+      private:
+          QString message;
+          int responseCode=550; // Default code: error action not taken.
+
+      };
 
     // FTP command function pointer
 
