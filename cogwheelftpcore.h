@@ -30,17 +30,17 @@ class CogWheelFTPCore
 
       struct FtpServerErrorReply : public std::exception {
 
-          FtpServerErrorReply (int responseCode) noexcept : responseCode(responseCode) { message = getResponseText(responseCode); }
-          FtpServerErrorReply (int responseCode, QString const& message) noexcept :  message(message), responseCode(responseCode) { }
+          FtpServerErrorReply (quint16 responseCode) noexcept : responseCode(responseCode) { message = getResponseText(responseCode); }
+          FtpServerErrorReply (quint16 responseCode, QString const& message) noexcept :  message(message), responseCode(responseCode) { }
           FtpServerErrorReply (QString const& message) noexcept  :  message(message)  { }
 
       public:
           QString getMessage() const { return message; }
-          int getResponseCode() const { return responseCode; }
+          quint16 getResponseCode() const { return responseCode; }
 
       private:
           QString message;
-          int responseCode=550; // Default code: error action not taken.
+          quint16 responseCode=550; // Default code: error action not taken.
 
       };
 

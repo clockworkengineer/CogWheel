@@ -357,7 +357,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
     if (mappedPath.startsWith(connection->rootDirectory())) {
         mappedPath = mappedPath.remove(0,connection->rootDirectory().length());
 
-        // If trying to go above root then reset to root
+    // If trying to go above root then reset to root
 
     } else if (mappedPath.length() < connection->rootDirectory().length()){
         mappedPath = "";
@@ -1193,11 +1193,6 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &arguments)
 {
-
-    //    if(connection->renameFromFileName() == "") {  // NEED TO RESTORE old QFile?
-    //        connection->sendReplyCode(550);
-    //        return;
-    //    }
 
     bool validInteger;
 
