@@ -45,13 +45,9 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_unauthCom
 
 QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable;
 
-// rfc2389 commands
+// Extended command table
 
-QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable2389;
-
-// rfc3659 commands
-
-QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTable3659;
+QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpCommandTableExtended;
 
 // Command code message responses (taken from rfc959)
 
@@ -140,6 +136,7 @@ void CogWheelFTPCore::loadFTPCommandTables()
         CogWheelFTPCore::m_unauthCommandTable.insert("USER", CogWheelFTPCore::USER);
         CogWheelFTPCore::m_unauthCommandTable.insert("PASS", CogWheelFTPCore::PASS);
         CogWheelFTPCore::m_unauthCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
+        CogWheelFTPCore::m_unauthCommandTable.insert("AUTH", CogWheelFTPCore::AUTH);
     }
 
     // Full command table
@@ -180,13 +177,16 @@ void CogWheelFTPCore::loadFTPCommandTables()
         CogWheelFTPCore::m_ftpCommandTable.insert("STAT", CogWheelFTPCore::STAT);
     }
 
-    // Add rfc2389 commands to main table
+    // Add extended commands to main table
 
-    if (CogWheelFTPCore::m_ftpCommandTable2389.isEmpty()) {
+    if (CogWheelFTPCore::m_ftpCommandTableExtended.isEmpty()) {
 
-        CogWheelFTPCore::m_ftpCommandTable2389.insert("FEAT", CogWheelFTPCore::FEAT);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("FEAT", CogWheelFTPCore::FEAT);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("MDTM", CogWheelFTPCore::MDTM);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("SIZE", CogWheelFTPCore::SIZE);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("AUTH", CogWheelFTPCore::AUTH);
 
-        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable2389);
+        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
             command.next();
             CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
@@ -194,20 +194,20 @@ void CogWheelFTPCore::loadFTPCommandTables()
 
     }
 
-    // Add rfc3659 commands to main table
+//    // Add rfc3659 commands to main table
 
-    if (CogWheelFTPCore::m_ftpCommandTable3659.isEmpty()) {
+//    if (CogWheelFTPCore::m_ftpCommandTable3659.isEmpty()) {
 
-        CogWheelFTPCore::m_ftpCommandTable3659.insert("MDTM", CogWheelFTPCore::MDTM);
-        CogWheelFTPCore::m_ftpCommandTable3659.insert("SIZE", CogWheelFTPCore::SIZE);
+//        CogWheelFTPCore::m_ftpCommandTable3659.insert("MDTM", CogWheelFTPCore::MDTM);
+//        CogWheelFTPCore::m_ftpCommandTable3659.insert("SIZE", CogWheelFTPCore::SIZE);
 
-        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable3659);
-        while(command.hasNext()) {
-            command.next();
-            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
-        }
+//        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable3659);
+//        while(command.hasNext()) {
+//            command.next();
+//            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
+//        }
 
-    }
+//    }
 
 }
 
@@ -1368,9 +1368,11 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     featReply.append("211-Extensions supported: \r\n");
 
-    for( auto key :  m_ftpCommandTable3659.keys() ) {
+    for( auto key :  m_ftpCommandTableExtended.keys() ) {
         featReply.append(" "+key+"\r\n");
     }
+
+    featReply.append(" AUTH TLS\r\n");
 
     connection->sendOnControlChannel(featReply);
 
@@ -1431,6 +1433,24 @@ void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &ar
     qDebug() << "File [" << file << "] Size [" << QString::number(fileInfo.size()) << "]";
 
     connection->sendReplyCode(213, QString::number(fileInfo.size()));
+
+}
+
+/**
+ * @brief CogWheelFTPCore::AUTH
+ * @param connection
+ * @param arguments
+ */
+void CogWheelFTPCore::AUTH(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    if (arguments=="TLS") {
+        connection->sendReplyCode(234);
+        connection->enbleTLSSupport();
+        return;
+    }
+
+    connection->sendReplyCode(502);
 
 }
 

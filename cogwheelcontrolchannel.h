@@ -16,7 +16,10 @@
 #include "cogwheelserversettings.h"
 
 #include <QObject>
-#include <QTcpSocket>
+#include <QtNetwork>
+#include <QSslSocket>
+#include <QSslCertificate>
+#include <QSslKey>
 #include <QThread>
 
 class CogWheelControlChannel : public QObject
@@ -51,6 +54,10 @@ public:
     void sendReplyCode(quint16 replyCode);
     void sendOnControlChannel(const QString &dataToSend);
 
+    // TLS support
+
+    void enbleTLSSupport();
+
     // Private data accessors
 
     QString password() const;
@@ -67,8 +74,8 @@ public:
     void setAnonymous(bool isAnonymous);
     QThread *connectionThread() const;
     void setConnectionThread(QThread *connectionThread);
-    QTcpSocket *controlChannelSocket() const;
-    void setControlChannelSocket(QTcpSocket *controlChannelSocket);
+    QSslSocket *controlChannelSocket() const;
+    void setControlChannelSocket(QSslSocket *controlChannelSocket);
     qintptr socketHandle() const;
     void setSocketHandle(const qintptr &socketHandle);
     QString rootDirectory() const;
@@ -107,6 +114,8 @@ public:
     void setWriteBytesSize(const qint64 &writeBytesSize);
     bool writeAccess() const;
     void setWriteAccess(bool writeAccess);
+    bool tlsEnabled() const;
+    void setTlsEnabled(bool tlsEnabled);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command
@@ -143,6 +152,11 @@ public slots:
     void readyRead();
     void bytesWritten(qint64 numberOfBytes);
 
+    // SSL specific
+
+    void sslError(QList<QSslError> errors);
+    void controlChannelEncrypted();
+
 private:
 
     QString m_userName;                 // Login user name
@@ -171,10 +185,14 @@ private:
     qint64 m_writeBytesSize=0;          // Number of bytes per write
 
     QThread *m_connectionThread=nullptr;            // Connection thread
-    QTcpSocket *m_controlChannelSocket=nullptr;     // Control channel socket
+    QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket
     CogWheelDataChannel *m_dataChannel=nullptr;     // Data channel
     QString m_readBufer;                            // Control channel read buffer
     qintptr m_socketHandle;                         // Control channel socket handle
+
+    bool m_tlsEnabled=false;                        // == true TLS has been snabled
+    QByteArray m_serverPrivateKey;                  // Server private key
+    QByteArray m_serverCert;                        // Server Certificate
 
 };
 

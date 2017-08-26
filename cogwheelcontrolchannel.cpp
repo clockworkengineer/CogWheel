@@ -302,7 +302,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     // Create control channel socket
 
-    m_controlChannelSocket = new QTcpSocket();
+    m_controlChannelSocket = new QSslSocket();
 
     if (m_controlChannelSocket == nullptr) {
         error("Failure to create control channel socket.");
@@ -332,10 +332,10 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     // Setup control channel signals/slots.
 
-    connect(m_controlChannelSocket, &QTcpSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
-    connect(m_controlChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QSslSocket::connected, this, &CogWheelControlChannel::connected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QSslSocket::disconnected, this, &CogWheelControlChannel::disconnected, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QSslSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
+    connect(m_controlChannelSocket, &QSslSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
     // Set connected and return success.
 
@@ -395,7 +395,7 @@ void CogWheelControlChannel::transferFinished()
  */
 void CogWheelControlChannel::error(const QString &message)
 {
-     qDebug() << QString("CONT[%1]E: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
+    qDebug() << QString("CONT[%1]E: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**
@@ -419,7 +419,7 @@ void CogWheelControlChannel::info(const QString &message)
  */
 void CogWheelControlChannel::warning(const QString &message)
 {
-     qDebug() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
+    qDebug() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**
@@ -453,6 +453,102 @@ void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
     // Convert QString to bytes
 
     m_controlChannelSocket->write(dataToSend.toUtf8().data());
+}
+
+/**
+ * @brief CogWheelControlChannel::enbleTLSSupport
+ *
+ * Enable TLS support for on SSL socket as an AUTH TLS command has been sent.
+ *
+ */
+void CogWheelControlChannel::enbleTLSSupport()
+{
+
+    // Use ony secure protocols
+
+    m_controlChannelSocket->setProtocol(QSsl::SecureProtocols);
+
+    // Read server key
+
+    QFile serverKeyFile("./server.key");
+    if(serverKeyFile.open(QIODevice::ReadOnly)){
+        m_serverPrivateKey = serverKeyFile.readAll();
+        serverKeyFile.close();
+    } else {
+        emit error(serverKeyFile.errorString());
+    }
+
+    // Read server cert
+
+    QFile serveCertFile("./server.crt");
+    if(serveCertFile.open(QIODevice::ReadOnly)){
+        m_serverCert = serveCertFile.readAll();
+        serveCertFile.close();
+    }
+    else{
+       emit error(serveCertFile.errorString());
+    }
+
+    // Convert to QSsl format and apply to socket
+
+    QSslKey sslPrivateKey(m_serverPrivateKey, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
+    QSslCertificate sslCert(m_serverCert);
+
+    m_controlChannelSocket->addCaCertificate(sslCert);
+    m_controlChannelSocket->setLocalCertificate(sslCert);
+    m_controlChannelSocket->setPrivateKey(sslPrivateKey);
+
+    // Hookup error and channel encypted signals
+
+    connect(m_controlChannelSocket, static_cast<void(QSslSocket::*)(const QList<QSslError> &)>(&QSslSocket::sslErrors), this, &CogWheelControlChannel::sslError);
+    connect(m_controlChannelSocket, &QSslSocket::encrypted,this, &CogWheelControlChannel::controlChannelEncrypted);
+
+    // Set keep alive and start TLS negotation
+
+    m_controlChannelSocket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
+    m_controlChannelSocket->startServerEncryption();
+
+}
+
+/**
+ * @brief CogWheelControlChannel::sslError
+ * @param errors
+ */
+void CogWheelControlChannel::sslError(QList<QSslError> errors)
+{
+
+    QString errorStr="";
+
+    foreach (const QSslError &e, errors) {
+        errorStr.append(e.errorString()).append("\n");
+    }
+
+    emit error(errorStr);
+
+    m_controlChannelSocket->ignoreSslErrors();
+
+}
+
+/**
+ * @brief CogWheelControlChannel::controlChannelEncrypted
+ */
+void CogWheelControlChannel::controlChannelEncrypted()
+{
+
+    emit info ("Control Channel now encrypted.");
+
+    m_tlsEnabled=true;
+
+}
+
+bool CogWheelControlChannel::tlsEnabled() const
+{
+    return m_tlsEnabled;
+}
+
+void CogWheelControlChannel::setTlsEnabled(bool tlsEnabled)
+{
+    m_tlsEnabled = tlsEnabled;
 }
 
 /**
@@ -912,7 +1008,7 @@ void CogWheelControlChannel::setSocketHandle(const qintptr &socketHandle)
  * @brief CogWheelControlChannel::controlChannelSocket
  * @return
  */
-QTcpSocket *CogWheelControlChannel::controlChannelSocket() const
+QSslSocket *CogWheelControlChannel::controlChannelSocket() const
 {
     return m_controlChannelSocket;
 }
@@ -921,7 +1017,7 @@ QTcpSocket *CogWheelControlChannel::controlChannelSocket() const
  * @brief CogWheelControlChannel::setControlChannelSocket
  * @param controlChannelSocket
  */
-void CogWheelControlChannel::setControlChannelSocket(QTcpSocket *controlChannelSocket)
+void CogWheelControlChannel::setControlChannelSocket(QSslSocket *controlChannelSocket)
 {
     m_controlChannelSocket = controlChannelSocket;
 }

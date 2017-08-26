@@ -82,7 +82,6 @@ private:
 
     static void USER(CogWheelControlChannel *connection, const QString &arguments);
     static void LIST(CogWheelControlChannel *connection, const QString &arguments);
-    static void FEAT(CogWheelControlChannel *connection, const QString &arguments);
     static void SYST(CogWheelControlChannel *connection, const QString &arguments);
     static void PWD(CogWheelControlChannel *connection, const QString &arguments);
     static void TYPE(CogWheelControlChannel *connection, const QString &arguments);
@@ -115,18 +114,18 @@ private:
     static void RNTO(CogWheelControlChannel *connection, const QString &arguments);
     static void ABOR(CogWheelControlChannel *connection, const QString &arguments);
 
-    // FTP commands (RFC3659)
+    // Extended FTP commands (RFC3659, RFC2389)
 
+    static void FEAT(CogWheelControlChannel *connection, const QString &arguments);
     static void MDTM(CogWheelControlChannel *connection, const QString &arguments);
     static void SIZE(CogWheelControlChannel *connection, const QString &arguments);
-
+    static void AUTH(CogWheelControlChannel *connection, const QString &arguments);
 
 private:
 
-    static QHash<QString, FTPCommandFunction> m_unauthCommandTable;     // Unauthorised user command table
-    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;        // Authorised user command table
-    static QHash<QString, FTPCommandFunction> m_ftpCommandTable3659;    // rfc3659 command table
-    static QHash<QString, FTPCommandFunction> m_ftpCommandTable2389;    // rfc2389 command table
+    static QHash<QString, FTPCommandFunction> m_unauthCommandTable;       // Unauthorised user command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTable;          // Authorised user command table
+    static QHash<QString, FTPCommandFunction> m_ftpCommandTableExtended;  // Extended command table
 
     static QHash<quint16, QString> m_ftpServerResponse;   // Server response table
 
