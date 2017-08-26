@@ -378,7 +378,7 @@ void CogWheelControlChannel::closeConnection()
 /**
  * @brief CogWheelControlChannel::transferFinished
  *
- * File transfer finished so send response to server.
+ * File transfer finished so send response to client.
  *
  */
 void CogWheelControlChannel::transferFinished()
@@ -540,6 +540,26 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
     m_tlsEnabled=true;
 
+}
+
+QByteArray CogWheelControlChannel::serverCert() const
+{
+    return m_serverCert;
+}
+
+void CogWheelControlChannel::setServerCert(const QByteArray &serverCert)
+{
+    m_serverCert = serverCert;
+}
+
+QByteArray CogWheelControlChannel::serverPrivateKey() const
+{
+    return m_serverPrivateKey;
+}
+
+void CogWheelControlChannel::setServerPrivateKey(const QByteArray &serverPrivateKey)
+{
+    m_serverPrivateKey = serverPrivateKey;
 }
 
 QChar CogWheelControlChannel::dataChanelProtection() const

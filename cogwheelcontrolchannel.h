@@ -117,6 +117,10 @@ public:
     void setTlsEnabled(bool tlsEnabled);
     QChar dataChanelProtection() const;
     void setDataChanelProtection(const QChar &dataChanelProtection);
+    QByteArray serverPrivateKey() const;
+    void setServerPrivateKey(const QByteArray &serverPrivateKey);
+    QByteArray serverCert() const;
+    void setServerCert(const QByteArray &serverCert);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command

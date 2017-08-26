@@ -13,7 +13,6 @@
 #define COGWHEELDATACHANNEL_H
 
 #include <QObject>
-#include <QSslSocket>
 #include <QString>
 #include <QHostAddress>
 #include <QTcpServer>
@@ -47,7 +46,7 @@ public:
 
     // TLS
 
-    void enbleDataChannelTLSSupport();
+    void enbleDataChannelTLSSupport(CogWheelControlChannel *connection);
 
     // Private data accessors
 
@@ -115,10 +114,7 @@ private:
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
     quint64 m_downloadFileSize=0;         // Downloading file size
     qint64 m_writeBytesSize=0;            // No of bytes per write
-
     bool m_tlsEnabled=false;              // == true TLS has been snabled
-    QByteArray m_serverPrivateKey;        // Server private key
-    QByteArray m_serverCert;              // Server Certificate
 
 };
 

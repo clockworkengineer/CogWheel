@@ -1426,9 +1426,12 @@ void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &ar
 
 /**
  * @brief CogWheelFTPCore::AUTH
- * @param connection
- * @param arguments
- */
+ *
+ * Switch on TLS support.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+  */
 void CogWheelFTPCore::AUTH(CogWheelControlChannel *connection, const QString &arguments)
 {
 
@@ -1442,10 +1445,18 @@ void CogWheelFTPCore::AUTH(CogWheelControlChannel *connection, const QString &ar
 
 }
 
+/**
+ * @brief CogWheelFTPCore::PROT
+ *
+ * TLS supports only private and clear protection on data channel.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
 void CogWheelFTPCore::PROT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    if (arguments=="P") {
+    if ((arguments=="P")|| (arguments=="C")) {
         connection->sendReplyCode(200);
         connection->setDataChanelProtection(arguments[0]);
         return;
@@ -1454,6 +1465,14 @@ void CogWheelFTPCore::PROT(CogWheelControlChannel *connection, const QString &ar
     connection->sendReplyCode(502);
 }
 
+/**
+ * @brief CogWheelFTPCore::PBSZ
+ *
+ * TLS needs no buffer protection so size 0.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+*/
 void CogWheelFTPCore::PBSZ(CogWheelControlChannel *connection, const QString &arguments)
 {
 

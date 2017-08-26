@@ -100,8 +100,10 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     m_connected=true;
 
+    // Data channel proectiosn set to private switch on SSL
+
     if (connection->dataChanelProtection()=='P') {
-        enbleDataChannelTLSSupport();
+        enbleDataChannelTLSSupport(connection);
     }
 
     m_writeBytesSize = connection->writeBytesSize();
@@ -127,7 +129,9 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
     if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
         m_dataChannelSocket->flush();
         m_dataChannelSocket->disconnectFromHost();
-        m_dataChannelSocket->waitForDisconnected(-1);
+        if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
+            m_dataChannelSocket->waitForDisconnected(-1);
+        }
         connection->sendReplyCode(226);
     } else {
         emit error("Data channel socket not connected.");
@@ -285,50 +289,29 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
 
 }
 
-void CogWheelDataChannel::enbleDataChannelTLSSupport()
+/**
+ * @brief CogWheelDataChannel::enbleDataChannelTLSSupport
+ *
+ * Enable SSL on data channel.
+ *
+ */
+void CogWheelDataChannel::enbleDataChannelTLSSupport(CogWheelControlChannel *connection)
 {
-    if (m_dataChannelSocket->isEncrypted()) {
-        qDebug() << "ALREADY SSL !!!!";
-    }
 
     // Use ony secure protocols
 
     m_dataChannelSocket->setProtocol(QSsl::SecureProtocols);
 
-    // Read server key
-
-    QFile serverKeyFile("./server.key");
-    if(serverKeyFile.open(QIODevice::ReadOnly)){
-        m_serverPrivateKey = serverKeyFile.readAll();
-        serverKeyFile.close();
-    } else {
-        emit error(serverKeyFile.errorString());
-    }
-
-    // Read server cert
-
-    QFile serveCertFile("./server.crt");
-    if(serveCertFile.open(QIODevice::ReadOnly)){
-        m_serverCert = serveCertFile.readAll();
-        serveCertFile.close();
-    }
-    else{
-        emit error(serveCertFile.errorString());
-    }
-
     // Convert to QSsl format and apply to socket
 
-    QSslKey sslPrivateKey(m_serverPrivateKey, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
-    QSslCertificate sslCert(m_serverCert);
+    QSslKey sslPrivateKey(connection->serverPrivateKey(), QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
+    QSslCertificate sslCert(connection->serverCert());
 
     m_dataChannelSocket->addCaCertificate(sslCert);
     m_dataChannelSocket->setLocalCertificate(sslCert);
     m_dataChannelSocket->setPrivateKey(sslPrivateKey);
 
     // Hookup error and channel encypted signals
-
-    //    disconnect(m_dataChannelSocket,static_cast<void(QSslSocket::*)(const QList<QSslError> &)>(&QSslSocket::sslErrors),0,0);
-    //    disconnect(m_dataChannelSocket,&QSslSocket::encrypted,0,0);
 
     connect(m_dataChannelSocket, static_cast<void(QSslSocket::*)(const QList<QSslError> &)>(&QSslSocket::sslErrors), this, &CogWheelDataChannel::sslError);
     connect(m_dataChannelSocket, &QSslSocket::encrypted,this, &CogWheelDataChannel::dataChannelEncrypted);
