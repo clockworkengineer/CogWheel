@@ -13,10 +13,13 @@
 #define COGWHEELDATACHANNEL_H
 
 #include <QObject>
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <QString>
 #include <QHostAddress>
 #include <QTcpServer>
+#include <QSslSocket>
+#include <QSslCertificate>
+#include <QSslKey>
 #include <QFile>
 
 class CogWheelControlChannel;
@@ -42,6 +45,10 @@ public:
     void downloadFile(CogWheelControlChannel *connection, const QString &fileName);
     void uploadFile(CogWheelControlChannel *connection, const QString &fileName);
 
+    // TLS
+
+    void enbleDataChannelTLSSupport();
+
     // Private data accessors
 
     void setClientHostIP(QString clientIP);
@@ -54,8 +61,8 @@ public:
     void setConnected(bool isConnected);
     bool isFileBeingUploaded() const;
     void setFileBeingUploaded(bool isFileBeingUploaded);
-    QTcpSocket *dataChannelSocket() const;
-    void setDataChannelSocket(QTcpSocket *dataChannelSocket);
+    QSslSocket *dataChannelSocket() const;
+    void setDataChannelSocket(QSslSocket *dataChannelSocket);
 
 private:
 
@@ -94,8 +101,13 @@ public slots:
     void readyRead();
     void socketError(QAbstractSocket::SocketError socketError);
 
+    // TLS/SSL specific
+
+    void sslError(QList<QSslError> errors);
+    void dataChannelEncrypted();
+
 private:
-    QTcpSocket *m_dataChannelSocket;      // Data channel socket
+    QSslSocket *m_dataChannelSocket;      // Data channel socket
     QHostAddress m_clientHostIP;          // Address of client
     quint16 m_clientHostPort;             // Port used on client
     bool m_connected=false;               // == true data channel connected
@@ -103,6 +115,10 @@ private:
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
     quint64 m_downloadFileSize=0;         // Downloading file size
     qint64 m_writeBytesSize=0;            // No of bytes per write
+
+    bool m_tlsEnabled=false;              // == true TLS has been snabled
+    QByteArray m_serverPrivateKey;        // Server private key
+    QByteArray m_serverCert;              // Server Certificate
 
 };
 

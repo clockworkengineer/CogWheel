@@ -16,7 +16,6 @@
 #include "cogwheelserversettings.h"
 
 #include <QObject>
-#include <QtNetwork>
 #include <QSslSocket>
 #include <QSslCertificate>
 #include <QSslKey>
@@ -116,6 +115,8 @@ public:
     void setWriteAccess(bool writeAccess);
     bool tlsEnabled() const;
     void setTlsEnabled(bool tlsEnabled);
+    QChar dataChanelProtection() const;
+    void setDataChanelProtection(const QChar &dataChanelProtection);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command
@@ -152,7 +153,7 @@ public slots:
     void readyRead();
     void bytesWritten(qint64 numberOfBytes);
 
-    // SSL specific
+    // TLS/SSL specific
 
     void sslError(QList<QSslError> errors);
     void controlChannelEncrypted();
@@ -178,6 +179,7 @@ private:
     qint16 m_transTypeByteSize = 8;     // Transfer byte size
     qint64 m_restoreFilePostion=0;      // File restore position in bytes
     QString m_renameFromFileName;       // RNFR/RNTO file name
+    QChar m_dataChanelProtection='C';   // Data channel protecion level
 
     QString m_serverName;               // Server name
     QString m_serverVersion;            // Server version

@@ -383,6 +383,7 @@ void CogWheelControlChannel::closeConnection()
  */
 void CogWheelControlChannel::transferFinished()
 {
+    tearDownDataChannel();
     sendReplyCode(226);
 }
 
@@ -539,6 +540,16 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
     m_tlsEnabled=true;
 
+}
+
+QChar CogWheelControlChannel::dataChanelProtection() const
+{
+    return m_dataChanelProtection;
+}
+
+void CogWheelControlChannel::setDataChanelProtection(const QChar &dataChanelProtection)
+{
+    m_dataChanelProtection = dataChanelProtection;
 }
 
 bool CogWheelControlChannel::tlsEnabled() const

@@ -185,6 +185,8 @@ void CogWheelFTPCore::loadFTPCommandTables()
         CogWheelFTPCore::m_ftpCommandTableExtended.insert("MDTM", CogWheelFTPCore::MDTM);
         CogWheelFTPCore::m_ftpCommandTableExtended.insert("SIZE", CogWheelFTPCore::SIZE);
         CogWheelFTPCore::m_ftpCommandTableExtended.insert("AUTH", CogWheelFTPCore::AUTH);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("PROT", CogWheelFTPCore::PROT);
+        CogWheelFTPCore::m_ftpCommandTableExtended.insert("PBSZ", CogWheelFTPCore::PBSZ);
 
         QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
@@ -194,20 +196,6 @@ void CogWheelFTPCore::loadFTPCommandTables()
 
     }
 
-//    // Add rfc3659 commands to main table
-
-//    if (CogWheelFTPCore::m_ftpCommandTable3659.isEmpty()) {
-
-//        CogWheelFTPCore::m_ftpCommandTable3659.insert("MDTM", CogWheelFTPCore::MDTM);
-//        CogWheelFTPCore::m_ftpCommandTable3659.insert("SIZE", CogWheelFTPCore::SIZE);
-
-//        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTable3659);
-//        while(command.hasNext()) {
-//            command.next();
-//            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
-//        }
-
-//    }
 
 }
 
@@ -357,7 +345,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
     if (mappedPath.startsWith(connection->rootDirectory())) {
         mappedPath = mappedPath.remove(0,connection->rootDirectory().length());
 
-    // If trying to go above root then reset to root
+        // If trying to go above root then reset to root
 
     } else if (mappedPath.length() < connection->rootDirectory().length()){
         mappedPath = "";
@@ -410,7 +398,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         }
 
     } catch (FtpServerErrorReply response)  {
-       connection->sendReplyCode(response.getResponseCode(),response.getMessage());
+        connection->sendReplyCode(response.getResponseCode(),response.getMessage());
 
     } catch(...) {
         connection->error("Unknown error handling " + command + " command.");
@@ -525,7 +513,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
                 listing.append(buildListLine(item));
             }
 
-        // List a single file
+            // List a single file
 
         } else {
             listing.append(buildListLine(fileInfo));
@@ -1452,6 +1440,29 @@ void CogWheelFTPCore::AUTH(CogWheelControlChannel *connection, const QString &ar
 
     connection->sendReplyCode(502);
 
+}
+
+void CogWheelFTPCore::PROT(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    if (arguments=="P") {
+        connection->sendReplyCode(200);
+        connection->setDataChanelProtection(arguments[0]);
+        return;
+    }
+
+    connection->sendReplyCode(502);
+}
+
+void CogWheelFTPCore::PBSZ(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    if (arguments=="0") {
+        connection->sendReplyCode(200);
+        return;
+    }
+
+    connection->sendReplyCode(502);
 }
 
 

@@ -39,20 +39,20 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 
     emit info("Data channel created.");
 
-    m_dataChannelSocket = new QTcpSocket();
+    m_dataChannelSocket = new QSslSocket();
 
     if (m_dataChannelSocket==nullptr) {
         emit error("Error trying to create data channel socket.");
         return;
     }
 
-    connect(m_dataChannelSocket, &QTcpSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
-    connect(m_dataChannelSocket, &QTcpSocket::disconnected, this, &CogWheelDataChannel::disconnected, Qt::DirectConnection);
-    connect(m_dataChannelSocket, &QTcpSocket::stateChanged, this, &CogWheelDataChannel::stateChanged, Qt::DirectConnection);
-    connect(m_dataChannelSocket, &QTcpSocket::bytesWritten, this, &CogWheelDataChannel::bytesWritten, Qt::DirectConnection);
-    connect(m_dataChannelSocket, &QTcpSocket::readyRead, this, &CogWheelDataChannel::readyRead, Qt::DirectConnection);
+    connect(m_dataChannelSocket, &QSslSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
+    connect(m_dataChannelSocket, &QSslSocket::disconnected, this, &CogWheelDataChannel::disconnected, Qt::DirectConnection);
+    connect(m_dataChannelSocket, &QSslSocket::stateChanged, this, &CogWheelDataChannel::stateChanged, Qt::DirectConnection);
+    connect(m_dataChannelSocket, &QSslSocket::bytesWritten, this, &CogWheelDataChannel::bytesWritten, Qt::DirectConnection);
+    connect(m_dataChannelSocket, &QSslSocket::readyRead, this, &CogWheelDataChannel::readyRead, Qt::DirectConnection);
 
-    connect(m_dataChannelSocket, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
+    connect(m_dataChannelSocket, static_cast<void (QSslSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
             this, &CogWheelDataChannel::socketError, Qt::DirectConnection);
 
 }
@@ -100,6 +100,10 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     m_connected=true;
 
+    if (connection->dataChanelProtection()=='P') {
+        enbleDataChannelTLSSupport();
+    }
+
     m_writeBytesSize = connection->writeBytesSize();
 
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
@@ -121,6 +125,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
 {
 
     if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
+        m_dataChannelSocket->flush();
         m_dataChannelSocket->disconnectFromHost();
         m_dataChannelSocket->waitForDisconnected(-1);
         connection->sendReplyCode(226);
@@ -280,6 +285,95 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
 
 }
 
+void CogWheelDataChannel::enbleDataChannelTLSSupport()
+{
+    if (m_dataChannelSocket->isEncrypted()) {
+        qDebug() << "ALREADY SSL !!!!";
+    }
+
+    // Use ony secure protocols
+
+    m_dataChannelSocket->setProtocol(QSsl::SecureProtocols);
+
+    // Read server key
+
+    QFile serverKeyFile("./server.key");
+    if(serverKeyFile.open(QIODevice::ReadOnly)){
+        m_serverPrivateKey = serverKeyFile.readAll();
+        serverKeyFile.close();
+    } else {
+        emit error(serverKeyFile.errorString());
+    }
+
+    // Read server cert
+
+    QFile serveCertFile("./server.crt");
+    if(serveCertFile.open(QIODevice::ReadOnly)){
+        m_serverCert = serveCertFile.readAll();
+        serveCertFile.close();
+    }
+    else{
+        emit error(serveCertFile.errorString());
+    }
+
+    // Convert to QSsl format and apply to socket
+
+    QSslKey sslPrivateKey(m_serverPrivateKey, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
+    QSslCertificate sslCert(m_serverCert);
+
+    m_dataChannelSocket->addCaCertificate(sslCert);
+    m_dataChannelSocket->setLocalCertificate(sslCert);
+    m_dataChannelSocket->setPrivateKey(sslPrivateKey);
+
+    // Hookup error and channel encypted signals
+
+    //    disconnect(m_dataChannelSocket,static_cast<void(QSslSocket::*)(const QList<QSslError> &)>(&QSslSocket::sslErrors),0,0);
+    //    disconnect(m_dataChannelSocket,&QSslSocket::encrypted,0,0);
+
+    connect(m_dataChannelSocket, static_cast<void(QSslSocket::*)(const QList<QSslError> &)>(&QSslSocket::sslErrors), this, &CogWheelDataChannel::sslError);
+    connect(m_dataChannelSocket, &QSslSocket::encrypted,this, &CogWheelDataChannel::dataChannelEncrypted);
+
+    // Set keep alive and start TLS negotation
+
+    m_dataChannelSocket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
+
+    m_dataChannelSocket->startServerEncryption();
+
+    m_dataChannelSocket->waitForEncrypted(-1);
+
+}
+
+/**
+ * @brief CogWheelDataChannel::sslError
+ * @param errors
+ */
+void CogWheelDataChannel::sslError(QList<QSslError> errors)
+{
+
+    QString errorStr="";
+
+    foreach (const QSslError &e, errors) {
+        errorStr.append(e.errorString()).append("\n");
+    }
+
+    emit error(errorStr);
+
+    m_dataChannelSocket->ignoreSslErrors();
+
+}
+
+/**
+ * @brief CogWheelDataChannel::controlChannelEncrypted
+ */
+void CogWheelDataChannel::dataChannelEncrypted()
+{
+
+    emit info ("Data Channel now encrypted.");
+
+    m_tlsEnabled=true;
+
+}
+
 /**
  * @brief CogWheelDataChannel::incomingConnection
  *
@@ -328,8 +422,8 @@ void CogWheelDataChannel::disconnected()
     m_connected=false;
 
     if (m_fileBeingTransferred) {
-        emit transferFinished();
         fileTransferCleanup();
+        emit transferFinished();
     }
 
 }
@@ -415,7 +509,11 @@ void CogWheelDataChannel::readyRead()
  */
 void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 {
-    emit error("Data channel socket error: "+QString::number(socketError));
+    if (socketError==QAbstractSocket::RemoteHostClosedError) {
+        emit info("Client closed data connection.");
+    } else {
+        emit error("Data channel socket error: "+QString::number(socketError));
+    }
 }
 
 // ============================
@@ -426,7 +524,7 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
  * @brief CogWheelDataChannel::dataChannelSocket
  * @return
  */
-QTcpSocket *CogWheelDataChannel::dataChannelSocket() const
+QSslSocket *CogWheelDataChannel::dataChannelSocket() const
 {
     return m_dataChannelSocket;
 }
@@ -435,7 +533,7 @@ QTcpSocket *CogWheelDataChannel::dataChannelSocket() const
  * @brief CogWheelDataChannel::setDataChannelSocket
  * @param dataChannelSocket
  */
-void CogWheelDataChannel::setDataChannelSocket(QTcpSocket *dataChannelSocket)
+void CogWheelDataChannel::setDataChannelSocket(QSslSocket *dataChannelSocket)
 {
     m_dataChannelSocket = dataChannelSocket;
 }

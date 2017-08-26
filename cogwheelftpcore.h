@@ -120,6 +120,8 @@ private:
     static void MDTM(CogWheelControlChannel *connection, const QString &arguments);
     static void SIZE(CogWheelControlChannel *connection, const QString &arguments);
     static void AUTH(CogWheelControlChannel *connection, const QString &arguments);
+    static void PROT(CogWheelControlChannel *connection, const QString &arguments);
+    static void PBSZ(CogWheelControlChannel *connection, const QString &arguments);
 
 private:
 
