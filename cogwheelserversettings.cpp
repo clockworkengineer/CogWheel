@@ -57,7 +57,13 @@ void CogWheelServerSettings::load()
         server.setValue("sslenabled", true);
     }
     if (!server.childKeys().contains("plain")) {
-        server.setValue("plains", true);
+        server.setValue("plain", true);
+    }
+    if (!server.childKeys().contains("serverkey")) {
+        server.setValue("serverkey", "./server.key");
+    }
+    if (!server.childKeys().contains("servercert")) {
+        server.setValue("servercert", "./server.crt");
     }
     server.endGroup();
 
@@ -70,10 +76,9 @@ void CogWheelServerSettings::load()
     setServerEnabled(server.value("enabled").toBool());
     setServerSslEnabled(server.value("sslenabled").toBool());
     setServerPlainFTPEnabled(server.value("plain").toBool());
+    setServerKeyFileName(server.value("serverkey").toString());
+    setServerCertFileName(server.value("servercert").toString());
     server.endGroup();
-
-    setServerKeyFileName("./server.key");   // Hard encoded for the moment.
-    setServerCertFileName("./server.crt");
 
 }
 
@@ -96,7 +101,9 @@ void CogWheelServerSettings::save()
     server.setValue("writesize", serverWriteBytesSize());
     server.setValue("enabled", serverEnabled());
     server.setValue("sslenabled",serverSslEnabled());
-    server.setValue("plains", serverPlainFTPEnabled());
+    server.setValue("plain", serverPlainFTPEnabled());
+    server.setValue("serverkey", serverKeyFileName());
+    server.setValue("servercert",serverCertFileName());
     server.endGroup();
 
 }

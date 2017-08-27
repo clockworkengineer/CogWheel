@@ -22,8 +22,8 @@
 // mode (minimum) and the second which contains all commands (full) for when a user
 // has been authorised either through USER/PASSWORD or logging on anonymously.
 //
-// An  table has been added for extensions and kept separate but they are copied
-// to the main table on initialistion.
+// A third table has been added for FTP command extensions and kept separate but entries
+// are copied to the main table on initialisation.
 //
 //
 
@@ -195,7 +195,6 @@ void CogWheelFTPCore::loadFTPCommandTables()
         }
 
     }
-
 
 }
 
