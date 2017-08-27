@@ -20,6 +20,7 @@
 // =============
 
 #include "cogwheelserversettings.h"
+#include <QDebug>
 
 /**
  * @brief CogWheelServerSettings::load
@@ -49,8 +50,14 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("writesize")) {
         server.setValue("writesize", 32*1024);
     }
-    if (!server.childKeys().contains("active")) {
-        server.setValue("active", true);
+    if (!server.childKeys().contains("enabled")) {
+        server.setValue("enabled", true);
+    }
+    if (!server.childKeys().contains("sslenabled")) {
+        server.setValue("sslenabled", true);
+    }
+    if (!server.childKeys().contains("plain")) {
+        server.setValue("plains", true);
     }
     server.endGroup();
 
@@ -58,10 +65,15 @@ void CogWheelServerSettings::load()
     setServerName(server.value("name").toString());
     setServerVersion(server.value("version").toString());
     setServerPort(server.value("port").toInt());
-    setAllowSMNT(server.value("allowSMNT").toBool());
-    setWriteBytesSize(server.value("writesize").toInt());
-    setActive(server.value("active").toBool());
+    setServerAllowSMNT(server.value("allowSMNT").toBool());
+    setServerWriteBytesSize(server.value("writesize").toInt());
+    setServerEnabled(server.value("enabled").toBool());
+    setServerSslEnabled(server.value("sslenabled").toBool());
+    setServerPlainFTPEnabled(server.value("plain").toBool());
     server.endGroup();
+
+    setServerKeyFileName("./server.key");   // Hard encoded for the moment.
+    setServerCertFileName("./server.crt");
 
 }
 
@@ -73,6 +85,48 @@ void CogWheelServerSettings::load()
  */
 void CogWheelServerSettings::save()
 {
+
+    QSettings server;
+
+    server.beginGroup("Server");
+    server.setValue("name", serverName());
+    server.setValue("version",serverVersion());
+    server.setValue("port", serverPort());
+    server.setValue("allowSMNT", serverAllowSMNT());
+    server.setValue("writesize", serverWriteBytesSize());
+    server.setValue("enabled", serverEnabled());
+    server.setValue("sslenabled",serverSslEnabled());
+    server.setValue("plains", serverPlainFTPEnabled());
+    server.endGroup();
+
+}
+
+bool CogWheelServerSettings::loadPrivateKeyAndCert()
+{
+
+    // Read server key
+
+    QFile serverKeyFile(serverKeyFileName());
+    if(serverKeyFile.open(QIODevice::ReadOnly)){
+        m_serverPrivateKey = serverKeyFile.readAll();
+        serverKeyFile.close();
+    } else {
+       qDebug() << "Error opening file " << serverKeyFileName() << ": " << serverKeyFile.errorString();
+       return(false);
+    }
+
+    // Read server cert
+
+    QFile serveCertFile(serverCertFileName());
+    if(serveCertFile.open(QIODevice::ReadOnly)){
+        m_serverCert = serveCertFile.readAll();
+        serveCertFile.close();
+    } else {
+       qDebug() << "Error opening file " << serverCertFileName() << ": " << serveCertFile.errorString();
+       return(false);
+    }
+
+    return(true);
 
 }
 
@@ -120,18 +174,18 @@ void CogWheelServerSettings::setServerVersion(const QString &serverVersion)
  * @brief CogWheelServerSettings::allowSMNT
  * @return
  */
-bool CogWheelServerSettings::allowSMNT() const
+bool CogWheelServerSettings::serverAllowSMNT() const
 {
-    return m_allowSMNT;
+    return m_serverAllowSMNT;
 }
 
 /**
  * @brief CogWheelServerSettings::setAllowSMNT
  * @param allowSMNT
  */
-void CogWheelServerSettings::setAllowSMNT(bool allowSMNT)
+void CogWheelServerSettings::setServerAllowSMNT(bool allowSMNT)
 {
-    m_allowSMNT = allowSMNT;
+    m_serverAllowSMNT = allowSMNT;
 }
 
 /**
@@ -156,34 +210,94 @@ void CogWheelServerSettings::setServerPort(const qint64 &serverPort)
  * @brief CogWheelServerSettings::writeBytesSize
  * @return
  */
-qint64 CogWheelServerSettings::writeBytesSize() const
+qint64 CogWheelServerSettings::serverWriteBytesSize() const
 {
-    return m_writeBytesSize;
+    return m_serverWriteBytesSize;
 }
 
 /**
  * @brief CogWheelServerSettings::setWriteBytesSize
  * @param writeBytesSize
  */
-void CogWheelServerSettings::setWriteBytesSize(const qint64 &writeBytesSize)
+void CogWheelServerSettings::setServerWriteBytesSize(const qint64 &writeBytesSize)
 {
-    m_writeBytesSize = writeBytesSize;
+    m_serverWriteBytesSize = writeBytesSize;
 }
 
 /**
  * @brief CogWheelServerSettings::active
  * @return
  */
-bool CogWheelServerSettings::active() const
+bool CogWheelServerSettings::serverEnabled() const
 {
-    return m_active;
+    return m_serverEnabled;
 }
 
 /**
  * @brief CogWheelServerSettings::setActive
  * @param active
  */
-void CogWheelServerSettings::setActive(bool active)
+void CogWheelServerSettings::setServerEnabled(bool enabled)
 {
-    m_active = active;
+    m_serverEnabled = enabled;
+}
+
+bool CogWheelServerSettings::serverSslEnabled() const
+{
+    return m_serverSslEnabled;
+}
+
+void CogWheelServerSettings::setServerSslEnabled(bool sslEnabled)
+{
+    m_serverSslEnabled = sslEnabled;
+}
+
+bool CogWheelServerSettings::serverPlainFTPEnabled() const
+{
+    return m_servePlainFTPEnabled;
+}
+
+void CogWheelServerSettings::setServerPlainFTPEnabled(bool plainFTPEnabled)
+{
+    m_servePlainFTPEnabled = plainFTPEnabled;
+}
+
+QByteArray CogWheelServerSettings::serverPrivateKey() const
+{
+    return m_serverPrivateKey;
+}
+
+void CogWheelServerSettings::setServerPrivateKey(const QByteArray &serverPrivateKey)
+{
+    m_serverPrivateKey = serverPrivateKey;
+}
+
+QByteArray CogWheelServerSettings::serverCert() const
+{
+    return m_serverCert;
+}
+
+void CogWheelServerSettings::setServerCert(const QByteArray &serverCert)
+{
+    m_serverCert = serverCert;
+}
+
+QString CogWheelServerSettings::serverKeyFileName() const
+{
+    return m_serverKeyFileName;
+}
+
+void CogWheelServerSettings::setServerKeyFileName(const QString &serverKeyFileName)
+{
+    m_serverKeyFileName = serverKeyFileName;
+}
+
+QString CogWheelServerSettings::serverCertFileName() const
+{
+    return m_serverCertFileName;
+}
+
+void CogWheelServerSettings::setServerCertFileName(const QString &serverCertFileName)
+{
+    m_serverCertFileName = serverCertFileName;
 }

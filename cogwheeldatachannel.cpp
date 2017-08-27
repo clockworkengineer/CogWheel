@@ -96,11 +96,10 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     }
 
-    emit info("connected.");
 
     m_connected=true;
 
-    // Data channel proectiosn set to private switch on SSL
+    // Data channel protection set to private switch on SSL
 
     if (connection->dataChanelProtection()=='P') {
         enbleDataChannelTLSSupport(connection);
@@ -133,9 +132,9 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
             m_dataChannelSocket->waitForDisconnected(-1);
         }
         connection->sendReplyCode(226);
-    } else {
+    } /*else {
         emit error("Data channel socket not connected.");
-    }
+    }*/
     m_connected=false;
 
 }
@@ -302,7 +301,7 @@ void CogWheelDataChannel::enbleDataChannelTLSSupport(CogWheelControlChannel *con
 
     m_dataChannelSocket->setProtocol(QSsl::SecureProtocols);
 
-    // Convert to QSsl format and apply to socket
+    // Create private key and cert
 
     QSslKey sslPrivateKey(connection->serverPrivateKey(), QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
     QSslCertificate sslCert(connection->serverCert());
@@ -321,7 +320,6 @@ void CogWheelDataChannel::enbleDataChannelTLSSupport(CogWheelControlChannel *con
     m_dataChannelSocket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
 
     m_dataChannelSocket->startServerEncryption();
-
     m_dataChannelSocket->waitForEncrypted(-1);
 
 }
@@ -353,8 +351,18 @@ void CogWheelDataChannel::dataChannelEncrypted()
 
     emit info ("Data Channel now encrypted.");
 
-    m_tlsEnabled=true;
+    m_sslConnection=true;
 
+}
+
+bool CogWheelDataChannel::IsSslConnection() const
+{
+    return m_sslConnection;
+}
+
+void CogWheelDataChannel::setSslConnection(bool sslConnection)
+{
+    m_sslConnection = sslConnection;
 }
 
 /**

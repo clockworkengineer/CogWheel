@@ -113,8 +113,8 @@ public:
     void setWriteBytesSize(const qint64 &writeBytesSize);
     bool writeAccess() const;
     void setWriteAccess(bool writeAccess);
-    bool tlsEnabled() const;
-    void setTlsEnabled(bool tlsEnabled);
+    bool IsSslConnection() const;
+    void setSslConnection(bool sslConnection);
     QChar dataChanelProtection() const;
     void setDataChanelProtection(const QChar &dataChanelProtection);
     QByteArray serverPrivateKey() const;
@@ -189,16 +189,16 @@ private:
     QString m_serverVersion;            // Server version
     bool m_allowSMNT=false;             // == true allow SMNT command
     qint64 m_writeBytesSize=0;          // Number of bytes per write
+    QByteArray m_serverPrivateKey;      // Server private key
+    QByteArray m_serverCert;            // Server Certificate
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket
     CogWheelDataChannel *m_dataChannel=nullptr;     // Data channel
     QString m_readBufer;                            // Control channel read buffer
     qintptr m_socketHandle;                         // Control channel socket handle
+    bool m_sslConnection=false;                     // == true connection is SSL
 
-    bool m_tlsEnabled=false;                        // == true TLS has been snabled
-    QByteArray m_serverPrivateKey;                  // Server private key
-    QByteArray m_serverCert;                        // Server Certificate
 
 };
 

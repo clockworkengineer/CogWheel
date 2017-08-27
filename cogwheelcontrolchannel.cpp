@@ -40,8 +40,10 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
 
     setServerName(serverSettings.serverName());
     setServerVersion(serverSettings.serverVersion());
-    setAllowSMNT(serverSettings.allowSMNT());
-    setWriteBytesSize(serverSettings.writeBytesSize());
+    setAllowSMNT(serverSettings.serverAllowSMNT());
+    setWriteBytesSize(serverSettings.serverWriteBytesSize());
+    setServerPrivateKey(serverSettings.serverPrivateKey());
+    setServerCert(serverSettings.serverCert());
 
 }
 
@@ -248,7 +250,7 @@ void CogWheelControlChannel::abortOnDataChannel()
 
     if(m_dataChannel != nullptr) {
         if(m_dataChannel->isConnected() || m_dataChannel->isListening()){
-            m_dataChannel->disconnectFromClient(this);
+            disconnectDataChannel();
         }
     }
 
@@ -383,7 +385,7 @@ void CogWheelControlChannel::closeConnection()
  */
 void CogWheelControlChannel::transferFinished()
 {
-    tearDownDataChannel();
+    disconnectDataChannel();
     sendReplyCode(226);
 }
 
@@ -469,28 +471,7 @@ void CogWheelControlChannel::enbleTLSSupport()
 
     m_controlChannelSocket->setProtocol(QSsl::SecureProtocols);
 
-    // Read server key
-
-    QFile serverKeyFile("./server.key");
-    if(serverKeyFile.open(QIODevice::ReadOnly)){
-        m_serverPrivateKey = serverKeyFile.readAll();
-        serverKeyFile.close();
-    } else {
-        emit error(serverKeyFile.errorString());
-    }
-
-    // Read server cert
-
-    QFile serveCertFile("./server.crt");
-    if(serveCertFile.open(QIODevice::ReadOnly)){
-        m_serverCert = serveCertFile.readAll();
-        serveCertFile.close();
-    }
-    else{
-       emit error(serveCertFile.errorString());
-    }
-
-    // Convert to QSsl format and apply to socket
+    // Create QSsl private key and cert
 
     QSslKey sslPrivateKey(m_serverPrivateKey, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
     QSslCertificate sslCert(m_serverCert);
@@ -538,7 +519,7 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
     emit info ("Control Channel now encrypted.");
 
-    m_tlsEnabled=true;
+    m_sslConnection=true;
 
 }
 
@@ -572,14 +553,14 @@ void CogWheelControlChannel::setDataChanelProtection(const QChar &dataChanelProt
     m_dataChanelProtection = dataChanelProtection;
 }
 
-bool CogWheelControlChannel::tlsEnabled() const
+bool CogWheelControlChannel::IsSslConnection() const
 {
-    return m_tlsEnabled;
+    return m_sslConnection;
 }
 
-void CogWheelControlChannel::setTlsEnabled(bool tlsEnabled)
+void CogWheelControlChannel::setSslConnection(bool sslConnection)
 {
-    m_tlsEnabled = tlsEnabled;
+    m_sslConnection = sslConnection;
 }
 
 /**

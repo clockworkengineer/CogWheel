@@ -62,6 +62,8 @@ public:
     void setFileBeingUploaded(bool isFileBeingUploaded);
     QSslSocket *dataChannelSocket() const;
     void setDataChannelSocket(QSslSocket *dataChannelSocket);
+    bool IsSslConnection() const;
+    void setSslConnection(bool IsSslConnection);
 
 private:
 
@@ -114,7 +116,7 @@ private:
     QFile *m_fileBeingTransferred=nullptr;// Upload/download file
     quint64 m_downloadFileSize=0;         // Downloading file size
     qint64 m_writeBytesSize=0;            // No of bytes per write
-    bool m_tlsEnabled=false;              // == true TLS has been snabled
+    bool m_sslConnection=false;           // == true connection is SSL
 
 };
 

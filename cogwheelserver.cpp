@@ -42,7 +42,24 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
     connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);
     connect(&m_connections, &CogWheelConnections::warning, this, &CogWheelServer::warning);
 
+    emit info("Loading CogWheel FTP Server Settings...");
+
     m_serverSettings.load();
+
+    if (!m_serverSettings.serverEnabled()) {
+        emit info ("Server not enbled. Closing down.");
+        return;
+    }
+
+    if (m_serverSettings.serverSslEnabled()) {
+         if (m_serverSettings.loadPrivateKeyAndCert()) {
+             emit info("Server Private Key & Certicate Loaded.");
+         } else {
+             m_serverSettings.setServerSslEnabled(false);
+             emit info("Error Loading Server Private & Certicate SSL Disabled.");
+         }
+    }
+
     m_connections.setServerSettings (m_serverSettings);
 
     if (autoStart) {
