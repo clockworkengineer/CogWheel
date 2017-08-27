@@ -37,5 +37,7 @@ int main(int argc, char *argv[])
 
     CogWheelServer server(true);
 
-    return a.exec();
+    if (server.isRunning()) {
+        return a.exec();
+    }
 }

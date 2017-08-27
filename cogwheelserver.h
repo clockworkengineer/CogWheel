@@ -34,6 +34,11 @@ public:
     void startServer(void);
     void stopServer(void);
 
+    // Private data accessors
+
+    bool isRunning() const;
+    void setRunning(bool isRunning);
+
 protected:
 
     // QTcpServer overrides
@@ -59,6 +64,8 @@ private:
     CogWheelConnections m_connections;          // Connections handler
     CogWheelServerSettings m_serverSettings;    // Server settings
     CogWheelFTPCore m_ftpServer;                // FTP server core
+
+    bool m_running=false;   // == true server running
 
 
 };

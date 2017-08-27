@@ -52,12 +52,12 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
     }
 
     if (m_serverSettings.serverSslEnabled()) {
-         if (m_serverSettings.loadPrivateKeyAndCert()) {
-             emit info("Server Private Key & Certicate Loaded.");
-         } else {
-             m_serverSettings.setServerSslEnabled(false);
-             emit info("Error Loading Server Private & Certicate SSL Disabled.");
-         }
+        if (m_serverSettings.loadPrivateKeyAndCert()) {
+            emit info("Server Private Key & Certicate Loaded.");
+        } else {
+            m_serverSettings.setServerSslEnabled(false);
+            emit info("Error Loading Server Private & Certicate SSL Disabled.");
+        }
     }
 
     m_connections.setServerSettings (m_serverSettings);
@@ -82,6 +82,7 @@ void CogWheelServer::startServer()
     if (listen(QHostAddress::Any, m_serverSettings.serverPort())) {
         info("CogWheel Server listening on port "+QString::number(m_serverSettings.serverPort()));
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
+        setRunning(true);
     } else {
         error("CogWheel Server listen failure.");
     }
@@ -93,10 +94,15 @@ void CogWheelServer::startServer()
  *
  * Stop server running.
  *
+ * NOTE: MAY NEED TO CLOSE ALL CONNECTIONS IN FUTURE.
+ *
  */
 void CogWheelServer::stopServer()
 {
     info("CogWheel Server stopped.");
+
+    setRunning(false);
+
 }
 
 /**
@@ -149,4 +155,26 @@ void CogWheelServer::info(const QString &message)
 void CogWheelServer::warning(const QString &message)
 {
     qDebug() << message.toStdString().c_str();
+}
+
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
+
+/**
+ * @brief CogWheelServer::isRunning
+ * @return
+ */
+bool CogWheelServer::isRunning() const
+{
+    return m_running;
+}
+
+/**
+ * @brief CogWheelServer::setRunning
+ * @param running
+ */
+void CogWheelServer::setRunning(bool running)
+{
+    m_running = running;
 }
