@@ -83,7 +83,23 @@ void CogWheelUserSettings::load(QString userName)
  */
 void CogWheelUserSettings::save(QString userName)
 {
-    Q_UNUSED(userName);
+    QSettings userSettings;
+
+    userSettings.beginGroup(userName);
+
+    // Encrypt the password using SHA1
+
+    if (!m_userPassword.isEmpty()) {
+        QByteArray passHash = QCryptographicHash::hash(m_userPassword.toUtf8(),QCryptographicHash::Sha1 );
+        QString passHashString(passHash.toHex());
+        userSettings.setValue("password", passHashString);
+    }
+    userSettings.setValue("root", m_rootPath);
+    userSettings.setValue("account",m_accountName);
+    userSettings.setValue("enabled", m_enabled);
+    userSettings.setValue("writeaccess", m_writeAccess);
+    userSettings.endGroup();
+
 }
 
 // ============================

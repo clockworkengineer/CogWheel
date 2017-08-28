@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CogWheelManagerMain</class>
+ <widget class="QMainWindow" name="CogWheelManagerMain">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>766</width>
+    <height>602</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CogWheel Server Manager</string>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionEditServerSettings"/>
+   <addaction name="actionEditUser"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionEditUser">
+   <property name="text">
+    <string>Users</string>
+   </property>
+  </action>
+  <action name="actionEditServerSettings">
+   <property name="text">
+    <string>Server</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
