@@ -579,6 +579,7 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
     QString reply { QString::number(replyCode) + " " + message + "\r\n"};
 
     m_controlChannelSocket->write(reply.toUtf8().data());
+    m_controlChannelSocket->flush();    //  Make sure replies arent buffered.
 
 }
 

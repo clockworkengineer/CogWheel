@@ -132,9 +132,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
             m_dataChannelSocket->waitForDisconnected(-1);
         }
         connection->sendReplyCode(226);
-    } /*else {
-        emit error("Data channel socket not connected.");
-    }*/
+    }
     m_connected=false;
 
 }

@@ -137,6 +137,7 @@ void CogWheelFTPCore::loadFTPCommandTables()
         CogWheelFTPCore::m_unauthCommandTable.insert("PASS", CogWheelFTPCore::PASS);
         CogWheelFTPCore::m_unauthCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
         CogWheelFTPCore::m_unauthCommandTable.insert("AUTH", CogWheelFTPCore::AUTH);
+        CogWheelFTPCore::m_unauthCommandTable.insert("FEAT", CogWheelFTPCore::FEAT);
     }
 
     // Full command table
