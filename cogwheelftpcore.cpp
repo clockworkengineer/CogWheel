@@ -53,6 +53,14 @@ QHash<QString, CogWheelFTPCore::FTPCommandFunction> CogWheelFTPCore::m_ftpComman
 
 QHash<quint16, QString> CogWheelFTPCore::m_ftpServerResponse;
 
+// Tailored FEAT command responses (ie. AUTH reponse is AUTH TLS).
+
+QHash<QString,QString> CogWheelFTPCore::m_featTailoredRespone;
+
+// FTP server settings
+
+CogWheelServerSettings CogWheelFTPCore::m_serverSettings;
+
 /**
  * @brief CogWheelFTPCore::CogWheelFTPCore
  *
@@ -67,8 +75,25 @@ CogWheelFTPCore::CogWheelFTPCore()
 
 }
 
+void CogWheelFTPCore::setupServer(const CogWheelServerSettings &serverSettings)
+{
+    m_serverSettings = serverSettings;
+
+    // Disable TLS/SSL commands
+
+    if (!serverSettings.serverSslEnabled()) {
+        m_unauthCommandTable.remove("AUTH");
+        m_unauthCommandTable.remove("PROT");
+        m_unauthCommandTable.remove("PBSZ");
+        m_ftpCommandTable.remove("AUTH");
+        m_ftpCommandTable.remove("PROT");
+        m_ftpCommandTable.remove("PBSZ");
+    }
+
+}
+
 /**
- * @brief CogWheelFTPCore::loadServerReponseTable
+ * @brief loadServerReponseTable
  *
  * Load server response table.
  *
@@ -78,47 +103,52 @@ void CogWheelFTPCore::loadServerReponseTable()
 
     // Server reponse codes and text
 
-    if (CogWheelFTPCore::m_ftpServerResponse.isEmpty()) {
-        CogWheelFTPCore::m_ftpServerResponse.insert(110,"Restart marker reply.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(120,"Service ready in nnn minutes.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(125,"Data connection already open; transfer starting.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(150,"File status okay; about to open data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(200,"Command okay.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(202,"Command not implemented, superfluous at this site.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(211,"System status, nothing to report.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(212,"Directory status.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(213,"End of status.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(214,"Help command successful.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(215,"NAME system type.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(220,"Service ready for new user.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(221,"Service closing control connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(225,"Data connection open; no transfer in progress.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(226,"Closing data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2).");
-        CogWheelFTPCore::m_ftpServerResponse.insert(230,"User logged in, proceed.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(250,"Requested file action okay, completed.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(257,"Path was created.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(331,"Password required.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(332,"Need account for login.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(350,"Requested file action pending further information.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(421,"Service not available, closing control connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(425,"Can't open data connection.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(426,"Connection closed; transfer aborted.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(450,"Requested file action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(451,"Requested action aborted: local error in processing.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(452,"Requested action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(500,"Syntax error, command unrecognized.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(501,"Syntax error in parameters or arguments.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(502,"Command not implemented.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(503,"Bad sequence of commands.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(504,"Command not implemented for that parameter.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(530,"Not logged in.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(532,"Need account for storing files.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(550,"Requested action not taken.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(551,"Requested action aborted: page type unknown.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(552,"Requested file action aborted.");
-        CogWheelFTPCore::m_ftpServerResponse.insert(553,"Requested action not taken.");
+    if (m_ftpServerResponse.isEmpty()) {
+        m_ftpServerResponse.insert(110,"Restart marker reply.");
+        m_ftpServerResponse.insert(120,"Service ready in nnn minutes.");
+        m_ftpServerResponse.insert(125,"Data connection already open; transfer starting.");
+        m_ftpServerResponse.insert(150,"File status okay; about to open data connection.");
+        m_ftpServerResponse.insert(200,"Command okay.");
+        m_ftpServerResponse.insert(202,"Command not implemented, superfluous at this site.");
+        m_ftpServerResponse.insert(211,"System status, nothing to report.");
+        m_ftpServerResponse.insert(212,"Directory status.");
+        m_ftpServerResponse.insert(213,"End of status.");
+        m_ftpServerResponse.insert(214,"Help command successful.");
+        m_ftpServerResponse.insert(215,"NAME system type.");
+        m_ftpServerResponse.insert(220,"Service ready for new user.");
+        m_ftpServerResponse.insert(221,"Service closing control connection.");
+        m_ftpServerResponse.insert(225,"Data connection open; no transfer in progress.");
+        m_ftpServerResponse.insert(226,"Closing data connection.");
+        m_ftpServerResponse.insert(227,"Entering Passive Mode (h1,h2,h3,h4,p1,p2).");
+        m_ftpServerResponse.insert(230,"User logged in, proceed.");
+        m_ftpServerResponse.insert(250,"Requested file action okay, completed.");
+        m_ftpServerResponse.insert(257,"Path was created.");
+        m_ftpServerResponse.insert(331,"Password required.");
+        m_ftpServerResponse.insert(332,"Need account for login.");
+        m_ftpServerResponse.insert(350,"Requested file action pending further information.");
+        m_ftpServerResponse.insert(421,"Service not available, closing control connection.");
+        m_ftpServerResponse.insert(425,"Can't open data connection.");
+        m_ftpServerResponse.insert(426,"Connection closed; transfer aborted.");
+        m_ftpServerResponse.insert(450,"Requested file action not taken.");
+        m_ftpServerResponse.insert(451,"Requested action aborted: local error in processing.");
+        m_ftpServerResponse.insert(452,"Requested action not taken.");
+        m_ftpServerResponse.insert(500,"Syntax error, command unrecognized.");
+        m_ftpServerResponse.insert(501,"Syntax error in parameters or arguments.");
+        m_ftpServerResponse.insert(502,"Command not implemented.");
+        m_ftpServerResponse.insert(503,"Bad sequence of commands.");
+        m_ftpServerResponse.insert(504,"Command not implemented for that parameter.");
+        m_ftpServerResponse.insert(530,"Not logged in.");
+        m_ftpServerResponse.insert(532,"Need account for storing files.");
+        m_ftpServerResponse.insert(550,"Requested action not taken.");
+        m_ftpServerResponse.insert(551,"Requested action aborted: page type unknown.");
+        m_ftpServerResponse.insert(552,"Requested file action aborted.");
+        m_ftpServerResponse.insert(553,"Requested action not taken.");
     }
+
+    if (m_featTailoredRespone.empty()) {
+         m_featTailoredRespone.insert("AUTH", "AUTH TLS");
+    }
+
 }
 
 /**
@@ -132,69 +162,69 @@ void CogWheelFTPCore::loadFTPCommandTables()
 
     // Miniumum command table
 
-    if (CogWheelFTPCore::m_unauthCommandTable.isEmpty()) {
-        CogWheelFTPCore::m_unauthCommandTable.insert("USER", CogWheelFTPCore::USER);
-        CogWheelFTPCore::m_unauthCommandTable.insert("PASS", CogWheelFTPCore::PASS);
-        CogWheelFTPCore::m_unauthCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
-        CogWheelFTPCore::m_unauthCommandTable.insert("FEAT", CogWheelFTPCore::FEAT);
-        CogWheelFTPCore::m_unauthCommandTable.insert("AUTH", CogWheelFTPCore::AUTH);
-        CogWheelFTPCore::m_unauthCommandTable.insert("PROT", CogWheelFTPCore::PROT);
-        CogWheelFTPCore::m_unauthCommandTable.insert("PBSZ", CogWheelFTPCore::PBSZ);
+    if (m_unauthCommandTable.isEmpty()) {
+        m_unauthCommandTable.insert("USER", USER);
+        m_unauthCommandTable.insert("PASS", PASS);
+        m_unauthCommandTable.insert("TYPE", TYPE);
+        m_unauthCommandTable.insert("FEAT", FEAT);
+        m_unauthCommandTable.insert("AUTH", AUTH);
+        m_unauthCommandTable.insert("PROT", PROT);
+        m_unauthCommandTable.insert("PBSZ", PBSZ);
     }
 
     // Full command table
 
-    if (CogWheelFTPCore::m_ftpCommandTable.isEmpty()) {
-        CogWheelFTPCore::m_ftpCommandTable.insert("USER", CogWheelFTPCore::USER);
-        CogWheelFTPCore::m_ftpCommandTable.insert("PASS", CogWheelFTPCore::PASS);
-        CogWheelFTPCore::m_ftpCommandTable.insert("LIST", CogWheelFTPCore::LIST);
-        CogWheelFTPCore::m_ftpCommandTable.insert("SYST", CogWheelFTPCore::SYST);
-        CogWheelFTPCore::m_ftpCommandTable.insert("PWD", CogWheelFTPCore::PWD);
-        CogWheelFTPCore::m_ftpCommandTable.insert("TYPE", CogWheelFTPCore::TYPE);
-        CogWheelFTPCore::m_ftpCommandTable.insert("PORT", CogWheelFTPCore::PORT);
-        CogWheelFTPCore::m_ftpCommandTable.insert("CWD", CogWheelFTPCore::CWD);
-        CogWheelFTPCore::m_ftpCommandTable.insert("CDUP", CogWheelFTPCore::CDUP);
-        CogWheelFTPCore::m_ftpCommandTable.insert("RETR", CogWheelFTPCore::RETR);
-        CogWheelFTPCore::m_ftpCommandTable.insert("MODE", CogWheelFTPCore::MODE);
-        CogWheelFTPCore::m_ftpCommandTable.insert("NOOP", CogWheelFTPCore::NOOP);
-        CogWheelFTPCore::m_ftpCommandTable.insert("STOR", CogWheelFTPCore::STOR);
-        CogWheelFTPCore::m_ftpCommandTable.insert("PASV", CogWheelFTPCore::PASV);
-        CogWheelFTPCore::m_ftpCommandTable.insert("HELP", CogWheelFTPCore::HELP);
-        CogWheelFTPCore::m_ftpCommandTable.insert("SITE", CogWheelFTPCore::SITE);
-        CogWheelFTPCore::m_ftpCommandTable.insert("NLST", CogWheelFTPCore::NLST);
-        CogWheelFTPCore::m_ftpCommandTable.insert("MKD", CogWheelFTPCore::MKD);
-        CogWheelFTPCore::m_ftpCommandTable.insert("RMD", CogWheelFTPCore::RMD);
-        CogWheelFTPCore::m_ftpCommandTable.insert("QUIT", CogWheelFTPCore::QUIT);
-        CogWheelFTPCore::m_ftpCommandTable.insert("DELE", CogWheelFTPCore::DELE);
-        CogWheelFTPCore::m_ftpCommandTable.insert("ACCT", CogWheelFTPCore::ACCT);
-        CogWheelFTPCore::m_ftpCommandTable.insert("STOU", CogWheelFTPCore::STOU);
-        CogWheelFTPCore::m_ftpCommandTable.insert("STRU", CogWheelFTPCore::STRU);
-        CogWheelFTPCore::m_ftpCommandTable.insert("SMNT", CogWheelFTPCore::SMNT);
-        CogWheelFTPCore::m_ftpCommandTable.insert("ALLO", CogWheelFTPCore::ALLO);
-        CogWheelFTPCore::m_ftpCommandTable.insert("RNFR", CogWheelFTPCore::RNFR);
-        CogWheelFTPCore::m_ftpCommandTable.insert("RNTO", CogWheelFTPCore::RNTO);
-        CogWheelFTPCore::m_ftpCommandTable.insert("REST", CogWheelFTPCore::REST);
-        CogWheelFTPCore::m_ftpCommandTable.insert("ABOR", CogWheelFTPCore::ABOR);
-        CogWheelFTPCore::m_ftpCommandTable.insert("REIN", CogWheelFTPCore::REIN);
-        CogWheelFTPCore::m_ftpCommandTable.insert("APPE", CogWheelFTPCore::APPE);
-        CogWheelFTPCore::m_ftpCommandTable.insert("STAT", CogWheelFTPCore::STAT);
+    if (m_ftpCommandTable.isEmpty()) {
+        m_ftpCommandTable.insert("USER", USER);
+        m_ftpCommandTable.insert("PASS", PASS);
+        m_ftpCommandTable.insert("LIST", LIST);
+        m_ftpCommandTable.insert("SYST", SYST);
+        m_ftpCommandTable.insert("PWD", PWD);
+        m_ftpCommandTable.insert("TYPE", TYPE);
+        m_ftpCommandTable.insert("PORT", PORT);
+        m_ftpCommandTable.insert("CWD", CWD);
+        m_ftpCommandTable.insert("CDUP", CDUP);
+        m_ftpCommandTable.insert("RETR", RETR);
+        m_ftpCommandTable.insert("MODE", MODE);
+        m_ftpCommandTable.insert("NOOP", NOOP);
+        m_ftpCommandTable.insert("STOR", STOR);
+        m_ftpCommandTable.insert("PASV", PASV);
+        m_ftpCommandTable.insert("HELP", HELP);
+        m_ftpCommandTable.insert("SITE", SITE);
+        m_ftpCommandTable.insert("NLST", NLST);
+        m_ftpCommandTable.insert("MKD", MKD);
+        m_ftpCommandTable.insert("RMD", RMD);
+        m_ftpCommandTable.insert("QUIT", QUIT);
+        m_ftpCommandTable.insert("DELE", DELE);
+        m_ftpCommandTable.insert("ACCT", ACCT);
+        m_ftpCommandTable.insert("STOU", STOU);
+        m_ftpCommandTable.insert("STRU", STRU);
+        m_ftpCommandTable.insert("SMNT", SMNT);
+        m_ftpCommandTable.insert("ALLO", ALLO);
+        m_ftpCommandTable.insert("RNFR", RNFR);
+        m_ftpCommandTable.insert("RNTO", RNTO);
+        m_ftpCommandTable.insert("REST", REST);
+        m_ftpCommandTable.insert("ABOR", ABOR);
+        m_ftpCommandTable.insert("REIN", REIN);
+        m_ftpCommandTable.insert("APPE", APPE);
+        m_ftpCommandTable.insert("STAT", STAT);
     }
 
     // Add extended commands to main table
 
-    if (CogWheelFTPCore::m_ftpCommandTableExtended.isEmpty()) {
+    if (m_ftpCommandTableExtended.isEmpty()) {
 
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("FEAT", CogWheelFTPCore::FEAT);
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("MDTM", CogWheelFTPCore::MDTM);
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("SIZE", CogWheelFTPCore::SIZE);
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("AUTH", CogWheelFTPCore::AUTH);
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("PROT", CogWheelFTPCore::PROT);
-        CogWheelFTPCore::m_ftpCommandTableExtended.insert("PBSZ", CogWheelFTPCore::PBSZ);
+        m_ftpCommandTableExtended.insert("FEAT", FEAT);
+        m_ftpCommandTableExtended.insert("MDTM", MDTM);
+        m_ftpCommandTableExtended.insert("SIZE", SIZE);
+        m_ftpCommandTableExtended.insert("AUTH", AUTH);
+        m_ftpCommandTableExtended.insert("PROT", PROT);
+        m_ftpCommandTableExtended.insert("PBSZ", PBSZ);
 
         QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
             command.next();
-            CogWheelFTPCore::m_ftpCommandTable.insert(command.key(), command.value());
+            m_ftpCommandTable.insert(command.key(), command.value());
         }
 
     }
@@ -1359,10 +1389,12 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
     featReply.append("211-Extensions supported: \r\n");
 
     for( auto key :  m_ftpCommandTableExtended.keys() ) {
-        featReply.append(" "+key+"\r\n");
+        if (!m_featTailoredRespone.contains(key))  {
+            featReply.append(" "+key+"\r\n");
+        } else {
+           featReply.append(" "+m_featTailoredRespone[key]+"\r\n");
+        }
     }
-
-    featReply.append(" AUTH TLS\r\n");
 
     connection->sendOnControlChannel(featReply);
 

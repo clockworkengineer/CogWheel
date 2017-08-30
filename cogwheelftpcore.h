@@ -12,7 +12,9 @@
 #ifndef COGWHEELFTPCORE_H
 #define COGWHEELFTPCORE_H
 
-#include <cogwheelcontrolchannel.h>
+#include "cogwheelcontrolchannel.h"
+#include "cogwheelusersettings.h"
+
 #include <stdexcept>
 
 #include <QMap>
@@ -52,7 +54,11 @@ public:
 
     // Constructor
 
-    explicit CogWheelFTPCore(/*QObject *parent = nullptr*/);
+    explicit CogWheelFTPCore();
+
+    // Load server settings and setup
+
+    static void setupServer(const CogWheelServerSettings &serverSettings);
 
     // Response table accessor
 
@@ -129,7 +135,11 @@ private:
     static QHash<QString, FTPCommandFunction> m_ftpCommandTable;          // Authorised user command table
     static QHash<QString, FTPCommandFunction> m_ftpCommandTableExtended;  // Extended command table
 
-    static QHash<quint16, QString> m_ftpServerResponse;   // Server response table
+    static QHash<quint16, QString> m_ftpServerResponse;   // Server response code table
+
+    static QHash<QString,QString> m_featTailoredRespone;  // Tailored FEAT command responses
+
+    static CogWheelServerSettings m_serverSettings; // FTP server settinngs
 
 };
 

@@ -55,7 +55,10 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
         }
     }
 
+    // Setup server settings
+
     m_connections.setServerSettings (m_serverSettings);
+    m_ftpServer.setupServer(m_serverSettings);
 
     if (autoStart) {
         startServer();
