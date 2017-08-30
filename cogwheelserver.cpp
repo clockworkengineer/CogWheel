@@ -46,11 +46,6 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
 
     m_serverSettings.load();
 
-    if (!m_serverSettings.serverEnabled()) {
-        emit info ("Server not enbled. Closing down.");
-        return;
-    }
-
     if (m_serverSettings.serverSslEnabled()) {
         if (m_serverSettings.loadPrivateKeyAndCert()) {
             emit info("Server Private Key & Certicate Loaded.");

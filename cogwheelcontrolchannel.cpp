@@ -44,6 +44,7 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
     setWriteBytesSize(serverSettings.serverWriteBytesSize());
     setServerPrivateKey(serverSettings.serverPrivateKey());
     setServerCert(serverSettings.serverCert());
+    setServerEnabled(serverSettings.serverEnabled());
 
 }
 
@@ -339,11 +340,24 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
     connect(m_controlChannelSocket, &QSslSocket::readyRead, this, &CogWheelControlChannel::readyRead, Qt::DirectConnection);
     connect(m_controlChannelSocket, &QSslSocket::bytesWritten, this, &CogWheelControlChannel::bytesWritten, Qt::DirectConnection);
 
-    // Set connected and return success.
-
     setConnected(true);
 
-    sendReplyCode(200);
+    if (serverEnabled()) {
+
+        // Set connected and return success.
+
+        sendReplyCode(200);
+
+    } else {
+
+        // Server unavailable
+
+        emit info ("Server disabled closing down control connection.");
+
+        sendReplyCode(503, "Server unavailable at the moment.");
+        closeConnection();
+
+    }
 
 }
 
@@ -356,12 +370,18 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 void CogWheelControlChannel::closeConnection()
 {
 
-    info ("Closing control on socket : "+ QString::number(m_socketHandle));
+    // Don't disconnect if already so
 
     if (!isConnected() || m_controlChannelSocket == nullptr) {
-        error("Control Channel already disconnected.");
+        info("Control Channel already disconnected.");
         return;
     }
+
+    info ("Closing control on socket : "+ QString::number(m_socketHandle));
+
+    // Set disconnected
+
+    setConnected(false);
 
     // Close control channel socket and flag for deletion
 
@@ -369,9 +389,7 @@ void CogWheelControlChannel::closeConnection()
     m_controlChannelSocket->deleteLater();
     m_controlChannelSocket = nullptr;
 
-    // Set disconnected and signal connection manager
-
-    setConnected(false);
+    // Set signal connection manager
 
     emit finishedConnection(m_socketHandle);
 
@@ -502,7 +520,7 @@ void CogWheelControlChannel::sslError(QList<QSslError> errors)
     QString errorStr="";
 
     foreach (const QSslError &e, errors) {
-        errorStr.append(e.errorString()).append("\n");
+        errorStr.append(e.errorString());
     }
 
     emit error(errorStr);
@@ -523,45 +541,7 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
 }
 
-QByteArray CogWheelControlChannel::serverCert() const
-{
-    return m_serverCert;
-}
 
-void CogWheelControlChannel::setServerCert(const QByteArray &serverCert)
-{
-    m_serverCert = serverCert;
-}
-
-QByteArray CogWheelControlChannel::serverPrivateKey() const
-{
-    return m_serverPrivateKey;
-}
-
-void CogWheelControlChannel::setServerPrivateKey(const QByteArray &serverPrivateKey)
-{
-    m_serverPrivateKey = serverPrivateKey;
-}
-
-QChar CogWheelControlChannel::dataChanelProtection() const
-{
-    return m_dataChanelProtection;
-}
-
-void CogWheelControlChannel::setDataChanelProtection(const QChar &dataChanelProtection)
-{
-    m_dataChanelProtection = dataChanelProtection;
-}
-
-bool CogWheelControlChannel::IsSslConnection() const
-{
-    return m_sslConnection;
-}
-
-void CogWheelControlChannel::setSslConnection(bool sslConnection)
-{
-    m_sslConnection = sslConnection;
-}
 
 /**
  * @brief CogWheelControlChannel::sendReplyCode
@@ -671,6 +651,92 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
+
+/**
+ * @brief CogWheelControlChannel::serverEnabled
+ * @return
+ */
+bool CogWheelControlChannel::serverEnabled() const
+{
+    return m_serverEnabled;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerEnabled
+ * @param serverEnabled
+ */
+void CogWheelControlChannel::setServerEnabled(bool serverEnabled)
+{
+    m_serverEnabled = serverEnabled;
+}
+
+/**
+ * @brief CogWheelControlChannel::serverCert
+ * @return
+ */
+QByteArray CogWheelControlChannel::serverCert() const
+{
+    return m_serverCert;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerCert
+ * @param serverCert
+ */
+void CogWheelControlChannel::setServerCert(const QByteArray &serverCert)
+{
+    m_serverCert = serverCert;
+}
+
+/**
+ * @brief CogWheelControlChannel::serverPrivateKey
+ * @return
+ */
+QByteArray CogWheelControlChannel::serverPrivateKey() const
+{
+    return m_serverPrivateKey;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerPrivateKey
+ * @param serverPrivateKey
+ */
+void CogWheelControlChannel::setServerPrivateKey(const QByteArray &serverPrivateKey)
+{
+    m_serverPrivateKey = serverPrivateKey;
+}
+
+/**
+ * @brief CogWheelControlChannel::dataChanelProtection
+ * @return
+ */
+QChar CogWheelControlChannel::dataChanelProtection() const
+{
+    return m_dataChanelProtection;
+}
+
+void CogWheelControlChannel::setDataChanelProtection(const QChar &dataChanelProtection)
+{
+    m_dataChanelProtection = dataChanelProtection;
+}
+
+/**
+ * @brief CogWheelControlChannel::IsSslConnection
+ * @return
+ */
+bool CogWheelControlChannel::IsSslConnection() const
+{
+    return m_sslConnection;
+}
+
+/**
+ * @brief CogWheelControlChannel::setSslConnection
+ * @param sslConnection
+ */
+void CogWheelControlChannel::setSslConnection(bool sslConnection)
+{
+    m_sslConnection = sslConnection;
+}
 
 /**
  * @brief CogWheelControlChannel::writeAccess

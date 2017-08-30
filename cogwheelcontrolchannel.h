@@ -121,6 +121,8 @@ public:
     void setServerPrivateKey(const QByteArray &serverPrivateKey);
     QByteArray serverCert() const;
     void setServerCert(const QByteArray &serverCert);
+    bool serverEnabled() const;
+    void setServerEnabled(bool serverEnabled);
 
 private:
     void processFTPCommand(QString commandLine);    // Process FTP command
@@ -191,6 +193,7 @@ private:
     qint64 m_writeBytesSize=0;          // Number of bytes per write
     QByteArray m_serverPrivateKey;      // Server private key
     QByteArray m_serverCert;            // Server Certificate
+    bool m_serverEnabled=false;         // == true Server enabled
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket

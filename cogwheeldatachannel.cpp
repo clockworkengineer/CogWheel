@@ -332,7 +332,7 @@ void CogWheelDataChannel::sslError(QList<QSslError> errors)
     QString errorStr="";
 
     foreach (const QSslError &e, errors) {
-        errorStr.append(e.errorString()).append("\n");
+        errorStr.append(e.errorString());
     }
 
     emit error(errorStr);
