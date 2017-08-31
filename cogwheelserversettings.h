@@ -42,6 +42,8 @@ public:
     void setServerKeyFileName(const QString &serverKeyFileName);
     QString serverCertFileName() const;
     void setServerCertFileName(const QString &serverCertFileName);
+    bool serverAnonymousEnabled() const;
+    void setServerAnonymousEnabled(bool serverAnonymousEnabled);
 
 private:
 
@@ -53,6 +55,7 @@ private:
     bool m_serverEnabled=false;            // ==true Server enabled
     bool m_serverSslEnabled=false;         // ==true TLS/SSL enabled
     bool m_servePlainFTPEnabled=false;     // ==true Plain insecure FTP enabled
+    bool m_serverAnonymousEnabled=false;         // == true anonymous login enabled
     QString m_serverKeyFileName;           // Server private key file name
     QString m_serverCertFileName;          // Server certifucate file
 

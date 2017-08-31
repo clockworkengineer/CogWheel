@@ -59,6 +59,9 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("plain")) {
         server.setValue("plain", true);
     }
+    if (!server.childKeys().contains("anonymous")) {
+        server.setValue("anonymous", true);
+    }
     if (!server.childKeys().contains("serverkey")) {
         server.setValue("serverkey", "./server.key");
     }
@@ -76,6 +79,7 @@ void CogWheelServerSettings::load()
     setServerEnabled(server.value("enabled").toBool());
     setServerSslEnabled(server.value("sslenabled").toBool());
     setServerPlainFTPEnabled(server.value("plain").toBool());
+    setServerAnonymousEnabled(server.value("anonymous").toBool());
     setServerKeyFileName(server.value("serverkey").toString());
     setServerCertFileName(server.value("servercert").toString());
     server.endGroup();
@@ -102,6 +106,7 @@ void CogWheelServerSettings::save()
     server.setValue("enabled", serverEnabled());
     server.setValue("sslenabled",serverSslEnabled());
     server.setValue("plain", serverPlainFTPEnabled());
+    server.setValue("anonymous", serverAnonymousEnabled());
     server.setValue("serverkey", serverKeyFileName());
     server.setValue("servercert",serverCertFileName());
     server.endGroup();
@@ -307,4 +312,14 @@ QString CogWheelServerSettings::serverCertFileName() const
 void CogWheelServerSettings::setServerCertFileName(const QString &serverCertFileName)
 {
     m_serverCertFileName = serverCertFileName;
+}
+
+bool CogWheelServerSettings::serverAnonymousEnabled() const
+{
+    return m_serverAnonymousEnabled;
+}
+
+void CogWheelServerSettings::setServerAnonymousEnabled(bool sererAnonymousEnabled)
+{
+    m_serverAnonymousEnabled = sererAnonymousEnabled;
 }

@@ -39,13 +39,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>30</x>
      <y>0</y>
      <width>351</width>
-     <height>281</height>
+     <height>308</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -123,7 +123,7 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="0">
+    <item row="7" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <widget class="QLabel" name="label">
@@ -137,7 +137,7 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="0">
+    <item row="6" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_14">
       <item>
        <widget class="QLabel" name="label_2">
@@ -151,16 +151,15 @@
       </item>
      </layout>
     </item>
+    <item row="5" column="0">
+     <widget class="QCheckBox" name="serverAnonymousEnabled">
+      <property name="text">
+       <string>Anonymous Login</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
-  <zorder>layoutWidget</zorder>
-  <zorder>layoutWidget</zorder>
-  <zorder>serverPlainFTPEnabled</zorder>
-  <zorder>serverTlsSslEnabled</zorder>
-  <zorder>serverEnabled</zorder>
-  <zorder>serverAllowSMNT</zorder>
-  <zorder>cancelButton</zorder>
-  <zorder>saveButton</zorder>
  </widget>
  <resources/>
  <connections/>

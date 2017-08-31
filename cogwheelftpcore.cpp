@@ -393,7 +393,9 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
  *
  * Execute FTP command. If the user has been authenicated then then they
  * get a full command list otherwise only a small subset. Note: This is
- * where all command exceptions are handled.
+ * where all command exceptions are handled. If plain FTP is disabled then
+ * the client must connect using explicit FTP over TLS which means it must
+ * be enabled.
  *
  * @param connection   Pointer to control channel instance.
  * @param command      FTP command.
@@ -416,15 +418,16 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
             } else if (m_unauthCommandTable.contains(command)) {
 
-                // Plain FTP off. Must connect using explicit FTP over TLS. All commands will fail
-                // until get an AUTH TLS.
+                // Plain FTP off so must connect using explicit FTP over TLS. All commands will fail
+                // until get an AUTH TLS. Note: TLS/SSL: must be enabled or commands will be ignored.
 
                 if (!m_serverSettings.serverPlainFTPEnabled()) {
                     if (m_serverSettings.serverSslEnabled() && !connection->IsSslConnection()) {
                         if ((command != "AUTH") || (arguments != "TLS")) {
-                            connection->info("No plain FTP allowed. Please connect using explicit FTP over TLS.");
-                            throw FtpServerErrorReply(530, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
+                             throw FtpServerErrorReply(550, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
                         }
+                    } else if (!m_serverSettings.serverSslEnabled()){
+                        throw FtpServerErrorReply(550, "No plain FTP allowed and TLS/SSL disabled.Server will not respond to commands.");
                     }
                 }
 
@@ -487,7 +490,11 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 
     if (arguments=="anonymous") {
 
-        connection->setAnonymous(true);
+        if (m_serverSettings.serverAnonymousEnabled()) {
+            connection->setAnonymous(true);
+        } else {
+            throw FtpServerErrorReply(530, "Anonymous logins are disabled.");
+        }
 
     } else if (!CogWheelUserSettings::checkUserName(arguments)) {
 
