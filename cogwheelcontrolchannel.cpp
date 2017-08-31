@@ -38,9 +38,6 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
 
     // Setup any control channel server settings
 
-    setServerName(serverSettings.serverName());
-    setServerVersion(serverSettings.serverVersion());
-    setAllowSMNT(serverSettings.serverAllowSMNT());
     setWriteBytesSize(serverSettings.serverWriteBytesSize());
     setServerPrivateKey(serverSettings.serverPrivateKey());
     setServerCert(serverSettings.serverCert());
@@ -541,8 +538,6 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
 }
 
-
-
 /**
  * @brief CogWheelControlChannel::sendReplyCode
  *
@@ -775,42 +770,6 @@ void CogWheelControlChannel::setWriteBytesSize(const qint64 &writeBytesSize)
 }
 
 /**
- * @brief CogWheelControlChannel::serverName
- * @return
- */
-QString CogWheelControlChannel::serverName() const
-{
-    return m_serverName;
-}
-
-/**
- * @brief CogWheelControlChannel::setServerName
- * @param serverName
- */
-void CogWheelControlChannel::setServerName(const QString &serverName)
-{
-    m_serverName = serverName;
-}
-
-/**
- * @brief CogWheelControlChannel::serverVersion
- * @return
- */
-QString CogWheelControlChannel::serverVersion() const
-{
-    return m_serverVersion;
-}
-
-/**
- * @brief CogWheelControlChannel::setServerVersion
- * @param serverVersion
- */
-void CogWheelControlChannel::setServerVersion(const QString &serverVersion)
-{
-    m_serverVersion = serverVersion;
-}
-
-/**
  * @brief CogWheelControlChannel::transTypeByteSize
  * @return
  */
@@ -1006,24 +965,6 @@ QString CogWheelControlChannel::renameFromFileName() const
 void CogWheelControlChannel::setRenameFromFileName(const QString &renameFromFileName)
 {
     m_renameFromFileName = renameFromFileName;
-}
-
-/**
- * @brief CogWheelControlChannel::isAllowSMNT
- * @return
- */
-bool CogWheelControlChannel::isAllowSMNT() const
-{
-    return m_allowSMNT;
-}
-
-/**
- * @brief CogWheelControlChannel::setAllowSMNT
- * @param allowSMT
- */
-void CogWheelControlChannel::setAllowSMNT(bool allowSMT)
-{
-    m_allowSMNT = allowSMT;
 }
 
 /**

@@ -81,8 +81,6 @@ public:
     void setRootDirectory(const QString &rootDirectory);
     QString accountName() const;
     void setAccountName(const QString &accountName);
-    bool isAllowSMNT() const;
-    void setAllowSMNT(bool isAllowSMNT);
     QString renameFromFileName() const;
     void setRenameFromFileName(const QString &value);
     qint64 restoreFilePostion() const;
@@ -105,10 +103,6 @@ public:
     void setTransferTypeFormat(const QChar &transferTypeFormat);
     qint16 transTypeByteSize() const;
     void setTransTypeByteSize(const qint16 &transTypeByteSize);
-    QString serverName() const;
-    void setServerName(const QString &serverName);
-    QString serverVersion() const;
-    void setServerVersion(const QString &serverVersion);
     qint64 writeBytesSize() const;
     void setWriteBytesSize(const qint64 &writeBytesSize);
     bool writeAccess() const;
@@ -187,9 +181,6 @@ private:
     QString m_renameFromFileName;       // RNFR/RNTO file name
     QChar m_dataChanelProtection='C';   // Data channel protecion level
 
-    QString m_serverName;               // Server name
-    QString m_serverVersion;            // Server version
-    bool m_allowSMNT=false;             // == true allow SMNT command
     qint64 m_writeBytesSize=0;          // Number of bytes per write
     QByteArray m_serverPrivateKey;      // Server private key
     QByteArray m_serverCert;            // Server Certificate
@@ -201,7 +192,6 @@ private:
     QString m_readBufer;                            // Control channel read buffer
     qintptr m_socketHandle;                         // Control channel socket handle
     bool m_sslConnection=false;                     // == true connection is SSL
-
 
 };
 

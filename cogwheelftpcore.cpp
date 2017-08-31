@@ -221,7 +221,7 @@ void CogWheelFTPCore::loadFTPCommandTables()
         m_ftpCommandTableExtended.insert("PROT", PROT);
         m_ftpCommandTableExtended.insert("PBSZ", PBSZ);
 
-        QHashIterator<QString, CogWheelFTPCore::FTPCommandFunction> command(m_ftpCommandTableExtended);
+        QHashIterator<QString, FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
             command.next();
             m_ftpCommandTable.insert(command.key(), command.value());
@@ -411,10 +411,27 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             FTPCommandFunction commandFn;
 
             if (connection->isAuthorized()) {
+
                 commandFn=m_ftpCommandTable[command];
+
             } else if (m_unauthCommandTable.contains(command)) {
+
+                // Plain FTP off. Must connect using explicit FTP over TLS. All commands will fail
+                // until get an AUTH TLS.
+
+                if (!m_serverSettings.serverPlainFTPEnabled()) {
+                    if (m_serverSettings.serverSslEnabled() && !connection->IsSslConnection()) {
+                        if ((command != "AUTH") || (arguments != "TLS")) {
+                            connection->info("No plain FTP allowed. Please connect using explicit FTP over TLS.");
+                            throw FtpServerErrorReply(530, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
+                        }
+                    }
+                }
+
                 commandFn=m_unauthCommandTable[command];
+
             } else {
+                connection->info("Please login with USER and PASS.");
                 throw FtpServerErrorReply(530, "Please login with USER and PASS.");
             }
 
@@ -935,7 +952,7 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
     QDir newDirectory { path };
 
     if(!newDirectory.mkdir(path)){
-        throw FtpServerErrorReply(530);
+        throw FtpServerErrorReply("Could not create directory.");
     }else{
         connection->sendReplyCode(257);
     }
@@ -1088,7 +1105,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    if(connection->isAllowSMNT()) {
+    if(m_serverSettings.serverAllowSMNT()) {
 
         QDir newRootDirectory(arguments);
 
@@ -1268,7 +1285,6 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
     Q_UNUSED(arguments);
 
     connection->setAccountName("");
-    connection->setAllowSMNT(false);
     connection->setAnonymous(false);
     connection->setAuthorized(false);
     connection->setClientHostIP("");
@@ -1349,8 +1365,8 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
     // No File transfer and no argument
 
     if(!connection->dataChannel() && arguments.isEmpty()) {
-        connection->sendOnControlChannel("213- "+ connection->serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + "\r\n");
-        connection->sendOnControlChannel("Version "+ connection->serverVersion() + "\r\n");
+        connection->sendOnControlChannel("213- "+ m_serverSettings.serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + "\r\n");
+        connection->sendOnControlChannel("Version "+ m_serverSettings.serverVersion()+ "\r\n");
         connection->sendOnControlChannel("Connected from "+connection->clientHostIP()+"\r\n");
         if (connection->isAnonymous()) {
             connection->sendOnControlChannel("Logged in anonymously \r\n");
