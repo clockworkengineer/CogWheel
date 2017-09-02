@@ -58,6 +58,20 @@ CogWheelDataChannel::CogWheelDataChannel(QObject *parent)
 }
 
 /**
+ * @brief CogWheelDataChannel::~CogWheelDataChannel
+ */
+CogWheelDataChannel::~CogWheelDataChannel()
+{
+    if (m_dataChannelSocket) {
+        if (m_dataChannelSocket->isOpen()) {
+            m_dataChannelSocket->close();
+        }
+        m_dataChannelSocket->deleteLater();
+        m_dataChannelSocket=nullptr;
+    }
+}
+
+/**
  * @brief CogWheelDataChannel::connectToClient
  *
  * Connect up data channel; either from server (active)

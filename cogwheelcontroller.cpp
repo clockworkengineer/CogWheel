@@ -63,6 +63,25 @@ CogWheelController::CogWheelController(const QString &socketName, QObject *paren
 }
 
 /**
+ * @brief CogWheelController::~CogWheelController
+ */
+CogWheelController::~CogWheelController()
+{
+
+    if (m_server) {
+        m_server->stopServer();
+        m_server->deleteLater();
+        m_server=nullptr;
+    }
+
+    if (m_controllerSocket) {
+        m_controllerSocket->deleteLater();
+        m_controllerSocket=nullptr;
+    }
+
+}
+
+/**
  * @brief CogWheelController::
  *
  * Start controller listening for incoming commands.

@@ -29,9 +29,10 @@ class CogWheelController : public QLocalServer
 
 public:
 
-    // Constructor
+    // Constructor / Destructor
 
     CogWheelController(const QString &socketName, QObject *parent = nullptr);
+    ~CogWheelController();
 
     // Start/Stop controller
 

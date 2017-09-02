@@ -75,6 +75,14 @@ CogWheelFTPCore::CogWheelFTPCore()
 
 }
 
+/**
+ * @brief CogWheelFTPCore::~CogWheelFTPCore
+ */
+CogWheelFTPCore::~CogWheelFTPCore()
+{
+
+}
+
 void CogWheelFTPCore::setupServer(const CogWheelServerSettings &serverSettings)
 {
     m_serverSettings = serverSettings;

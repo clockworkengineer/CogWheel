@@ -39,6 +39,14 @@ CogWheelConnections::CogWheelConnections(QObject *parent) : QObject(parent)
 }
 
 /**
+ * @brief CogWheelConnections::~CogWheelConnections
+ */
+CogWheelConnections::~CogWheelConnections()
+{
+    closeAll();
+}
+
+/**
  * @brief CogWheelConnections::closeAll
  */
 void CogWheelConnections::closeAll()

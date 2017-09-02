@@ -67,6 +67,14 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
 }
 
 /**
+ * @brief CogWheelServer::~CogWheelServer
+ */
+CogWheelServer::~CogWheelServer()
+{
+
+}
+
+/**
  * @brief CogWheelServer::startServer
  *
  * Start listening for client connections on the specified port and also

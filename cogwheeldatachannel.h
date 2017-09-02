@@ -29,9 +29,10 @@ class CogWheelDataChannel : public QTcpServer
 
 public:
 
-    // Constructor
+  // Constructor / Destructor
 
     explicit CogWheelDataChannel(QObject *parent = nullptr);
+    ~CogWheelDataChannel();
 
     // Channel control
 

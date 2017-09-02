@@ -27,9 +27,10 @@ class CogWheelControlChannel : public QObject
 
 public:
 
-    // Constructor
+    // Constructor / Destructors
 
     explicit CogWheelControlChannel(CogWheelServerSettings serverSettings, QObject *parent = nullptr);
+    ~CogWheelControlChannel();
 
     // Data channel creation/destrucion
 

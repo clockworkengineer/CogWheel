@@ -46,6 +46,15 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
 }
 
 /**
+ * @brief CogWheelControlChannel::~CogWheelControlChannel
+ */
+CogWheelControlChannel::~CogWheelControlChannel()
+{
+    disconnectDataChannel();
+    closeConnection();
+}
+
+/**
  * @brief CogWheelControlChannel::createDataChannel
  *
  * Create data channel.
@@ -93,16 +102,6 @@ void CogWheelControlChannel::tearDownDataChannel()
         error("Failure to destroy data channel as it does not exist.");
         return;
     }
-
-    if ( m_dataChannel->dataChannelSocket() == nullptr) {
-        error("Data channel socket does not exist.");
-        m_dataChannel->deleteLater();
-        m_dataChannel = nullptr;
-        return;
-    }
-
-    m_dataChannel->dataChannelSocket()->close();
-    m_dataChannel->dataChannelSocket()->deleteLater();
 
     m_dataChannel->deleteLater();
     m_dataChannel = nullptr;
@@ -160,7 +159,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 {
 
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        info("Data channel not active.");
         return;
     }
 

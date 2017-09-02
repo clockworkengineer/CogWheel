@@ -23,9 +23,10 @@ class CogWheelConnections : public QObject
 
 public:
 
-    // Constructor
+    // Constructor/Destructor
 
     explicit CogWheelConnections(QObject *parent = nullptr);
+    ~CogWheelConnections();
 
     void closeAll();
 

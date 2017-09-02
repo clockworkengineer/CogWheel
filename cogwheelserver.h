@@ -25,9 +25,10 @@ class CogWheelServer : public QTcpServer
 
 public:
 
-    // Constructor
+    // Constructor / Destructor
 
     explicit CogWheelServer(bool autoStart = false, QObject *parent = nullptr);
+    ~CogWheelServer();
 
     // Server control
 

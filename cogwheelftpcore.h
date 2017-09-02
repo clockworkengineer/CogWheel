@@ -52,9 +52,10 @@ class CogWheelFTPCore
 
 public:
 
-    // Constructor
+    // Constructor / Destructor
 
     explicit CogWheelFTPCore();
+    ~CogWheelFTPCore();
 
     // Load server settings and setup
 
