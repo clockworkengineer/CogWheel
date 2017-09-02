@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -30,13 +30,15 @@ SOURCES += \
     cogwheeluserlistdialog.cpp \
     cogwheelusersettingsdialog.cpp \
     ../cogwheelserversettings.cpp \
-    ../cogwheelusersettings.cpp
+    ../cogwheelusersettings.cpp \
+    cogwheelmanager.cpp
 
 HEADERS += \
         cogwheelmanagermain.h \
     cogwheelserversettingsdialog.h \
     cogwheeluserlistdialog.h \
-    cogwheelusersettingsdialog.h
+    cogwheelusersettingsdialog.h \
+    cogwheelmanager.h
 
 FORMS += \
         cogwheelmanagermain.ui \

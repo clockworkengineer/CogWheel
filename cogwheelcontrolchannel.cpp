@@ -425,7 +425,7 @@ void CogWheelControlChannel::error(const QString &message)
  */
 void CogWheelControlChannel::info(const QString &message)
 {
-    qDebug() << QString("CONT[%1]I: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
+    qInfo() << QString("CONT[%1]I: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**
@@ -437,7 +437,7 @@ void CogWheelControlChannel::info(const QString &message)
  */
 void CogWheelControlChannel::warning(const QString &message)
 {
-    qDebug() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
+    qWarning() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
 }
 
 /**

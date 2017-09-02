@@ -37,6 +37,8 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
+    m_serverManager.startManager("CogWheel");
+
 }
 
 /**
@@ -69,4 +71,14 @@ void CogWheelManagerMain::on_actionEditUser_triggered()
 
     userList.exec();
 
+}
+
+void CogWheelManagerMain::on_pushButton_2_clicked()
+{
+    m_serverManager.writeCommand("STOP");
+}
+
+void CogWheelManagerMain::on_pushButton_clicked()
+{
+    m_serverManager.writeCommand("START");
 }

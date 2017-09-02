@@ -39,6 +39,14 @@ CogWheelConnections::CogWheelConnections(QObject *parent) : QObject(parent)
 }
 
 /**
+ * @brief CogWheelConnections::closeAll
+ */
+void CogWheelConnections::closeAll()
+{
+    emit closeAllConnections();
+}
+
+/**
  * @brief CogWheelConnections::acceptConnection
  *
  * Accept incoming FTP client connection. Create a control channel
@@ -90,6 +98,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
     connect(this,&CogWheelConnections::openConnection, m_connections[handle], &CogWheelControlChannel::openConnection);
     connect(m_connections[handle],&CogWheelControlChannel::finishedConnection,this, &CogWheelConnections::finishedConnection);
     connect(m_connections[handle],&CogWheelControlChannel::abortedConnection,this, &CogWheelConnections::finishedConnection);
+    connect(this,&CogWheelConnections::closeAllConnections, m_connections[handle], &CogWheelControlChannel::closeConnection);
 
     // Delete thread when it is finished
 

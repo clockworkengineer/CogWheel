@@ -12,6 +12,7 @@
 #ifndef COGWHEELMANAGERMAIN_H
 #define COGWHEELMANAGERMAIN_H
 
+#include "cogwheelmanager.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -31,8 +32,15 @@ private slots:
 
     void on_actionEditUser_triggered();
 
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_clicked();
+
 private:
     Ui::CogWheelManagerMain *ui;
+
+    CogWheelManager m_serverManager;
+
 };
 
 #endif // COGWHEELMANAGERMAIN_H

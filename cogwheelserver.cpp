@@ -90,9 +90,8 @@ void CogWheelServer::startServer()
 /**
  * @brief CogWheelServer::stopServer
  *
- * Stop server running.
+ * Stop server running. Closing all active connections.
  *
- * NOTE: MAY NEED TO CLOSE ALL CONNECTIONS IN FUTURE.
  *
  */
 void CogWheelServer::stopServer()
@@ -100,6 +99,8 @@ void CogWheelServer::stopServer()
     info("CogWheel Server stopped.");
 
     setRunning(false);
+
+    m_connections.closeAll();
 
 }
 
@@ -140,7 +141,7 @@ void CogWheelServer::error(const QString &message)
  */
 void CogWheelServer::info(const QString &message)
 {
-    qDebug() << message.toStdString().c_str();
+    qInfo() << message.toStdString().c_str();
 }
 
 /**
@@ -152,7 +153,7 @@ void CogWheelServer::info(const QString &message)
  */
 void CogWheelServer::warning(const QString &message)
 {
-    qDebug() << message.toStdString().c_str();
+    qWarning() << message.toStdString().c_str();
 }
 
 // ============================

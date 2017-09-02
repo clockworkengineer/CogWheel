@@ -27,6 +27,8 @@ public:
 
     explicit CogWheelConnections(QObject *parent = nullptr);
 
+    void closeAll();
+
     // Private data accessors
 
     CogWheelServerSettings serverSettings() const;
@@ -44,6 +46,8 @@ signals:
     void error(const QString &message);
     void info(const QString &message);
     void warning(const QString &message);
+
+    void closeAllConnections();
 
 public slots:
     void acceptConnection(qint64 handle);   // Accept client connection
