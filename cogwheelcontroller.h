@@ -26,7 +26,7 @@ class CogWheelController : public QLocalServer
 
     // Controller command function pointer
 
-    typedef std::function<void (QDataStream &) > CommandFunction;
+    typedef void (CogWheelController::*CommandFunction) (QDataStream & input);
 
 public:
 
@@ -40,15 +40,19 @@ public:
     void startController();
     void stopController();
 
+    // Write response to manager
+
+    void writeRespnseToManager(const QString &command, const QString param1);
+
     static CogWheelServer *server();
 
 private:
 
     // Controller commands
 
-    static void startServer(QDataStream &input);
-    static void stopServer(QDataStream &input);
-    static void killServer(QDataStream &input);
+    void startServer(QDataStream &input);
+    void stopServer(QDataStream &input);
+    void killServer(QDataStream &input);
 
 protected:
 
@@ -72,7 +76,7 @@ private:
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
 
-    static QCoreApplication *m_cogWheelApplication;  //
+    static QCoreApplication *m_cogWheelApplication;  // Qt Application object
     static CogWheelServer *m_server;                 // FTP Server instance
 
     // Controller command table

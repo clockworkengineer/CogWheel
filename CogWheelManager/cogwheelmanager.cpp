@@ -23,6 +23,10 @@
 
 #include "cogwheelmanager.h"
 
+// Manager response table
+
+QHash<QString, CogWheelManager::ResponseFunction> CogWheelManager::m_managerResponseTable;
+
 /**
  * @brief CogWheelManager::CogWheelManager
  *
@@ -79,6 +83,8 @@ bool CogWheelManager::startManager(const QString &serverName)
     } else {
         m_active=true;
     }
+
+    m_managerResponseTable.insert("STATUS", &CogWheelManager::serverStatus);
 
     return(m_active);
 
@@ -137,7 +143,9 @@ void CogWheelManager::disconnected()
  */
 void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
 {
+    if (m_active) {
     qDebug() << "Manager socket error" << socketError;
+    }
 }
 
 /**
@@ -148,7 +156,40 @@ void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
  */
 void CogWheelManager::readyRead()
 {
-  qDebug() << "Manager readyRead";
+
+    // Datastream for commands
+;
+    QDataStream in(m_managerSocket);
+    in.setVersion(QDataStream::Qt_4_7);
+
+    // Read blocksize header
+
+    if (m_commandResponseBlockSize == 0) {
+        if (m_managerSocket->bytesAvailable() < (int)sizeof(quint32)) {
+            return;
+        }
+        in >> m_commandResponseBlockSize;
+    }
+
+    // Bytes still to read
+
+    if (m_managerSocket->bytesAvailable() < m_commandResponseBlockSize || in.atEnd()) {
+        return;
+    }
+
+    // Read response and if valid process. Note data stream passed to command function to
+    // enable any response parameters to be processed.
+
+    QString command;
+    in >> command;
+
+    if (m_managerResponseTable.contains(command)) {
+        (this->*m_managerResponseTable[command])(in);
+        m_commandResponseBlockSize=0;
+    } else {
+        qDebug() << "Response [" << command << "] not valid.";
+    }
+
 }
 
 /**
@@ -172,7 +213,7 @@ void CogWheelManager::bytesWritten(qint64 bytes)
  * @param command   Command.
  *
  */
-void CogWheelManager::writeCommand(const QString &command)
+void CogWheelManager::writeCommandToController(const QString &command)
 {
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
@@ -183,6 +224,20 @@ void CogWheelManager::writeCommand(const QString &command)
     out << (quint32)(block.size() - sizeof(quint32));
     m_managerSocket->write(block);
     m_managerSocket->flush();
+}
+
+/**
+ * @brief CogWheelManager::serverStatus
+ * @param input
+ */
+void CogWheelManager::serverStatus(QDataStream &input)
+{
+    QString status;
+
+    input >> status;
+
+    emit serverStatusUpdate(status);
+
 }
 
 // ============================

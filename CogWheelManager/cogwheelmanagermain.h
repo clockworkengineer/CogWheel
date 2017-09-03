@@ -52,6 +52,8 @@ private slots:
     void on_stopButton_clicked();
     void on_launchKillButton_clicked();
 
+    void serverStatusUpdate(const QString status);
+
 private:
 
     Ui::CogWheelManagerMain *ui;        // Qt window data

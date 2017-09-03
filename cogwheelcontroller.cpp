@@ -44,7 +44,7 @@ QHash<QString, CogWheelController::CommandFunction> CogWheelController::m_contro
 CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, const QString &socketName, QObject *parent)
 {
 
-   Q_UNUSED(parent);
+    Q_UNUSED(parent);
 
     // Socket name
 
@@ -52,9 +52,9 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, const QStr
 
     // Load command table
 
-    m_controllerCommandTable.insert("START", startServer);
-    m_controllerCommandTable.insert("STOP", stopServer);
-    m_controllerCommandTable.insert("KILL", killServer);
+    m_controllerCommandTable.insert("START", &CogWheelController::startServer);
+    m_controllerCommandTable.insert("STOP", &CogWheelController::stopServer);
+    m_controllerCommandTable.insert("KILL", &CogWheelController::killServer);
 
     // Create server instance
 
@@ -124,6 +124,27 @@ void CogWheelController::stopController()
 }
 
 /**
+ * @brief CogWheelController::writeRespnseToManager
+ * @param command
+ * @param param1
+ */
+void CogWheelController::writeRespnseToManager(const QString &command, const QString param1)
+{
+
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_7);
+    out << (quint32)0;
+    out << command;
+    out << param1;
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    m_controllerSocket->write(block);
+    m_controllerSocket->flush();
+
+}
+
+/**
  * @brief CogWheelController::incomingConnection
  *
  * Handle incoming manager connection.
@@ -158,6 +179,8 @@ void CogWheelController::incomingConnection(quintptr handle)
     connect(m_controllerSocket,&QLocalSocket::readyRead, this, &CogWheelController::readyRead);
     connect(m_controllerSocket,&QLocalSocket::bytesWritten, this, &CogWheelController::bytesWritten);
 
+    writeRespnseToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
+
 }
 
 /**
@@ -170,6 +193,8 @@ void CogWheelController::connected()
 {
 
     qDebug() << "CogWheel Manager Connected";
+
+
 
 }
 
@@ -235,13 +260,13 @@ void CogWheelController::readyRead()
     }
 
     // Read command and if valid process. Note data stream passed to command function to
-    // enableany command parameters to be processed.
+    // enable any command parameters to be processed.
 
     QString command;
     in >> command;
 
     if (m_controllerCommandTable.contains(command)) {
-        m_controllerCommandTable[command](in);
+        (this->*m_controllerCommandTable[command])(in);
         m_commandBlockSize=0;
     } else {
         qDebug() << "Command [" << command << "] not valid.";
@@ -281,6 +306,8 @@ void CogWheelController::startServer(QDataStream &input)
         qInfo() << "CogWheel Server already started.";
     }
 
+    writeRespnseToManager("STATUS", "RUNNING");
+
 }
 
 /**
@@ -293,15 +320,17 @@ void CogWheelController::startServer(QDataStream &input)
 void CogWheelController::stopServer(QDataStream &input)
 {
 
-     Q_UNUSED(input);
+    Q_UNUSED(input);
 
-     if (m_server) {
-         m_server->stopServer();
-         m_server->deleteLater();
-         m_server=nullptr;
-     } else {
-         qInfo() << "CogWheel Server already stopped.";
-     }
+    if (m_server) {
+        m_server->stopServer();
+        m_server->deleteLater();
+        m_server=nullptr;
+    } else {
+        qInfo() << "CogWheel Server already stopped.";
+    }
+
+    writeRespnseToManager("STATUS", "STOPPED");
 
 }
 

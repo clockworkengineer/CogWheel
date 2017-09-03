@@ -45,6 +45,8 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     m_serverManager.startManager("CogWheel");
 
+    connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
+
     updateServerStatus();
 
 }
@@ -113,7 +115,7 @@ bool CogWheelManagerMain::launchServer()
 void CogWheelManagerMain::killServer()
 {
 
-    m_serverManager.writeCommand("KILL");
+    m_serverManager.writeCommandToController("KILL");
 
     if (m_serverProcess) {
         m_serverProcess->deleteLater();
@@ -162,10 +164,10 @@ void CogWheelManagerMain::on_actionEditUser_triggered()
  */
 void CogWheelManagerMain::on_startButton_clicked()
 {
-    m_serverManager.writeCommand("START");
-    ui->serverStatus->setText("<b>Running.</b>");
-    ui->startButton->setEnabled(false);
-    ui->stopButton->setEnabled(true);
+    m_serverManager.writeCommandToController("START");
+//    ui->serverStatus->setText("<b>Running.</b>");
+//    ui->startButton->setEnabled(false);
+//    ui->stopButton->setEnabled(true);
 
 }
 
@@ -177,10 +179,10 @@ void CogWheelManagerMain::on_startButton_clicked()
  */
 void CogWheelManagerMain::on_stopButton_clicked()
 {
-    m_serverManager.writeCommand("STOP");
-    ui->serverStatus->setText("<b>Running but stopped.</b>");
-    ui->startButton->setEnabled(true);
-    ui->stopButton->setEnabled(false);
+    m_serverManager.writeCommandToController("STOP");
+//    ui->serverStatus->setText("<b>Running but stopped.</b>");
+//    ui->startButton->setEnabled(true);
+//    ui->stopButton->setEnabled(false);
 
 }
 
@@ -202,5 +204,20 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
         ui->launchKillButton->setText("Launch");
         updateServerStatus();
     }
+}
+
+void CogWheelManagerMain::serverStatusUpdate(const QString status)
+{
+  qDebug() << "Server Status " << status;
+
+  if (status=="STOPPED") {
+      ui->serverStatus->setText("<b>Running but stopped.</b>");
+      ui->startButton->setEnabled(true);
+      ui->stopButton->setEnabled(false);
+  } else if (status=="RUNNING") {
+      ui->serverStatus->setText("<b>Running.</b>");
+      ui->startButton->setEnabled(false);
+      ui->stopButton->setEnabled(true);
+  }
 }
 

@@ -20,6 +20,10 @@ class CogWheelManager : public QObject
 {
     Q_OBJECT
 
+    // Manager response function pointer
+
+    typedef void (CogWheelManager::*ResponseFunction) (QDataStream & input) ;
+
 public:
 
     // Constructor / Destructor
@@ -34,7 +38,11 @@ public:
 
     // Write command to server
 
-    void writeCommand(const QString &command);
+    void writeCommandToController(const QString &command);
+
+    // Response commands
+
+    void serverStatus(QDataStream &input);
 
     // Private data accessors
 
@@ -42,6 +50,8 @@ public:
     void setActive(bool isActive);
 
 signals:
+
+    void serverStatusUpdate(QString status);
 
 public slots:
 
@@ -54,10 +64,14 @@ public slots:
     void bytesWritten(qint64 bytes);
 
 private:
-    bool m_active=false;            // == true manager active
-    QString m_serverName;           // Local socket name
-    QLocalSocket *m_managerSocket;  // Manager socket
+    bool m_active=false;                    // == true manager active
+    QString m_serverName;                   // Local socket name
+    QLocalSocket *m_managerSocket;          // Manager socket
+    quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
 
+    // Manager response table
+
+    static QHash<QString, ResponseFunction> m_managerResponseTable;
 };
 
 #endif // COGWHEELMANAGER_H
