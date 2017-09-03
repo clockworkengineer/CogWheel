@@ -12,7 +12,7 @@
 //
 // Class: CogWheelUserSettingsDialog
 //
-// Description:
+// Description: Class to display user settings dialog.
 //
 
 // =============
@@ -24,7 +24,11 @@
 
 /**
  * @brief CogWheelUserSettingsDialog::CogWheelUserSettingsDialog
- * @param userName
+ *
+ * Create  user settings dialog. If a user name is passed in then the
+ * user field is set ready only and we have an edit dialog.
+ *
+ * @param userName  User name (== "" then new user)
  * @param parent
  */
 CogWheelUserSettingsDialog::CogWheelUserSettingsDialog(QString userName, QWidget *parent) :
@@ -43,6 +47,9 @@ CogWheelUserSettingsDialog::CogWheelUserSettingsDialog(QString userName, QWidget
 
 /**
  * @brief CogWheelUserSettingsDialog::~CogWheelUserSettingsDialog
+ *
+ * Dialog destructor.
+ *
  */
 CogWheelUserSettingsDialog::~CogWheelUserSettingsDialog()
 {
@@ -51,6 +58,9 @@ CogWheelUserSettingsDialog::~CogWheelUserSettingsDialog()
 
 /**
  * @brief CogWheelUserSettingsDialog::populateDialog
+ *
+ * Populate user settings dialog.
+ *
  */
 void CogWheelUserSettingsDialog::populateDialog()
 {
@@ -65,6 +75,9 @@ void CogWheelUserSettingsDialog::populateDialog()
 
 /**
  * @brief CogWheelUserSettingsDialog::on_saveButton_clicked
+ *
+ * Save current user settings away to config.
+ *
  */
 void CogWheelUserSettingsDialog::on_saveButton_clicked()
 {
@@ -83,10 +96,11 @@ void CogWheelUserSettingsDialog::on_saveButton_clicked()
 
 /**
  * @brief CogWheelUserSettingsDialog::on_cancelButton_clicked
+ *
+ * Close dialog.
+ *
  */
 void CogWheelUserSettingsDialog::on_cancelButton_clicked()
 {
-
     this->close();
-
 }

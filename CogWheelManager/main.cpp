@@ -30,9 +30,11 @@
  */
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    CogWheelManagerMain w;
-    w.show();
+    QApplication cogWheelManagerApp(argc, argv);
 
-    return a.exec();
+    CogWheelManagerMain cogWheelMainWindow;
+
+    cogWheelMainWindow.show();
+
+    return cogWheelManagerApp.exec();
 }
