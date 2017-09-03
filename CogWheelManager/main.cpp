@@ -12,7 +12,10 @@
 //
 // Program: CogWheelManager
 //
-// Description:
+// Description: Companion program to the CogWheel FTP server
+// for managing server settings, of users and control over
+// the server. Which includes lanuch/closedown of the server
+// and stopping and starting it.
 //
 
 // =============
@@ -22,12 +25,6 @@
 #include "cogwheelmanagermain.h"
 #include <QApplication>
 
-/**
- * @brief main
- * @param argc
- * @param argv
- * @return
- */
 int main(int argc, char *argv[])
 {
     QApplication cogWheelManagerApp(argc, argv);

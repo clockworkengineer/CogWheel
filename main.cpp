@@ -31,16 +31,16 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication cogWheelServer(argc, argv);
+    QCoreApplication cogWheelServerApplication(argc, argv);
 
     // Server controller instance
 
-    CogWheelController controller(&cogWheelServer, "CogWheel");
+    CogWheelController controller(&cogWheelServerApplication, "CogWheel");
 
     controller.startController();
 
     if (controller.server()->isRunning()) {
-        return cogWheelServer.exec();
+        return cogWheelServerApplication.exec();
     } else {
         qInfo() << "CogWheel FTP Server not started.";
     }
