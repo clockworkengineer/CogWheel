@@ -14,6 +14,7 @@
 
 #include "cogwheelmanager.h"
 #include <QMainWindow>
+#include <QProcess>
 
 namespace Ui {
 class CogWheelManagerMain;
@@ -24,22 +25,39 @@ class CogWheelManagerMain : public QMainWindow
     Q_OBJECT
 
 public:
+
+    // Constructor / Destructor
+
     explicit CogWheelManagerMain(QWidget *parent = 0);
     ~CogWheelManagerMain();
 
-private slots:
-    void on_actionEditServerSettings_triggered();
+    // Launch and kill server
 
-    void on_actionEditUser_triggered();
-
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_clicked();
+    bool launchServer();
+    void killServer();
 
 private:
-    Ui::CogWheelManagerMain *ui;
 
-    CogWheelManager m_serverManager;
+    // Update server status
+
+    void updateServerStatus();
+
+private slots:
+
+    // Window  controls
+
+    void on_actionEditServerSettings_triggered();
+    void on_actionEditUser_triggered();
+    void on_startButton_clicked();
+    void on_stopButton_clicked();
+    void on_launchKillButton_clicked();
+
+private:
+
+    Ui::CogWheelManagerMain *ui;        // Qt window data
+
+    CogWheelManager m_serverManager;    // Server manager
+    QProcess *m_serverProcess=nullptr;  // Server process
 
 };
 

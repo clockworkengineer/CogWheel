@@ -12,7 +12,7 @@
 //
 // Class: CogWheelUserListDialog
 //
-// Description:
+// Description: Class to display user list dialog.
 //
 
 // =============
@@ -25,6 +25,9 @@
 
 /**
  * @brief CogWheelUserListDialog::CogWheelUserListDialog
+ *
+ * Load user list from config and display dialog.
+ *
  * @param parent
  */
 CogWheelUserListDialog::CogWheelUserListDialog(QWidget *parent) :
@@ -43,6 +46,9 @@ CogWheelUserListDialog::CogWheelUserListDialog(QWidget *parent) :
 
 /**
  * @brief CogWheelUserListDialog::~CogWheelUserListDialog
+ *
+ * Dialog destructor.
+ *
  */
 CogWheelUserListDialog::~CogWheelUserListDialog()
 {
@@ -50,7 +56,10 @@ CogWheelUserListDialog::~CogWheelUserListDialog()
 }
 
 /**
- * @brief CogWheelUserListDialog::loadUserList
+ * @brief CogWheelUserListDialog::
+ *
+ * Load user list from config.
+ *
  */
 void CogWheelUserListDialog::loadUserList()
 {
@@ -63,6 +72,9 @@ void CogWheelUserListDialog::loadUserList()
 
 /**
  * @brief CogWheelUserListDialog::saveUserList
+ *
+ * Save current user list to config.
+ *
  */
 void CogWheelUserListDialog::saveUserList()
 {
@@ -76,6 +88,9 @@ void CogWheelUserListDialog::saveUserList()
 
 /**
  * @brief CogWheelUserListDialog::populateUserList
+ *
+ * Populate user list in dialog.
+ *
  */
 void CogWheelUserListDialog::populateUserList()
 {
@@ -87,6 +102,9 @@ void CogWheelUserListDialog::populateUserList()
 
 /**
  * @brief CogWheelUserListDialog::on_newButton_clicked
+ *
+ * Display new user dialog.
+ *
  */
 void CogWheelUserListDialog::on_newButton_clicked()
 {
@@ -105,6 +123,9 @@ void CogWheelUserListDialog::on_newButton_clicked()
 
 /**
  * @brief CogWheelUserListDialog::on_editButton_clicked
+ *
+ * Display edit user dialog.
+ *
  */
 void CogWheelUserListDialog::on_editButton_clicked()
 {
@@ -123,6 +144,8 @@ void CogWheelUserListDialog::on_editButton_clicked()
 
 /**
  * @brief CogWheelUserListDialog::on_RemoveButton_clicked
+ *
+ * Remove user from list and its config data.
  */
 void CogWheelUserListDialog::on_RemoveButton_clicked()
 {
@@ -146,6 +169,9 @@ void CogWheelUserListDialog::on_RemoveButton_clicked()
 
 /**
  * @brief CogWheelUserListDialog::on_userList_clicked
+ *
+ * Activate buttons on user list being clicked.
+ *
  * @param index
  */
 void CogWheelUserListDialog::on_userList_clicked(const QModelIndex &index)

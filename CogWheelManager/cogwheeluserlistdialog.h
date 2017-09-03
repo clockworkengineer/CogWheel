@@ -23,14 +23,24 @@ class CogWheelUserListDialog : public QDialog
     Q_OBJECT
 
 public:
+
+    // Constructor / Destructor
+
     explicit CogWheelUserListDialog(QWidget *parent = 0);
     ~CogWheelUserListDialog();
 
+    // Load / Save user list
+
     void loadUserList();
     void saveUserList();
+
+    // Populate user list control
+
     void populateUserList();
 
 private slots:
+
+    // Dialog controls
 
     void on_newButton_clicked();
     void on_editButton_clicked();
@@ -38,9 +48,9 @@ private slots:
     void on_userList_clicked(const QModelIndex &index);
 
 private:
-    Ui::CogWheelUserListDialog *ui;
+    Ui::CogWheelUserListDialog *ui;     // Q dialog data
 
-    QStringList m_userList;
+    QStringList m_userList;     // User list
 
 };
 

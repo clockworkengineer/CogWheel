@@ -12,7 +12,7 @@
 //
 // Class: CogWheelServerSettingsDialog
 //
-// Description:
+// Description: Class to display server settings dialog.
 //
 
 // =============
@@ -24,6 +24,9 @@
 
 /**
  * @brief CogWheelServerSettingsDialog::CogWheelServerSettingsDialog
+ *
+ * Load server settings from config and display.
+ *
  * @param parent
  */
 CogWheelServerSettingsDialog::CogWheelServerSettingsDialog(QWidget *parent) :
@@ -49,6 +52,9 @@ CogWheelServerSettingsDialog::CogWheelServerSettingsDialog(QWidget *parent) :
 
 /**
  * @brief CogWheelServerSettingsDialog::~CogWheelServerSettingsDialog
+ *
+ * Dialog destructor.
+ *
  */
 CogWheelServerSettingsDialog::~CogWheelServerSettingsDialog()
 {
@@ -57,6 +63,9 @@ CogWheelServerSettingsDialog::~CogWheelServerSettingsDialog()
 
 /**
  * @brief CogWheelServerSettingsDialog::on_saveButton_clicked
+ *
+ * Save current server dialog settings to config.
+ *
  */
 void CogWheelServerSettingsDialog::on_saveButton_clicked()
 {
@@ -79,6 +88,9 @@ void CogWheelServerSettingsDialog::on_saveButton_clicked()
 
 /**
  * @brief CogWheelServerSettingsDialog::on_cancelButton_clicked
+ *
+ * Close dialog.
+ *
  */
 void CogWheelServerSettingsDialog::on_cancelButton_clicked()
 {

@@ -27,22 +27,28 @@ class CogWheelUserSettingsDialog : public QDialog
     Q_OBJECT
 
 public:
+
+    // Constructor / Destructor
+
     explicit CogWheelUserSettingsDialog(QString userName, QWidget *parent = 0);
     ~CogWheelUserSettingsDialog();
 
+    // Popuplate dialog with user settings
+
     void populateDialog();
 
-
 private slots:
+
+    // Dialog controls
+
     void on_saveButton_clicked();
     void on_cancelButton_clicked();
 
 public:
-   CogWheelUserSettings m_settings;
+    CogWheelUserSettings m_settings;     // User settings
 
 private:
-    Ui::CogWheelUserSettingsDialog *ui;
-
+    Ui::CogWheelUserSettingsDialog *ui; // Qt dialog data
 
 };
 

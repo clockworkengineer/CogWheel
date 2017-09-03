@@ -26,17 +26,22 @@ class CogWheelServerSettingsDialog : public QDialog
     Q_OBJECT
 
 public:
+
+    // Constructor / Destructor
+
     explicit CogWheelServerSettingsDialog(QWidget *parent = 0);
     ~CogWheelServerSettingsDialog();
 
-
 private slots:
+
+    // Dialog controls
+
     void on_saveButton_clicked();
     void on_cancelButton_clicked();
 
 private:
 
-    Ui::CogWheelServerSettingsDialog *ui;
+    Ui::CogWheelServerSettingsDialog *ui;   // Qt dialog data
 
     CogWheelServerSettings m_settings;      // Server settings
 

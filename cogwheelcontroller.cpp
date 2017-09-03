@@ -13,7 +13,8 @@
 // Class: CogWheelController
 //
 // Description: Class to control CogWheel server by recieving commands from
-// the CogWheelManager and also sending replies back.
+// the CogWheelManager and also sending replies back. Note: This class creates
+// and destroys the server instance.
 //
 
 // =============
@@ -23,9 +24,10 @@
 #include "cogwheelcontroller.h"
 #include "cogwheelserver.h"
 
-// Server instance
+// Server instance and Qt application pointer
 
 CogWheelServer *CogWheelController::m_server=nullptr;
+QCoreApplication *CogWheelController::m_cogWheelApplication=nullptr;
 
 // Command table
 
@@ -39,12 +41,12 @@ QHash<QString, CogWheelController::CommandFunction> CogWheelController::m_contro
  * @param socketName
  * @param parent
  */
-CogWheelController::CogWheelController(const QString &socketName, QObject *parent)
+CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, const QString &socketName, QObject *parent)
 {
 
    Q_UNUSED(parent);
 
-    // Save socket name
+    // Socket name
 
     m_socketName = socketName;
 
@@ -52,13 +54,16 @@ CogWheelController::CogWheelController(const QString &socketName, QObject *paren
 
     m_controllerCommandTable.insert("START", startServer);
     m_controllerCommandTable.insert("STOP", stopServer);
+    m_controllerCommandTable.insert("KILL", killServer);
 
     // Create server instance
 
     m_server = new CogWheelServer(true);
     if (m_server==nullptr) {
-        qDebug() << "Unable to allocate server object";
+        qDebug() << "Unable to allocate server object.";
     }
+
+    m_cogWheelApplication = cogWheelApp;
 
 }
 
@@ -67,6 +72,7 @@ CogWheelController::CogWheelController(const QString &socketName, QObject *paren
  */
 CogWheelController::~CogWheelController()
 {
+    // Delete server instance
 
     if (m_server) {
         m_server->stopServer();
@@ -74,7 +80,12 @@ CogWheelController::~CogWheelController()
         m_server=nullptr;
     }
 
+    // Delete coontroller socket
+
     if (m_controllerSocket) {
+        if (m_controllerSocket->isOpen()) {
+            m_controllerSocket->close();
+        }
         m_controllerSocket->deleteLater();
         m_controllerSocket=nullptr;
     }
@@ -173,6 +184,9 @@ void CogWheelController::disconnected()
     qDebug() << "CogWheel Manager disconnected";
 
     if (m_controllerSocket) {
+        if (m_controllerSocket->isOpen()) {
+            m_controllerSocket->close();
+        }
         m_controllerSocket->deleteLater();
         m_controllerSocket=nullptr;
     }
@@ -220,7 +234,8 @@ void CogWheelController::readyRead()
         return;
     }
 
-    // Read command and if valid process.
+    // Read command and if valid process. Note data stream passed to command function to
+    // enableany command parameters to be processed.
 
     QString command;
     in >> command;
@@ -288,6 +303,12 @@ void CogWheelController::stopServer(QDataStream &input)
          qInfo() << "CogWheel Server already stopped.";
      }
 
+}
+
+void CogWheelController::killServer(QDataStream &input)
+{
+    stopServer(input);
+    m_cogWheelApplication->quit();
 }
 
 // ============================

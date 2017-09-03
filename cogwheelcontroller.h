@@ -17,6 +17,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDataStream>
+#include <QCoreApplication>
 
 class CogWheelController : public QLocalServer
 {
@@ -31,7 +32,7 @@ public:
 
     // Constructor / Destructor
 
-    CogWheelController(const QString &socketName, QObject *parent = nullptr);
+    CogWheelController(QCoreApplication *cogWheelApp,const QString &socketName, QObject *parent = nullptr);
     ~CogWheelController();
 
     // Start/Stop controller
@@ -47,6 +48,7 @@ private:
 
     static void startServer(QDataStream &input);
     static void stopServer(QDataStream &input);
+    static void killServer(QDataStream &input);
 
 protected:
 
@@ -70,7 +72,8 @@ private:
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
 
-    static CogWheelServer *m_server;            // FTP Server instance
+    static QCoreApplication *m_cogWheelApplication;  //
+    static CogWheelServer *m_server;                 // FTP Server instance
 
     // Controller command table
 

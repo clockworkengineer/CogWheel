@@ -24,7 +24,6 @@
 // INCLUDE FILES
 // =============
 
-//#include "cogwheelserver.h"
 #include "cogwheelcontroller.h"
 #include "cogwheelusersettings.h"
 
@@ -32,16 +31,16 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication cogWheelServer(argc, argv);
 
-    // Server Controller instance
+    // Server controller instance
 
-    CogWheelController controller("CogWheel");
+    CogWheelController controller(&cogWheelServer, "CogWheel");
 
     controller.startController();
 
     if (controller.server()->isRunning()) {
-        return a.exec();
+        return cogWheelServer.exec();
     } else {
         qInfo() << "CogWheel FTP Server not started.";
     }
