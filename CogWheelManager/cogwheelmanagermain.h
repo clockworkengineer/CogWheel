@@ -36,12 +36,6 @@ public:
     bool launchServer();
     void killServer();
 
-private:
-
-    // Update server status
-
-    void updateServerStatus();
-
 private slots:
 
     // Window  controls

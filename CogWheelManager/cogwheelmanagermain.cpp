@@ -25,8 +25,6 @@
 #include "cogwheelserversettingsdialog.h"
 #include "cogwheeluserlistdialog.h"
 
-#include <QThread>
-
 /**
  * @brief CogWheelManagerMain::CogWheelManagerMain
  *
@@ -47,7 +45,10 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
 
-    updateServerStatus();
+    ui->startButton->setEnabled(false);
+    ui->stopButton->setEnabled(false);
+    ui->launchKillButton->setText("Launch");
+    ui->serverStatus->setText("<b>Not Running.</b>");
 
 }
 
@@ -60,26 +61,6 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 CogWheelManagerMain::~CogWheelManagerMain()
 {
     delete ui;
-}
-
-/**
- * @brief CogWheelManagerMain::updateServerStatus
- *
- * Update server status.
- *
- */
-void CogWheelManagerMain::updateServerStatus()
-{
-    if (!m_serverManager.isActive()) {
-        ui->startButton->setEnabled(false);
-        ui->stopButton->setEnabled(false);
-        ui->launchKillButton->setText("Launch");
-        ui->serverStatus->setText("<b>Not Running.</b>");
-    } else {
-        ui->serverStatus->setText("<b>Running.</b>");
-        ui->startButton->setEnabled(false);
-        ui->stopButton->setEnabled(true);
-    }
 }
 
 /**
@@ -97,7 +78,6 @@ bool CogWheelManagerMain::launchServer()
     m_serverProcess = new QProcess();
     m_serverProcess->startDetached(program);
     m_serverProcess->waitForStarted(-1);
-    QThread::sleep(2);  // WAIT FOR SERVER TO CREATE MANAGER SOCKET (NEEDS TO CHANGE).
 
     m_serverManager.startManager("CogWheel");
 
@@ -165,10 +145,6 @@ void CogWheelManagerMain::on_actionEditUser_triggered()
 void CogWheelManagerMain::on_startButton_clicked()
 {
     m_serverManager.writeCommandToController("START");
-//    ui->serverStatus->setText("<b>Running.</b>");
-//    ui->startButton->setEnabled(false);
-//    ui->stopButton->setEnabled(true);
-
 }
 
 /**
@@ -180,9 +156,6 @@ void CogWheelManagerMain::on_startButton_clicked()
 void CogWheelManagerMain::on_stopButton_clicked()
 {
     m_serverManager.writeCommandToController("STOP");
-//    ui->serverStatus->setText("<b>Running but stopped.</b>");
-//    ui->startButton->setEnabled(true);
-//    ui->stopButton->setEnabled(false);
 
 }
 
@@ -197,12 +170,16 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
     if (ui->launchKillButton->text()=="Launch") {
         if (launchServer()) {
             ui->launchKillButton->setText("Kill");
-            updateServerStatus();
+            ui->startButton->setEnabled(false);
+            ui->stopButton->setEnabled(false);
+            ui->serverStatus->setText("<b>Running.</b>");
         }
     } else {
         killServer();
         ui->launchKillButton->setText("Launch");
-        updateServerStatus();
+        ui->startButton->setEnabled(false);
+        ui->stopButton->setEnabled(false);
+        ui->serverStatus->setText("<b>Not Running.</b>");
     }
 }
 
@@ -214,10 +191,12 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
       ui->serverStatus->setText("<b>Running but stopped.</b>");
       ui->startButton->setEnabled(true);
       ui->stopButton->setEnabled(false);
+      ui->launchKillButton->setText("Kill");
   } else if (status=="RUNNING") {
       ui->serverStatus->setText("<b>Running.</b>");
       ui->startButton->setEnabled(false);
       ui->stopButton->setEnabled(true);
+      ui->launchKillButton->setText("Kill");
   }
 }
 

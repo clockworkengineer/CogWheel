@@ -30,7 +30,7 @@
      <item row="1" column="3">
       <widget class="QPushButton" name="launchKillButton">
        <property name="text">
-        <string>Kill</string>
+        <string>Launch</string>
        </property>
       </widget>
      </item>

@@ -44,9 +44,15 @@ public:
 
     void writeRespnseToManager(const QString &command, const QString param1);
 
+    // Pricate data accessors
+
     static CogWheelServer *server();
 
 private:
+
+    // Socket clean up
+
+    void resetControllerSocket();
 
     // Controller commands
 
@@ -72,7 +78,10 @@ public slots:
 
 private:
 
-    QString m_socketName;                       // Named local socket
+
+    bool m_active=false;                        // == true controller active
+    bool m_listening=false;                     // == true controller lisening
+    QString m_serverName;                       // Named local socket
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
 

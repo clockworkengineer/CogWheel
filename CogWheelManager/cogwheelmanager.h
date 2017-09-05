@@ -14,9 +14,10 @@
 
 #include <QObject>
 #include <QLocalSocket>
+#include <QLocalServer>
 #include <QDataStream>
 
-class CogWheelManager : public QObject
+class CogWheelManager : public QLocalServer
 {
     Q_OBJECT
 
@@ -49,6 +50,18 @@ public:
     bool isActive() const;
     void setActive(bool isActive);
 
+private:
+
+    // Reset manager socket
+
+    void resetManagerSocket();
+
+protected:
+
+    // QLocalServer override
+
+    void incomingConnection(quintptr handle);
+
 signals:
 
     void serverStatusUpdate(QString status);
@@ -65,6 +78,7 @@ public slots:
 
 private:
     bool m_active=false;                    // == true manager active
+    bool m_listening=false;                 // == true manager listening on socket
     QString m_serverName;                   // Local socket name
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
@@ -72,6 +86,7 @@ private:
     // Manager response table
 
     static QHash<QString, ResponseFunction> m_managerResponseTable;
+
 };
 
 #endif // COGWHEELMANAGER_H
