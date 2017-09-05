@@ -41,7 +41,8 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
-    m_serverManager.startManager("CogWheel");
+    m_serverManager.load();
+    m_serverManager.startManager();
 
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
 
@@ -72,14 +73,12 @@ CogWheelManagerMain::~CogWheelManagerMain()
  */
 bool CogWheelManagerMain::launchServer()
 {
-    // HARD ENDCODED NEEDS TO CHANGE
-    QString program = "/home/robt/QtProjects/build-CogWheel-Desktop_Qt_5_9_0_GCC_64bit-Debug/CogWheel";
 
     m_serverProcess = new QProcess();
-    m_serverProcess->startDetached(program);
+    m_serverProcess->startDetached( m_serverManager.serverPath());
     m_serverProcess->waitForStarted(-1);
 
-    m_serverManager.startManager("CogWheel");
+    m_serverManager.startManager();
 
     return(true);
 

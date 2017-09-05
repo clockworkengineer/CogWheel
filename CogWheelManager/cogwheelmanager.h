@@ -16,6 +16,7 @@
 #include <QLocalSocket>
 #include <QLocalServer>
 #include <QDataStream>
+#include <QSettings>
 
 class CogWheelManager : public QLocalServer
 {
@@ -32,9 +33,13 @@ public:
     explicit CogWheelManager(QObject *parent = nullptr);
     ~CogWheelManager();
 
+    // Load manager settings
+
+    void load();
+
     // Manager Control
 
-    bool startManager(const QString &socketName);
+    bool startManager();
     void stopManager();
 
     // Write command to server
@@ -49,6 +54,10 @@ public:
 
     bool isActive() const;
     void setActive(bool isActive);
+    QString serverPath() const;
+    void setServerPath(const QString &serverPath);
+    QString serverName() const;
+    void setServerName(const QString &serverName);
 
 private:
 
@@ -77,9 +86,12 @@ public slots:
     void bytesWritten(qint64 bytes);
 
 private:
+
+    QString m_serverPath;                   // Path to CogWheel Server
+    QString m_serverName;                   // Named local socket
+
     bool m_active=false;                    // == true manager active
     bool m_listening=false;                 // == true manager listening on socket
-    QString m_serverName;                   // Local socket name
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
 

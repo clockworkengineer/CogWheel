@@ -53,6 +53,34 @@ CogWheelManager::~CogWheelManager()
 {
 
 }
+
+/**
+ * @brief CogWheelManager::load
+ *
+ * Load Manager related settings from config.
+ *
+ */
+void CogWheelManager::load()
+{
+
+    QSettings manager;
+
+    manager.beginGroup("Manager");
+    if (!manager.childKeys().contains("servername")) {
+        manager.setValue("servername", "CogWheel");
+    }
+    if (!manager.childKeys().contains("serverpath")) {
+        manager.setValue("serverpath", "");
+    }
+    manager.endGroup();
+
+    manager.beginGroup("Manager");
+    m_serverName = manager.value("servername").toString();
+    m_serverPath = manager.value("serverpath").toString();
+    manager.endGroup();
+
+}
+
 /**
  * @brief CogWheelManager::startManager
  *
@@ -64,7 +92,7 @@ CogWheelManager::~CogWheelManager()
  * @return  == true then connection made.
  */
 
-bool CogWheelManager::startManager(const QString &serverName)
+bool CogWheelManager::startManager()
 {
 
     // Already active
@@ -79,8 +107,6 @@ bool CogWheelManager::startManager(const QString &serverName)
     if (m_managerSocket==nullptr) {
         qDebug() << "Error in creating manager socket.";
     }
-
-    m_serverName = serverName;
 
     connect(m_managerSocket,&QLocalSocket::connected, this, &CogWheelManager::connected);
     connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
@@ -274,6 +300,26 @@ void CogWheelManager::readyRead()
 void CogWheelManager::bytesWritten(qint64 bytes)
 {
   qDebug() << "Manager bytesWritten" << bytes;
+}
+
+QString CogWheelManager::serverName() const
+{
+    return m_serverName;
+}
+
+void CogWheelManager::setServerName(const QString &serverName)
+{
+    m_serverName = serverName;
+}
+
+QString CogWheelManager::serverPath() const
+{
+    return m_serverPath;
+}
+
+void CogWheelManager::setServerPath(const QString &serverPath)
+{
+    m_serverPath = serverPath;
 }
 
 /**

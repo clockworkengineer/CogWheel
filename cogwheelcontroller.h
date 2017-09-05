@@ -78,9 +78,8 @@ public slots:
 
 private:
 
-
     bool m_active=false;                        // == true controller active
-    bool m_listening=false;                     // == true controller lisening
+    bool m_listening=false;                     // == true controller listening for connects
     QString m_serverName;                       // Named local socket
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
