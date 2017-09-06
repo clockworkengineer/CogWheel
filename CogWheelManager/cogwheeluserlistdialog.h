@@ -48,9 +48,9 @@ private slots:
     void on_userList_clicked(const QModelIndex &index);
 
 private:
-    Ui::CogWheelUserListDialog *ui;     // Q dialog data
 
-    QStringList m_userList;     // User list
+    Ui::CogWheelUserListDialog *ui;     // Q dialog data
+    QStringList m_userList;             // User list
 
 };
 

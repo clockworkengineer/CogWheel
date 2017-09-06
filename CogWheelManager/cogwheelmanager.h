@@ -22,9 +22,9 @@ class CogWheelManager : public QLocalServer
 {
     Q_OBJECT
 
-    // Manager response function pointer
+    // Controller command function pointer
 
-    typedef void (CogWheelManager::*ResponseFunction) (QDataStream & input) ;
+    typedef void (CogWheelManager::*CommandFunction) (QDataStream & input) ;
 
 public:
 
@@ -74,6 +74,8 @@ protected:
 
 signals:
 
+    // Controller command signals
+
     void serverStatusUpdate(QString status);
     void connectionListUpdate(const QStringList &connections);
 
@@ -97,9 +99,9 @@ private:
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
 
-    // Manager response table
+    // Controller command table
 
-    static QHash<QString, ResponseFunction> m_managerResponseTable;
+    static QHash<QString, CommandFunction> m_managerResponseTable;
 
 };
 

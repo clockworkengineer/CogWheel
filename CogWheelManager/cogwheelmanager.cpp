@@ -13,8 +13,8 @@
 // Class: CogWheelManager
 //
 // Description: Class to open up a local socket to server and send commands
-// to control it. At present this is just stop, start and kill but will be expanded
-// in future and enable replies from the server.
+// to control it. At present this is just stop, start and kill. It also supports
+// commands sent from the server (controller) such as update connection list.
 //
 
 // =============
@@ -23,9 +23,9 @@
 
 #include "cogwheelmanager.h"
 
-// Manager response table
+// Controller command table
 
-QHash<QString, CogWheelManager::ResponseFunction> CogWheelManager::m_managerResponseTable;
+QHash<QString, CogWheelManager::CommandFunction> CogWheelManager::m_controllerCommandTable;
 
 /**
  * @brief CogWheelManager::CogWheelManager
@@ -39,8 +39,8 @@ CogWheelManager::CogWheelManager(QObject *parent)
 
     Q_UNUSED(parent);
 
-    m_managerResponseTable.insert("STATUS", &CogWheelManager::serverStatus);
-    m_managerResponseTable.insert("CONNECTIONS", &CogWheelManager::connectionList);
+    m_controllerCommandTable.insert("STATUS", &CogWheelManager::serverStatus);
+    m_controllerCommandTable.insert("CONNECTIONS", &CogWheelManager::connectionList);
 
 }
 
@@ -58,7 +58,7 @@ CogWheelManager::~CogWheelManager()
 /**
  * @brief CogWheelManager::load
  *
- * Load Manager related settings from config.
+ * Load manager related settings from config.
  *
  */
 void CogWheelManager::load()
@@ -87,8 +87,6 @@ void CogWheelManager::load()
  *
  * Create a local socket and try to connect to server. If can't connect
  * then listen on a socket and wait for server to connect.
- *
- * @param serverName  Name of server local socket.
  *
  * @return  == true then connection made.
  */
@@ -156,7 +154,7 @@ void CogWheelManager::stopManager()
 /**
  * @brief CogWheelManager::resetManagerSocket
  *
- * Close manger socket if open and remove it object data.
+ * Close manger socket if open and remove its object data.
  *
  */
 void CogWheelManager::resetManagerSocket()
@@ -250,7 +248,7 @@ void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
 /**
  * @brief CogWheelManager::readyRead
  *
- * Bytes received on manager socket.
+ * Bytes received on manager socket (controller commands).
  *
  */
 void CogWheelManager::readyRead()
@@ -282,8 +280,8 @@ void CogWheelManager::readyRead()
     QString command;
     in >> command;
 
-    if (m_managerResponseTable.contains(command)) {
-        (this->*m_managerResponseTable[command])(in);
+    if (m_controllerCommandTable.contains(command)) {
+        (this->*m_controllerCommandTable[command])(in);
         m_commandResponseBlockSize=0;
     } else {
         qDebug() << "Response [" << command << "] not valid.";
@@ -301,26 +299,6 @@ void CogWheelManager::readyRead()
 void CogWheelManager::bytesWritten(qint64 bytes)
 {
   qDebug() << "Manager bytesWritten" << bytes;
-}
-
-QString CogWheelManager::serverName() const
-{
-    return m_serverName;
-}
-
-void CogWheelManager::setServerName(const QString &serverName)
-{
-    m_serverName = serverName;
-}
-
-QString CogWheelManager::serverPath() const
-{
-    return m_serverPath;
-}
-
-void CogWheelManager::setServerPath(const QString &serverPath)
-{
-    m_serverPath = serverPath;
 }
 
 /**
@@ -347,6 +325,9 @@ void CogWheelManager::writeCommandToController(const QString &command)
 
 /**
  * @brief CogWheelManager::serverStatus
+ *
+ * Server status command recieved from controller.
+ *
  * @param input
  */
 void CogWheelManager::serverStatus(QDataStream &input)
@@ -361,6 +342,9 @@ void CogWheelManager::serverStatus(QDataStream &input)
 
 /**
  * @brief CogWheelManager::connectionList
+ *
+ * Server conenction list command recieved from controller.
+ *
  * @param input
  */
 void CogWheelManager::connectionList(QDataStream &input)
@@ -395,3 +379,34 @@ void CogWheelManager::setActive(bool active)
     m_active = active;
 }
 
+QString CogWheelManager::serverName() const
+{
+    return m_serverName;
+}
+
+/**
+ * @brief CogWheelManager::setServerName
+ * @param serverName
+ */
+void CogWheelManager::setServerName(const QString &serverName)
+{
+    m_serverName = serverName;
+}
+
+/**
+ * @brief CogWheelManager::serverPath
+ * @return
+ */
+QString CogWheelManager::serverPath() const
+{
+    return m_serverPath;
+}
+
+/**
+ * @brief CogWheelManager::setServerPath
+ * @param serverPath
+ */
+void CogWheelManager::setServerPath(const QString &serverPath)
+{
+    m_serverPath = serverPath;
+}

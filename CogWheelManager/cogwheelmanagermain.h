@@ -46,6 +46,8 @@ private slots:
     void on_stopButton_clicked();
     void on_launchKillButton_clicked();
 
+    // Controller command
+
     void serverStatusUpdate(const QString status);
     void connectionListUpdate(const QStringList &connections);
 

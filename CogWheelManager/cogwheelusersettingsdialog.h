@@ -45,7 +45,7 @@ private slots:
     void on_cancelButton_clicked();
 
 public:
-    CogWheelUserSettings m_settings;     // User settings
+    CogWheelUserSettings m_settings;     // User settings (TO DO: MAKE PRIVATE)
 
 private:
     Ui::CogWheelUserSettingsDialog *ui; // Qt dialog data

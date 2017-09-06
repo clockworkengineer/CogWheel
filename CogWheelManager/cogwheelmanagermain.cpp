@@ -13,7 +13,7 @@
 // Class: CogWheelManagerMain
 //
 // Description: Class for CogManager main window. It creates, uses and destroys
-// the manager socket used to control the server.
+// the manager/controller socket used to control the server.
 //
 
 // =============
@@ -36,21 +36,33 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::CogWheelManagerMain)
 {
+
+    // Setup windows data
+
     ui->setupUi(this);
+
+    // Initialise config parameters
 
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
+    // Load and start manager instance
+
     m_serverManager.load();
     m_serverManager.startManager();
 
+    // Controller command signals/slotss
+
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
     connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
+
+    // Setup window initial state
 
     ui->startButton->setEnabled(false);
     ui->stopButton->setEnabled(false);
     ui->launchKillButton->setText("Launch");
     ui->serverStatus->setText("<b>Not Running.</b>");
+
 
 }
 
@@ -76,7 +88,7 @@ bool CogWheelManagerMain::launchServer()
 {
 
     m_serverProcess = new QProcess();
-    m_serverProcess->startDetached( m_serverManager.serverPath());
+    m_serverProcess->startDetached(m_serverManager.serverPath());
     m_serverProcess->waitForStarted(-1);
 
     m_serverManager.startManager();
@@ -185,6 +197,14 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
     }
 }
 
+/**
+ * @brief CogWheelManagerMain::serverStatusUpdate
+ *
+ * Update server status sent by controller.
+ *
+ * @param status
+ */
+
 void CogWheelManagerMain::serverStatusUpdate(const QString status)
 {
   qDebug() << "Server Status " << status;
@@ -205,6 +225,13 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
 
 }
 
+/**
+ * @brief CogWheelManagerMain::connectionListUpdate
+ *
+ * Update connections list sent by controller.
+ *
+ * @param connections
+ */
 void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 {
     ui->connectionList->clear();
