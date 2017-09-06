@@ -271,6 +271,8 @@ void CogWheelController::incomingConnection(quintptr handle)
 
     writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
 
+    m_lastConnectionList.clear();
+
 }
 
 /**
@@ -375,11 +377,14 @@ void CogWheelController::bytesWritten(qint64 bytes)
  * @brief CogWheelController::updateConnectionList
  * @param connections
  */
-void CogWheelController::updateConnectionList(const QStringList &connections)
+void CogWheelController::updateConnectionList(const QStringList &connectionList)
 {
-    qDebug() << "New connction : [" << connections << "]";
+    qDebug() << "New connction : [" << connectionList << "]";
 
-    writeCommandToManager("CONNECTIONS", connections);
+    if (m_lastConnectionList != connectionList) {
+        writeCommandToManager("CONNECTIONS", connectionList);
+        m_lastConnectionList = connectionList;
+    }
 
 }
 

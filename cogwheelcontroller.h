@@ -88,6 +88,7 @@ private:
     QString m_serverName;                       // Named local socket
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
+    QStringList m_lastConnectionList;           // Last connection list sent
 
     static QCoreApplication *m_cogWheelApplication;  // Qt Application object
     static CogWheelServer *m_server;                 // FTP Server instance
