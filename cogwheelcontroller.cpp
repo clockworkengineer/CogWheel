@@ -31,7 +31,7 @@ QCoreApplication *CogWheelController::m_cogWheelApplication=nullptr;
 
 // Command table
 
-QHash<QString, CogWheelController::CommandFunction> CogWheelController::m_controllerCommandTable;
+QHash<QString, CogWheelController::CommandFunction> CogWheelController::m_managerCommandTable;
 
 /**
  * @brief CogWheelController::CogWheelController
@@ -52,9 +52,9 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, const QStr
 
     // Load command table
 
-    m_controllerCommandTable.insert("START", &CogWheelController::startServer);
-    m_controllerCommandTable.insert("STOP", &CogWheelController::stopServer);
-    m_controllerCommandTable.insert("KILL", &CogWheelController::killServer);
+    m_managerCommandTable.insert("START", &CogWheelController::startServer);
+    m_managerCommandTable.insert("STOP", &CogWheelController::stopServer);
+    m_managerCommandTable.insert("KILL", &CogWheelController::killServer);
 
     // Create server instance
 
@@ -356,11 +356,11 @@ void CogWheelController::readyRead()
     QString command;
     in >> command;
 
-    if (m_controllerCommandTable.contains(command)) {
-        (this->*m_controllerCommandTable[command])(in);
+    if (m_managerCommandTable.contains(command)) {
+        (this->*m_managerCommandTable[command])(in);
         m_commandBlockSize=0;
     } else {
-        qDebug() << "Command [" << command << "] not valid.";
+        qDebug() << "Manager command [" << command << "] not valid.";
     }
 
 }

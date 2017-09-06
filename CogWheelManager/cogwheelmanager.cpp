@@ -284,7 +284,7 @@ void CogWheelManager::readyRead()
         (this->*m_controllerCommandTable[command])(in);
         m_commandResponseBlockSize=0;
     } else {
-        qDebug() << "Response [" << command << "] not valid.";
+        qDebug() << "Controller command [" << command << "] not valid.";
     }
 
 }

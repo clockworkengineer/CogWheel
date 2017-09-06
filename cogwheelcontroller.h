@@ -93,9 +93,9 @@ private:
     static QCoreApplication *m_cogWheelApplication;  // Qt Application object
     static CogWheelServer *m_server;                 // FTP Server instance
 
-    // Controller command table
+    // Manager command table
 
-    static QHash<QString, CommandFunction> m_controllerCommandTable;
+    static QHash<QString, CommandFunction> m_managerCommandTable;
 
 };
 #endif // COGWHEELCONTROLLER_H

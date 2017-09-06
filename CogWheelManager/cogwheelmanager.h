@@ -101,7 +101,7 @@ private:
 
     // Controller command table
 
-    static QHash<QString, CommandFunction> m_managerResponseTable;
+    static QHash<QString, CommandFunction> m_controllerCommandTable;
 
 };
 
