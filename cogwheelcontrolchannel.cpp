@@ -47,6 +47,9 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
 
 /**
  * @brief CogWheelControlChannel::~CogWheelControlChannel
+ *
+ * Destructor. Disconnect data channel and close connection.
+ *
  */
 CogWheelControlChannel::~CogWheelControlChannel()
 {

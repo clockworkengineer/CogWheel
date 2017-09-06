@@ -16,6 +16,7 @@
 #include "cogwheelserversettings.h"
 
 #include <QObject>
+#include <QTimer>
 
 class CogWheelConnections : public QObject
 {
@@ -28,6 +29,8 @@ public:
     explicit CogWheelConnections(QObject *parent = nullptr);
     ~CogWheelConnections();
 
+    // Close all currenrly opn connections
+
     void closeAll();
 
     // Private data accessors
@@ -36,11 +39,18 @@ public:
     void setServerSettings(const CogWheelServerSettings &serverSettings);
 
 
+private:
+
+    // Reset connection list update timer
+
+    void resetConnectionListUpdateTimer();
+
 signals:
 
-    // Open connection
+    // Open connection / close all connections
 
     void openConnection(qint64 handle);
+    void closeAllConnections();
 
     // Error, information and warning messages
 
@@ -48,14 +58,18 @@ signals:
     void info(const QString &message);
     void warning(const QString &message);
 
-    void closeAllConnections();
+    // Connection list updates for controller
+
+    void updateConnectionList(const QStringList &connections);
 
 public slots:
     void acceptConnection(qint64 handle);   // Accept client connection
     void finishedConnection(qint64 handle); // Connection finished
     void abortedConnection(qint64 handle);  // Connection aborted
+    void connectionListToManager();         // Send connection list to manager
 
 private:
+    QTimer *m_connectionListUpdateTimer=nullptr;            // Timer for sending connectionupdates to manager
     QMap<qint64, CogWheelControlChannel *> m_connections;   // Socket Handle connection mapping
     CogWheelServerSettings m_serverSettings;                // Server settings
 

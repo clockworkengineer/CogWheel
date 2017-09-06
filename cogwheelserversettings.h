@@ -14,6 +14,8 @@ public:
     void load();
     void save();
 
+    // Load server private key and certificate
+
     bool loadPrivateKeyAndCert();
 
     // Private data accessors

@@ -39,6 +39,7 @@ public:
 
     bool isRunning() const;
     void setRunning(bool isRunning);
+    CogWheelConnections *connections() const;
 
 protected:
 

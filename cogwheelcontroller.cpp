@@ -63,12 +63,21 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, const QStr
         qDebug() << "Unable to allocate server object.";
     }
 
+    // Save QtApplication data
+
     m_cogWheelApplication = cogWheelApp;
+
+    // Controller response signal/slots
+
+    connect(m_server->connections(), &CogWheelConnections::updateConnectionList, this, &CogWheelController::updateConnectionList);
 
 }
 
 /**
  * @brief CogWheelController::~CogWheelController
+ *
+ * Destructor.
+ *
  */
 CogWheelController::~CogWheelController()
 {
@@ -117,11 +126,11 @@ void CogWheelController::startController()
     m_active=true;
 
     if (m_controllerSocket->state() == QLocalSocket::ConnectedState) {
-        writeRespnseToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
+        writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
         return;
     }
 
-    qInfo() << "Controller failed to connect to client. Waiting for it.";
+    qInfo() << "Controller failed to connect to client. Waiting for it to connect...";
 
     resetControllerSocket();  // Reset socket
 
@@ -160,27 +169,60 @@ void CogWheelController::stopController()
 
 /**
  * @brief CogWheelController::writeRespnseToManager
+ *
+ * Write command to manager.
+ *
  * @param command
  * @param param1
  */
-void CogWheelController::writeRespnseToManager(const QString &command, const QString param1)
+void CogWheelController::writeCommandToManager(const QString &command, const QString param1)
 {
 
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_7);
-    out << (quint32)0;
-    out << command;
-    out << param1;
-    out.device()->seek(0);
-    out << (quint32)(block.size() - sizeof(quint32));
-    m_controllerSocket->write(block);
-    m_controllerSocket->flush();
+    if (m_active && m_controllerSocket) {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_7);
+        out << (quint32)0;
+        out << command;
+        out << param1;
+        out.device()->seek(0);
+        out << (quint32)(block.size() - sizeof(quint32));
+        m_controllerSocket->write(block);
+        m_controllerSocket->flush();
+    }
+
+}
+/**
+ * @brief CogWheelController::writeRespnseToManager
+ *
+ * Write command to manager.
+ *
+ * @param command
+ * @param param1
+ */
+void CogWheelController::writeCommandToManager(const QString &command, const QStringList param1)
+{
+
+    if (m_active && m_controllerSocket) {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_7);
+        out << (quint32)0;
+        out << command;
+        out << param1;
+        out.device()->seek(0);
+        out << (quint32)(block.size() - sizeof(quint32));
+        m_controllerSocket->write(block);
+        m_controllerSocket->flush();
+    }
 
 }
 
 /**
  * @brief CogWheelController::resetControllerSocket
+ *
+ * Reset controller socket.
+ *
  */
 void CogWheelController::resetControllerSocket()
 {
@@ -227,7 +269,7 @@ void CogWheelController::incomingConnection(quintptr handle)
     connect(m_controllerSocket,&QLocalSocket::readyRead, this, &CogWheelController::readyRead);
     connect(m_controllerSocket,&QLocalSocket::bytesWritten, this, &CogWheelController::bytesWritten);
 
-    writeRespnseToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
+    writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
 
 }
 
@@ -280,7 +322,7 @@ void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
 /**
  * @brief CogWheelController::readyRead
  *
- * Read CogWheel Manager commands.
+ * Read CogWheel Manager commands sent to controller.
  *
  */
 void CogWheelController::readyRead()
@@ -329,6 +371,18 @@ void CogWheelController::bytesWritten(qint64 bytes)
     qDebug() << "Controller bytesWritten" << bytes;
 }
 
+/**
+ * @brief CogWheelController::updateConnectionList
+ * @param connections
+ */
+void CogWheelController::updateConnectionList(const QStringList &connections)
+{
+    qDebug() << "New connction : [" << connections << "]";
+
+    writeCommandToManager("CONNECTIONS", connections);
+
+}
+
 // ===================
 // CONTROLLER COMMANDS
 // ===================
@@ -349,11 +403,12 @@ void CogWheelController::startServer(QDataStream &input)
         if (m_server==nullptr) {
             qDebug() << "Unable to allocate server object";
         }
+        connect(m_server->connections(), &CogWheelConnections::updateConnectionList, this, &CogWheelController::updateConnectionList);
     } else {
         qInfo() << "CogWheel Server already started.";
     }
 
-    writeRespnseToManager("STATUS", "RUNNING");
+    writeCommandToManager("STATUS", "RUNNING");
 
 }
 
@@ -377,7 +432,7 @@ void CogWheelController::stopServer(QDataStream &input)
         qInfo() << "CogWheel Server already stopped.";
     }
 
-    writeRespnseToManager("STATUS", "STOPPED");
+    writeCommandToManager("STATUS", "STOPPED");
 
 }
 

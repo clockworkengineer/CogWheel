@@ -40,6 +40,9 @@ CogWheelConnections::CogWheelConnections(QObject *parent) : QObject(parent)
 
 /**
  * @brief CogWheelConnections::~CogWheelConnections
+ *
+ * Destructor. Close all open connections.
+ *
  */
 CogWheelConnections::~CogWheelConnections()
 {
@@ -47,11 +50,15 @@ CogWheelConnections::~CogWheelConnections()
 }
 
 /**
- * @brief CogWheelConnections::closeAll
+ * @brief CogWheelConnections::
+ *
+ * Close all open/active conenctions.
+ *
  */
 void CogWheelConnections::closeAll()
 {
     emit closeAllConnections();
+    resetConnectionListUpdateTimer();
 }
 
 /**
@@ -118,6 +125,14 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     emit info("Number of active connections now: "+QString::number(m_connections.size()));
 
+    // Set timer running for coonnectionlist update to manager
+
+    if (!m_connections.empty() && !m_connectionListUpdateTimer) {
+        m_connectionListUpdateTimer = new QTimer();
+        connect(m_connectionListUpdateTimer, &QTimer::timeout, this, &CogWheelConnections::connectionListToManager);
+        m_connectionListUpdateTimer->start(5000);   // TO DO MAKE SERVER SETTING
+    }
+
 }
 
 /**
@@ -146,8 +161,33 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     if (!m_connections.isEmpty()) {
         emit info("Number of active connections: "+QString::number(m_connections.size()));
     } else {
+        // Send empty connection list and reset  timer.
+        connectionListToManager();
+        resetConnectionListUpdateTimer();
         emit info("No active connections on server.");
     }
+
+}
+
+/**
+ * @brief CogWheelConnections::connectionListToManager
+ *
+ * Send current connection list to manager.
+ *
+ */
+void CogWheelConnections::connectionListToManager()
+{
+    QStringList connectionList;
+
+    for( auto &connection : m_connections) {
+        if (connection->isAuthorized()) {
+            connectionList.append(connection->userName());
+        } else {
+            connectionList.append(QString::number(connection->socketHandle()));
+        }
+    }
+
+    emit updateConnectionList(connectionList);
 
 }
 
@@ -163,6 +203,22 @@ void CogWheelConnections::abortedConnection(qint64 handle)
     emit error("Aborting connection for handle: "+QString::number(handle));
     finishedConnection(handle);
 }
+
+/**
+ * @brief CogWheelConnections::resetConnectionListUpdateTimer
+ *
+ * Stop and delete connection list update timer.
+ *
+ */
+void CogWheelConnections::resetConnectionListUpdateTimer()
+{
+    if (m_connectionListUpdateTimer) {
+        m_connectionListUpdateTimer->stop();
+        m_connectionListUpdateTimer->deleteLater();
+        m_connectionListUpdateTimer=nullptr;
+    }
+}
+
 
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
@@ -191,3 +247,4 @@ void CogWheelConnections::setServerSettings(const CogWheelServerSettings &server
 {
     m_serverSettings = serverSettings;
 }
+

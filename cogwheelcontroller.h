@@ -40,9 +40,10 @@ public:
     void startController();
     void stopController();
 
-    // Write response to manager
+    // Write command to manager
 
-    void writeRespnseToManager(const QString &command, const QString param1);
+    void writeCommandToManager(const QString &command, const QString param1);
+    void writeCommandToManager(const QString &command, const QStringList param1);
 
     // Pricate data accessors
 
@@ -50,7 +51,7 @@ public:
 
 private:
 
-    // Socket clean up
+    // Reset Controller socket
 
     void resetControllerSocket();
 
@@ -75,6 +76,10 @@ public slots:
     void error(QLocalSocket::LocalSocketError socketError);
     void readyRead();
     void bytesWritten(qint64 bytes);
+
+    // Command slots
+
+    void updateConnectionList(const QStringList &connections);
 
 private:
 

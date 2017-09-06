@@ -164,6 +164,15 @@ void CogWheelServer::warning(const QString &message)
     qWarning() << message.toStdString().c_str();
 }
 
+/**
+ * @brief CogWheelServer::connections
+ * @return
+ */
+CogWheelConnections *CogWheelServer::connections() const
+{
+    return const_cast<CogWheelConnections*>(&m_connections);
+}
+
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================

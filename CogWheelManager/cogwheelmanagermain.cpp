@@ -45,6 +45,7 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     m_serverManager.startManager();
 
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
+    connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
 
     ui->startButton->setEnabled(false);
     ui->stopButton->setEnabled(false);
@@ -171,6 +172,7 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
             ui->launchKillButton->setText("Kill");
             ui->startButton->setEnabled(false);
             ui->stopButton->setEnabled(false);
+            ui->connectionList->clear();
             ui->serverStatus->setText("<b>Running.</b>");
         }
     } else {
@@ -178,6 +180,7 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
         ui->launchKillButton->setText("Launch");
         ui->startButton->setEnabled(false);
         ui->stopButton->setEnabled(false);
+        ui->connectionList->clear();
         ui->serverStatus->setText("<b>Not Running.</b>");
     }
 }
@@ -197,5 +200,15 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
       ui->stopButton->setEnabled(true);
       ui->launchKillButton->setText("Kill");
   }
+
+   ui->connectionList->clear();
+
+}
+
+void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
+{
+    ui->connectionList->clear();
+    ui->connectionList->addItems(connections);
+
 }
 

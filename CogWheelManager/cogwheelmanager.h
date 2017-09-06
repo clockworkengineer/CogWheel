@@ -46,9 +46,10 @@ public:
 
     void writeCommandToController(const QString &command);
 
-    // Response commands
+    // Controller commands
 
     void serverStatus(QDataStream &input);
+    void connectionList(QDataStream &input);
 
     // Private data accessors
 
@@ -74,6 +75,7 @@ protected:
 signals:
 
     void serverStatusUpdate(QString status);
+    void connectionListUpdate(const QStringList &connections);
 
 public slots:
 

@@ -40,6 +40,7 @@ CogWheelManager::CogWheelManager(QObject *parent)
     Q_UNUSED(parent);
 
     m_managerResponseTable.insert("STATUS", &CogWheelManager::serverStatus);
+    m_managerResponseTable.insert("CONNECTIONS", &CogWheelManager::connectionList);
 
 }
 
@@ -355,6 +356,20 @@ void CogWheelManager::serverStatus(QDataStream &input)
     input >> status;
 
     emit serverStatusUpdate(status);
+
+}
+
+/**
+ * @brief CogWheelManager::connectionList
+ * @param input
+ */
+void CogWheelManager::connectionList(QDataStream &input)
+{
+    QStringList connections;
+
+    input >> connections;
+
+    emit connectionListUpdate(connections);
 
 }
 
