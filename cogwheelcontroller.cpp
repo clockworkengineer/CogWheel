@@ -109,6 +109,12 @@ void CogWheelController::startController()
 
     qDebug() << "Start Controller....";
 
+    if (!m_listening && !listen(m_serverName)) {
+        qDebug() << "Controller unable listen on socket name: " << m_serverName;
+        return;
+    }
+    m_listening=true;
+
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
         qDebug() << "Error in creating controller socket.";
@@ -123,24 +129,13 @@ void CogWheelController::startController()
     m_controllerSocket->connectToServer(m_serverName+"Manager");
     m_controllerSocket->waitForConnected(-1);
 
-    m_active=true;
-
     if (m_controllerSocket->state() == QLocalSocket::ConnectedState) {
+        m_active=true;
         writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
         return;
     }
 
-    qInfo() << "Controller failed to connect to client. Waiting for it to connect...";
-
     resetControllerSocket();  // Reset socket
-
-    // Setup listen if not aleady
-
-    if (!m_listening && !listen(m_serverName)) {
-        qDebug() << "Controller unable listen on socket name: " << m_serverName;
-        return;
-    }
-    m_listening=true;
 
     qInfo() << "CogWheel Controller Started on [" << m_serverName << "]";
 
@@ -312,10 +307,10 @@ void CogWheelController::disconnected()
 void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
 {
     if (socketError==QLocalSocket::PeerClosedError) {
-        qInfo() << "Manager disconnected listen for a new connection....";
-        if (!listen(m_serverName)) {
-            qDebug() << "Controller unable listen on socket name: " << m_serverName;
-        }
+//        qInfo() << "Manager disconnected listen for a new connection....";
+//        if (!listen(m_serverName)) {
+//            qDebug() << "Controller unable listen on socket name: " << m_serverName;
+//        }
         return;
     }
     qDebug() << "Controller socket error" << socketError;

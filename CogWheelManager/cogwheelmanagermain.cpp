@@ -46,12 +46,19 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 
-    // Load and start manager instance
+    // Load manager config data
 
     m_serverManager.load();
+
+    // Remove any old manager socket servers
+
+    QLocalServer::removeServer(m_serverManager.serverName()+"Manager");
+
+    // Start manager
+
     m_serverManager.startManager();
 
-    // Controller command signals/slotss
+    // Controller command signals/slots
 
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
     connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
@@ -91,7 +98,7 @@ bool CogWheelManagerMain::launchServer()
     m_serverProcess->startDetached(m_serverManager.serverPath());
     m_serverProcess->waitForStarted(-1);
 
-    m_serverManager.startManager();
+  //  m_serverManager.startManager();
 
     return(true);
 
@@ -114,7 +121,7 @@ void CogWheelManagerMain::killServer()
         m_serverProcess=nullptr;
     }
 
-    m_serverManager.stopManager();
+    m_serverManager.disconnectFromServer();
 
 }
 

@@ -53,6 +53,8 @@ CogWheelManager::CogWheelManager(QObject *parent)
 CogWheelManager::~CogWheelManager()
 {
 
+    disconnectFromServer();
+
 }
 
 /**
@@ -83,10 +85,26 @@ void CogWheelManager::load()
 }
 
 /**
+ * @brief CogWheelManager::connectUpManagerSocket
+ *
+ * Connect up signal/slots for maanger socket.
+ *
+ */
+void CogWheelManager::connectUpManagerSocket()
+{
+
+    connect(m_managerSocket,&QLocalSocket::connected, this, &CogWheelManager::connected);
+    connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
+    connect(m_managerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelManager::error);
+    connect(m_managerSocket,&QLocalSocket::readyRead, this, &CogWheelManager::readyRead);
+    connect(m_managerSocket,&QLocalSocket::bytesWritten, this, &CogWheelManager::bytesWritten);
+}
+
+/**
  * @brief CogWheelManager::startManager
  *
- * Create a local socket and try to connect to server. If can't connect
- * then listen on a socket and wait for server to connect.
+ * Create a local socket and try to connect to server. Also set up listen
+ * for incoming server connections.
  *
  * @return  == true then connection made.
  */
@@ -94,38 +112,18 @@ void CogWheelManager::load()
 bool CogWheelManager::startManager()
 {
 
-    // Already active
+    qDebug() << "Startingup manager";
 
-    if (m_active) {
+    // Setup socket listen
+
+    if (!listen(m_serverName+"Manager")) {
+        qDebug() << "Manager unable listen on socket name: " << m_serverName;
         return(m_active);
     }
 
-    qDebug() << "Start manager";
+    // Try to connect to server
 
-    m_managerSocket = new QLocalSocket();
-    if (m_managerSocket==nullptr) {
-        qDebug() << "Error in creating manager socket.";
-    }
-
-    connect(m_managerSocket,&QLocalSocket::connected, this, &CogWheelManager::connected);
-    connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
-    connect(m_managerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelManager::error);
-    connect(m_managerSocket,&QLocalSocket::readyRead, this, &CogWheelManager::readyRead);
-    connect(m_managerSocket,&QLocalSocket::bytesWritten, this, &CogWheelManager::bytesWritten);
-
-    m_managerSocket->connectToServer(m_serverName);
-    m_managerSocket->waitForConnected(-1);
-
-    if (m_managerSocket->state() == QLocalSocket::UnconnectedState) {
-        qInfo() << "Manager failed to connect to server. Waiting for it.";
-        resetManagerSocket();
-        m_active=false;
-        if (!m_listening && !listen(m_serverName+"Manager")) {
-            qDebug() << "Manager unable listen on socket name: " << m_serverName;
-            return(m_active);
-        }
-        m_listening=true;
-    }
+    connectToServer();
 
     m_active=true;
 
@@ -134,20 +132,53 @@ bool CogWheelManager::startManager()
 }
 
 /**
- * @brief CogWheelManager::stopManager
+ * @brief CogWheelManager::disconnectFromServer
  *
- * Disconnect socket and set to not active.
+ * Disconnect manager socket.
  *
  */
-void CogWheelManager::stopManager()
+void CogWheelManager::disconnectFromServer()
 {
 
-    qInfo() << "Stopping manager";
 
     if (m_managerSocket) {
         m_managerSocket->disconnectFromServer();
     }
-    m_active=false;
+  //  m_active=false;
+
+}
+
+/**
+ * @brief CogWheelManager::connectToServer
+ *
+ * Connect to server/controller.
+ *
+ */
+void CogWheelManager::connectToServer()
+{
+
+    // Create manager sockets
+
+    m_managerSocket = new QLocalSocket();
+    if (m_managerSocket==nullptr) {
+        qDebug() << "Error in creating manager socket.";
+        return;
+    }
+
+    connectUpManagerSocket();
+
+    // Attempt server connect
+
+    m_managerSocket->connectToServer(m_serverName);
+    m_managerSocket->waitForConnected(-1);
+
+    // Failure wait for server connect
+
+    if (m_managerSocket->state() == QLocalSocket::UnconnectedState) {
+        resetManagerSocket();
+    } else {
+        qInfo() << "Manager connected to controller.";
+    }
 
 }
 
@@ -194,13 +225,7 @@ void CogWheelManager::incomingConnection(quintptr handle)
         return;
     }
 
-    connect(m_managerSocket,&QLocalSocket::connected, this, &CogWheelManager::connected);
-    connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
-    connect(m_managerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelManager::error);
-    connect(m_managerSocket,&QLocalSocket::readyRead, this, &CogWheelManager::readyRead);
-    connect(m_managerSocket,&QLocalSocket::bytesWritten, this, &CogWheelManager::bytesWritten);
-
-    m_active=true;
+    connectUpManagerSocket();
 
 }
 
@@ -213,7 +238,7 @@ void CogWheelManager::incomingConnection(quintptr handle)
 void CogWheelManager::connected()
 {
 
-  qDebug() << "Manager Connected";
+    qDebug() << "Manager Connected";
 
 }
 
@@ -255,7 +280,7 @@ void CogWheelManager::readyRead()
 {
 
     // Datastream for commands
-;
+
     QDataStream in(m_managerSocket);
     in.setVersion(QDataStream::Qt_4_7);
 
@@ -298,7 +323,7 @@ void CogWheelManager::readyRead()
  */
 void CogWheelManager::bytesWritten(qint64 bytes)
 {
-  qDebug() << "Manager bytesWritten" << bytes;
+    qDebug() << "Manager bytesWritten" << bytes;
 }
 
 /**

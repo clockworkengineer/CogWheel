@@ -40,7 +40,11 @@ public:
     // Manager Control
 
     bool startManager();
-    void stopManager();
+
+    // Connect/disconnect server
+
+    void connectToServer();
+    void disconnectFromServer();
 
     // Write command to server
 
@@ -65,6 +69,10 @@ private:
     // Reset manager socket
 
     void resetManagerSocket();
+
+    // Connect up manager socket signals/slots
+
+    void connectUpManagerSocket();
 
 protected:
 
@@ -92,10 +100,9 @@ public slots:
 private:
 
     QString m_serverPath;                   // Path to CogWheel Server
-    QString m_serverName;                   // Named local socket
+    QString m_serverName;                   // Manager socket name
 
     bool m_active=false;                    // == true manager active
-    bool m_listening=false;                 // == true manager listening on socket
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
 
