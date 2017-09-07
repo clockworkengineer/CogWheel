@@ -161,7 +161,7 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     if (!m_connections.isEmpty()) {
         emit info("Number of active connections: "+QString::number(m_connections.size()));
     } else {
-        // Send empty connection list and reset  timer.
+        // Send empty connection list and reset/stop timer.
         connectionListToManager();
         resetConnectionListUpdateTimer();
         emit info("No active connections on server.");

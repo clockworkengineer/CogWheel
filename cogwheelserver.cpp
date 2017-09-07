@@ -35,8 +35,7 @@
 CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(parent)
 {
 
-    QCoreApplication::setOrganizationName("ClockWorkEngineer");
-    QCoreApplication::setApplicationName("CogWheel");
+    // Logging signals/slots
 
     connect(&m_connections, &CogWheelConnections::error, this, &CogWheelServer::error);
     connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);

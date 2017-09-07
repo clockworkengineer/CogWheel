@@ -98,8 +98,6 @@ bool CogWheelManagerMain::launchServer()
     m_serverProcess->startDetached(m_serverManager.serverPath());
     m_serverProcess->waitForStarted(-1);
 
-  //  m_serverManager.startManager();
-
     return(true);
 
 }

@@ -32,7 +32,7 @@ public:
 
     // Constructor / Destructor
 
-    CogWheelController(QCoreApplication *cogWheelApp,const QString &socketName, QObject *parent = nullptr);
+    CogWheelController(QCoreApplication *cogWheelApp, QObject *parent = nullptr);
     ~CogWheelController();
 
     // Start/Stop controller
@@ -45,11 +45,15 @@ public:
     void writeCommandToManager(const QString &command, const QString param1);
     void writeCommandToManager(const QString &command, const QStringList param1);
 
-    // Pricate data accessors
+    // Private data accessors
 
     static CogWheelServer *server();
 
 private:
+
+    // Connect up controller socket signal/slots
+
+    void connectUpControllerSocket();
 
     // Reset Controller socket
 
@@ -84,7 +88,6 @@ public slots:
 private:
 
     bool m_active=false;                        // == true controller active
-    bool m_listening=false;                     // == true controller listening for connects
     QString m_serverName;                       // Named local socket
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.

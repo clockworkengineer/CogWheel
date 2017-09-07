@@ -112,7 +112,7 @@ void CogWheelManager::connectUpManagerSocket()
 bool CogWheelManager::startManager()
 {
 
-    qDebug() << "Startingup manager";
+    qDebug() << "Starting up manager...";
 
     // Setup socket listen
 
@@ -144,7 +144,6 @@ void CogWheelManager::disconnectFromServer()
     if (m_managerSocket) {
         m_managerSocket->disconnectFromServer();
     }
-  //  m_active=false;
 
 }
 
