@@ -14,7 +14,7 @@
 //
 // Description: Companion program to the CogWheel FTP server
 // for managing server settings, of users and control over
-// the server. Which includes lanuch/closedown of the server
+// the server. Which includes launch/closedown of the server
 // and stopping and starting it.
 //
 
@@ -23,16 +23,23 @@
 // =============
 
 #include "cogwheelmanagermain.h"
+#include "cogwheelmanagersingleinstance.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication cogWheelManagerApp(argc, argv);
 
-    CogWheelManagerMain cogWheelMainWindow;
+    CogWheelManagerSingleInstance singleInstance(&cogWheelManagerApp);
 
-    cogWheelMainWindow.show();
+    if (!singleInstance.alreadyRunning()){
+        CogWheelManagerMain cogWheelMainWindow;
+        singleInstance.setMainWindow(&cogWheelMainWindow);
+        cogWheelMainWindow.show();
+        return cogWheelManagerApp.exec();
+    } else {
+        cogWheelManagerApp.quit();
+    }
 
-    return cogWheelManagerApp.exec();
 
 }

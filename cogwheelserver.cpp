@@ -26,8 +26,7 @@
 /**
  * @brief CogWheelServer::CogWheelServer
  *
- * Initialise Organisation and Application names, load server
- * settings and start server if specified.
+ * Load server settings and start server if specified.
  *
  * @param autoStart     If true then start the server
  * @param parent        Parent object which should be null.

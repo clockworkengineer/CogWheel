@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication cogWheelServerApplication(argc, argv);
 
+    // Initialise Organisation and Application names
+
     QCoreApplication::setOrganizationName("ClockWorkEngineer");
     QCoreApplication::setApplicationName("CogWheel");
 

@@ -34,7 +34,7 @@ QHash<QString, CogWheelManager::CommandFunction> CogWheelManager::m_controllerCo
  *
  * @param parent
  */
-CogWheelManager::CogWheelManager(QObject *parent)
+CogWheelManager::CogWheelManager(QObject *parent) : QLocalServer(parent)
 {
 
     Q_UNUSED(parent);

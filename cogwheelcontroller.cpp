@@ -41,7 +41,7 @@ QHash<QString, CogWheelController::CommandFunction> CogWheelController::m_manage
  * @param socketName
  * @param parent
  */
-CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *parent)
+CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *parent) : QLocalServer(parent)
 {
 
     Q_UNUSED(parent);
