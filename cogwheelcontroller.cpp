@@ -154,7 +154,6 @@ void CogWheelController::startController()
     m_controllerSocket->waitForConnected(-1);
 
     if (m_controllerSocket->state() == QLocalSocket::ConnectedState) {
-        m_active=true;
         writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
         return;
     }
@@ -182,8 +181,6 @@ void CogWheelController::stopController()
         }
     }
 
-    m_active=false;
-
 }
 
 /**
@@ -197,7 +194,7 @@ void CogWheelController::stopController()
 void CogWheelController::writeCommandToManager(const QString &command, const QString param1)
 {
 
-    if (m_active && m_controllerSocket) {
+    if (m_controllerSocket) {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
         out.setVersion(QDataStream::Qt_4_7);
@@ -222,7 +219,7 @@ void CogWheelController::writeCommandToManager(const QString &command, const QSt
 void CogWheelController::writeCommandToManager(const QString &command, const QStringList param1)
 {
 
-    if (m_active && m_controllerSocket) {
+    if (m_controllerSocket) {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
         out.setVersion(QDataStream::Qt_4_7);

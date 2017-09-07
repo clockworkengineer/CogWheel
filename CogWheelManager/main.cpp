@@ -26,8 +26,13 @@
 #include "cogwheelmanagersingleinstance.h"
 #include <QApplication>
 
+// ============================
+// ===== MAIN ENTRY POINT =====
+// ============================
+
 int main(int argc, char *argv[])
 {
+
     QApplication cogWheelManagerApp(argc, argv);
 
     CogWheelManagerSingleInstance singleInstance(&cogWheelManagerApp);
@@ -38,8 +43,7 @@ int main(int argc, char *argv[])
         cogWheelMainWindow.show();
         return cogWheelManagerApp.exec();
     } else {
-        cogWheelManagerApp.quit();
+        exit(EXIT_FAILURE);
     }
-
 
 }

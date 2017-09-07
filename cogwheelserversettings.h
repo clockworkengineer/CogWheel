@@ -46,6 +46,8 @@ public:
     void setServerCertFileName(const QString &serverCertFileName);
     bool serverAnonymousEnabled() const;
     void setServerAnonymousEnabled(bool serverAnonymousEnabled);
+    quint64 connectionListUpdateTime() const;
+    void setConnectionListUpdateTime(const quint64 &connectionListUpdateTime);
 
 private:
 
@@ -57,9 +59,11 @@ private:
     bool m_serverEnabled=false;            // ==true Server enabled
     bool m_serverSslEnabled=false;         // ==true TLS/SSL enabled
     bool m_servePlainFTPEnabled=false;     // ==true Plain insecure FTP enabled
-    bool m_serverAnonymousEnabled=false;         // == true anonymous login enabled
+    bool m_serverAnonymousEnabled=false;   // == true anonymous login enabled
     QString m_serverKeyFileName;           // Server private key file name
     QString m_serverCertFileName;          // Server certifucate file
+
+    quint64 m_connectionListUpdateTime=5000;    // Connection list update timer
 
     QByteArray m_serverPrivateKey;         // Server private key
     QByteArray m_serverCert;               // Server Certificate

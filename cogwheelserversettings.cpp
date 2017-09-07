@@ -68,6 +68,9 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("servercert")) {
         server.setValue("servercert", "./server.crt");
     }
+    if (!server.childKeys().contains("connectionlistppdate")) {
+        server.setValue("connectionlistppdate", 5000);
+    }
     server.endGroup();
 
     server.beginGroup("Server");
@@ -75,13 +78,14 @@ void CogWheelServerSettings::load()
     setServerVersion(server.value("version").toString());
     setServerPort(server.value("port").toInt());
     setServerAllowSMNT(server.value("allowSMNT").toBool());
-    setServerWriteBytesSize(server.value("writesize").toInt());
+    setServerWriteBytesSize(server.value("writesize").toInt()); // NO UI
     setServerEnabled(server.value("enabled").toBool());
     setServerSslEnabled(server.value("sslenabled").toBool());
     setServerPlainFTPEnabled(server.value("plain").toBool());
     setServerAnonymousEnabled(server.value("anonymous").toBool());
     setServerKeyFileName(server.value("serverkey").toString());
     setServerCertFileName(server.value("servercert").toString());
+    setConnectionListUpdateTime(server.value("connectionlistppdate").toInt()); // NO UI
     server.endGroup();
 
 }
@@ -323,3 +327,14 @@ void CogWheelServerSettings::setServerAnonymousEnabled(bool sererAnonymousEnable
 {
     m_serverAnonymousEnabled = sererAnonymousEnabled;
 }
+
+quint64 CogWheelServerSettings::connectionListUpdateTime() const
+{
+    return m_connectionListUpdateTime;
+}
+
+void CogWheelServerSettings::setConnectionListUpdateTime(const quint64 &connectionListUpdateTime)
+{
+    m_connectionListUpdateTime = connectionListUpdateTime;
+}
+

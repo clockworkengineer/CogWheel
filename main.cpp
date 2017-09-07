@@ -29,24 +29,59 @@
 
 #include <QCoreApplication>
 
+#include <QString>
+#include <QLockFile>
+#include <QDir>
+
+/**
+ * @brief alreadyRunning
+ *
+ * Simple lock file to guarantee one server instance.
+ *
+ * @return
+ */
+bool alreadyRunning() {
+
+    QString tmpDir = QDir::tempPath();
+    static QLockFile lockFile(tmpDir + "/CogWheel.lock");
+
+    if(!lockFile.tryLock(100)){
+        return (true);
+    } else {
+        return(false);
+    }
+
+}
+
+// ============================
+// ===== MAIN ENTRY POINT =====
+// ============================
+
 int main(int argc, char *argv[])
 {
     QCoreApplication cogWheelServerApplication(argc, argv);
 
-    // Initialise Organisation and Application names
+    if  (!alreadyRunning()) {
 
-    QCoreApplication::setOrganizationName("ClockWorkEngineer");
-    QCoreApplication::setApplicationName("CogWheel");
+        // Initialise Organisation and Application names
 
-    // Server controller instance
+        QCoreApplication::setOrganizationName("ClockWorkEngineer");
+        QCoreApplication::setApplicationName("CogWheel");
 
-    CogWheelController controller(&cogWheelServerApplication);
+        // Server controller instance
 
-    controller.startController();
+        CogWheelController controller(&cogWheelServerApplication);
 
-    if (controller.server()->isRunning()) {
-        return cogWheelServerApplication.exec();
+        controller.startController();
+
+        if (controller.server() && controller.server()->isRunning()) {
+            return cogWheelServerApplication.exec();
+        } else {
+            qInfo() << "CogWheel FTP Server not started.";
+        }
+
     } else {
-        qInfo() << "CogWheel FTP Server not started.";
+        qInfo() << "CogWheel FTP Server already running.";
+        exit(EXIT_FAILURE);
     }
 }

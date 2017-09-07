@@ -125,12 +125,12 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     emit info("Number of active connections now: "+QString::number(m_connections.size()));
 
-    // Set timer running for coonnectionlist update to manager
+    // Set timer running for connection list update to manager
 
     if (!m_connections.empty() && !m_connectionListUpdateTimer) {
         m_connectionListUpdateTimer = new QTimer();
         connect(m_connectionListUpdateTimer, &QTimer::timeout, this, &CogWheelConnections::connectionListToManager);
-        m_connectionListUpdateTimer->start(5000);   // TO DO MAKE SERVER SETTING
+        m_connectionListUpdateTimer->start(m_serverSettings.connectionListUpdateTime());
     }
 
 }
