@@ -56,7 +56,7 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     // Start manager
 
-    m_serverManager.startManager();
+    m_serverManager.startUpManager();
 
     // Controller command signals/slots
 

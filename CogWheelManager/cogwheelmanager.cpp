@@ -109,7 +109,7 @@ void CogWheelManager::connectUpManagerSocket()
  * @return  == true then connection made.
  */
 
-bool CogWheelManager::startManager()
+void CogWheelManager::startUpManager()
 {
 
     qDebug() << "Starting up manager...";
@@ -118,16 +118,12 @@ bool CogWheelManager::startManager()
 
     if (!listen(m_serverName+"Manager")) {
         qDebug() << "Manager unable listen on socket name: " << m_serverName;
-        return(m_active);
+        return;
     }
 
     // Try to connect to server
 
     connectToServer();
-
-    m_active=true;
-
-    return(m_active);
 
 }
 
@@ -139,7 +135,6 @@ bool CogWheelManager::startManager()
  */
 void CogWheelManager::disconnectFromServer()
 {
-
 
     if (m_managerSocket) {
         m_managerSocket->disconnectFromServer();
@@ -264,7 +259,7 @@ void CogWheelManager::disconnected()
  */
 void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
 {
-    if (m_active) {
+    if (m_managerSocket) {
         qDebug() << "Manager socket error" << socketError;
     }
 }
@@ -336,15 +331,17 @@ void CogWheelManager::bytesWritten(qint64 bytes)
  */
 void CogWheelManager::writeCommandToController(const QString &command)
 {
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_7);
-    out << (quint32)0;
-    out << command;
-    out.device()->seek(0);
-    out << (quint32)(block.size() - sizeof(quint32));
-    m_managerSocket->write(block);
-    m_managerSocket->flush();
+    if (m_managerSocket) {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_7);
+        out << (quint32)0;
+        out << command;
+        out.device()->seek(0);
+        out << (quint32)(block.size() - sizeof(quint32));
+        m_managerSocket->write(block);
+        m_managerSocket->flush();
+    }
 }
 
 /**
@@ -384,24 +381,6 @@ void CogWheelManager::connectionList(QDataStream &input)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
-
-/**
- * @brief CogWheelManager::isActive
- * @return
- */
-bool CogWheelManager::isActive() const
-{
-    return m_active;
-}
-
-/**
- * @brief CogWheelManager::setActive
- * @param active
- */
-void CogWheelManager::setActive(bool active)
-{
-    m_active = active;
-}
 
 QString CogWheelManager::serverName() const
 {

@@ -39,7 +39,7 @@ public:
 
     // Manager Control
 
-    bool startManager();
+    void startUpManager();
 
     // Connect/disconnect server
 
@@ -57,8 +57,8 @@ public:
 
     // Private data accessors
 
-    bool isActive() const;
-    void setActive(bool isActive);
+//    bool isActive() const;
+//    void setActive(bool isActive);
     QString serverPath() const;
     void setServerPath(const QString &serverPath);
     QString serverName() const;
@@ -102,7 +102,7 @@ private:
     QString m_serverPath;                   // Path to CogWheel Server
     QString m_serverName;                   // Manager socket name
 
-    bool m_active=false;                    // == true manager active
+//    bool m_active=false;                    // == true manager active
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
 
