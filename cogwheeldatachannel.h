@@ -31,7 +31,7 @@ public:
 
   // Constructor / Destructor
 
-    explicit CogWheelDataChannel(QObject *parent = nullptr);
+    explicit CogWheelDataChannel(qintptr controlSocketHandle, QObject *parent = nullptr);
     ~CogWheelDataChannel();
 
     // Channel control
@@ -86,12 +86,6 @@ signals:
     void transferFinished();                   // File transfer finished
     void passiveConnection();                  // Passive connection
 
-    // Error, information and warning messages
-
-    void error(const QString &message);
-    void info(const QString &message);
-    void warning(const QString &message);
-
 public slots:
 
     // Data channel socket
@@ -109,6 +103,7 @@ public slots:
     void dataChannelEncrypted();
 
 private:
+    qintptr m_controlSocketHandle;        // Control channel socket handle
     QSslSocket *m_dataChannelSocket;      // Data channel socket
     QHostAddress m_clientHostIP;          // Address of client
     quint16 m_clientHostPort;             // Port used on client

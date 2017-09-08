@@ -21,7 +21,7 @@
 // =============
 
 #include "cogwheelserver.h"
-#include <QtCore>
+#include "cogwheellogger.h"
 
 /**
  * @brief CogWheelServer::CogWheelServer
@@ -34,22 +34,16 @@
 CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(parent)
 {
 
-    // Logging signals/slots
-
-    connect(&m_connections, &CogWheelConnections::error, this, &CogWheelServer::error);
-    connect(&m_connections, &CogWheelConnections::info, this, &CogWheelServer::info);
-    connect(&m_connections, &CogWheelConnections::warning, this, &CogWheelServer::warning);
-
-    emit info("Loading CogWheel FTP Server Settings...");
+    cogWheelInfo("Loading CogWheel FTP Server Settings...");
 
     m_serverSettings.load();
 
     if (m_serverSettings.serverSslEnabled()) {
         if (m_serverSettings.loadPrivateKeyAndCert()) {
-            emit info("Server Private Key & Certicate Loaded.");
+            cogWheelInfo("Server Private Key & Certicate Loaded.");
         } else {
             m_serverSettings.setServerSslEnabled(false);
-            emit info("Error Loading Server Private & Certicate SSL Disabled.");
+            cogWheelInfo("Error Loading Server Private & Certicate SSL Disabled.");
         }
     }
 
@@ -81,14 +75,14 @@ CogWheelServer::~CogWheelServer()
  */
 void CogWheelServer::startServer()
 {
-    info("CogWheel FTP Server started.");
+    cogWheelInfo("CogWheel FTP Server started.");
 
     if (listen(QHostAddress::Any, m_serverSettings.serverPort())) {
-        info("CogWheel Server listening on port "+QString::number(m_serverSettings.serverPort()));
+        cogWheelInfo("CogWheel Server listening on port "+QString::number(m_serverSettings.serverPort()));
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
         setRunning(true);
     } else {
-        error("CogWheel Server listen failure.");
+        cogWheelError("CogWheel Server listen failure.");
     }
 
 }
@@ -102,7 +96,7 @@ void CogWheelServer::startServer()
  */
 void CogWheelServer::stopServer()
 {
-    info("CogWheel Server stopped.");
+    cogWheelInfo("CogWheel Server stopped.");
 
     setRunning(false);
 
@@ -120,47 +114,15 @@ void CogWheelServer::stopServer()
  */
 void CogWheelServer::incomingConnection(qintptr handle)
 {
-    info("--- CogWheel Server incoming connection --- "+QString::number(handle));
+    cogWheelInfo("--- CogWheel Server incoming connection --- "+QString::number(handle));
 
     emit accept(handle);
 
 }
 
-/**
- * @brief CogWheelServer::error
- *
- * Produce error trace message.
- *
- * @param message  Message string.
- */
-void CogWheelServer::error(const QString &message)
-{
-    qDebug() << message.toStdString().c_str();
-}
-
-/**
- * @brief CogWheelServer::info
- *
- * Produce informational trace message.
- *
- * @param message  Message string.
- */
-void CogWheelServer::info(const QString &message)
-{
-    qInfo() << message.toStdString().c_str();
-}
-
-/**
- * @brief CogWheelServer::warning
- *
- * Produce warning trace message.
- *
- * @param message  Message string.
- */
-void CogWheelServer::warning(const QString &message)
-{
-    qWarning() << message.toStdString().c_str();
-}
+// ============================
+// CLASS PRIVATE DATA ACCESSORS
+// ============================
 
 /**
  * @brief CogWheelServer::connections
@@ -170,10 +132,6 @@ CogWheelConnections *CogWheelServer::connections() const
 {
     return const_cast<CogWheelConnections*>(&m_connections);
 }
-
-// ============================
-// CLASS PRIVATE DATA ACCESSORS
-// ============================
 
 /**
  * @brief CogWheelServer::isRunning

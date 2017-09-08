@@ -24,8 +24,10 @@
 // INCLUDE FILES
 // =============
 
+
 #include "cogwheelcontroller.h"
 #include "cogwheelusersettings.h"
+#include "cogwheellogger.h"
 
 #include <QCoreApplication>
 
@@ -38,9 +40,9 @@
  *
  * Simple lock file to guarantee one server instance.
  *
- * @return
+ * @return == true Server already running.
  */
-bool alreadyRunning() {
+static bool alreadyRunning() {
 
     QString tmpDir = QDir::tempPath();
     static QLockFile lockFile(tmpDir + "/CogWheel.lock");
@@ -77,11 +79,11 @@ int main(int argc, char *argv[])
         if (controller.server() && controller.server()->isRunning()) {
             return cogWheelServerApplication.exec();
         } else {
-            qInfo() << "CogWheel FTP Server not started.";
+            cogWheelInfo("CogWheel FTP Server not started.");
         }
 
     } else {
-        qInfo() << "CogWheel FTP Server already running.";
+        cogWheelInfo("CogWheel FTP Server already running.");
         exit(EXIT_FAILURE);
     }
 }

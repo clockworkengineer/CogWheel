@@ -21,6 +21,7 @@
 // =============
 
 #include "cogwheelusersettings.h"
+#include "cogwheellogger.h"
 
 #include <QCryptographicHash>
 

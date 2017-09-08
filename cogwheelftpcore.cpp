@@ -32,6 +32,7 @@
 // =============
 
 #include "cogwheelftpcore.h"
+#include "cogwheellogger.h"
 #include "cogwheelusersettings.h"
 
 #include <QDir>
@@ -358,7 +359,7 @@ QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, cons
         }
     }
 
-    connection->info("Mapping local "+path+" to "+mappedPath);
+    cogWheelInfo(connection->socketHandle(),"Mapping local "+path+" to "+mappedPath);
 
     return(mappedPath);
 }
@@ -378,7 +379,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
 
     QString mappedPath { QFileInfo(path).absoluteFilePath()};
 
-    connection->info("mapped path : "+mappedPath);
+    cogWheelInfo(connection->socketHandle(),"mapped path : "+mappedPath);
 
     // Strip off root path
 
@@ -391,7 +392,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
         mappedPath = "";
     }
 
-    connection->info("Mapping local from "+path+" to "+mappedPath);
+    cogWheelInfo(connection->socketHandle(),"Mapping local from "+path+" to "+mappedPath);
 
     return(mappedPath);
 }
@@ -414,7 +415,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
     try {
 
-        connection->info("COMMAND : ["+command+"]  ARGUMENT ["+arguments+"]");
+        cogWheelInfo(connection->socketHandle(),"COMMAND : ["+command+"]  ARGUMENT ["+arguments+"]");
 
         if (m_ftpCommandTable.contains(command)) {
 
@@ -442,7 +443,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
                 commandFn=m_unauthCommandTable[command];
 
             } else {
-                connection->info("Please login with USER and PASS.");
+                cogWheelInfo(connection->socketHandle(),"Please login with USER and PASS.");
                 throw FtpServerErrorReply(530, "Please login with USER and PASS.");
             }
 
@@ -453,7 +454,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             }
 
         } else {
-            connection->warning("Unsupported FTP command ["+command+"]");
+            cogWheelWarning(connection->socketHandle(),"Unsupported FTP command ["+command+"]");
             throw FtpServerErrorReply(500);
         }
 
@@ -461,7 +462,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         connection->sendReplyCode(response.getResponseCode(),response.getMessage());
 
     } catch(...) {
-        connection->error("Unknown error handling " + command + " command.");
+        cogWheelError(connection->socketHandle(),"Unknown error handling " + command + " command.");
         connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
     }
 
@@ -623,7 +624,7 @@ void CogWheelFTPCore::PWD(CogWheelControlChannel *connection, const QString &arg
 
     Q_UNUSED(arguments);
 
-    connection->info("PWD "+connection->currentWorkingDirectory());
+    cogWheelInfo(connection->socketHandle(),"PWD "+connection->currentWorkingDirectory());
 
     connection->sendReplyCode (257, "\""+connection->currentWorkingDirectory()+"\"");
 
@@ -1483,7 +1484,7 @@ void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &ar
         throw FtpServerErrorReply("Requested file not found.");
     }
 
-    qDebug() << "File [" << file << "] Size [" << QString::number(fileInfo.size()) << "]";
+    cogWheelInfo(connection->socketHandle(),"File [" + file + "] Size [" + QString::number(fileInfo.size()) + "]");
 
     connection->sendReplyCode(213, QString::number(fileInfo.size()));
 

@@ -52,12 +52,6 @@ signals:
     void openConnection(qint64 handle);
     void closeAllConnections();
 
-    // Error, information and warning messages
-
-    void error(const QString &message);
-    void info(const QString &message);
-    void warning(const QString &message);
-
     // Connection list updates for controller
 
     void updateConnectionList(const QStringList &connections);

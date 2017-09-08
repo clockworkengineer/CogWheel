@@ -20,7 +20,7 @@
 // =============
 
 #include "cogwheelserversettings.h"
-#include <QDebug>
+#include "cogwheellogger.h"
 
 /**
  * @brief CogWheelServerSettings::load

@@ -23,6 +23,7 @@
 // =============
 
 #include "cogwheelcontrolchannel.h"
+#include "cogwheellogger.h"
 #include "cogwheelftpcore.h"
 
 /**
@@ -68,16 +69,16 @@ void CogWheelControlChannel::createDataChannel()
     // Channel already exists
 
     if ( m_dataChannel != nullptr) {
-        error("Data channel already exists.");;
+        cogWheelError(socketHandle(),"Data channel already exists.");;
         return;
     }
 
     // Create data channel
 
-    m_dataChannel = new CogWheelDataChannel();
+    m_dataChannel = new CogWheelDataChannel(socketHandle());
 
     if (m_dataChannel == nullptr) {
-        error("Failure to create data channel.");
+        cogWheelError(socketHandle(),"Failure to create data channel.");
         return;
     }
 
@@ -85,10 +86,6 @@ void CogWheelControlChannel::createDataChannel()
 
     connect(m_dataChannel,&CogWheelDataChannel::transferFinished, this,&CogWheelControlChannel::transferFinished, Qt::DirectConnection);
     connect(m_dataChannel, &CogWheelDataChannel::passiveConnection, this, &CogWheelControlChannel::passiveConnection, Qt::DirectConnection);
-
-    connect(m_dataChannel, &CogWheelDataChannel::error, this, &CogWheelControlChannel::error, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::info, this, &CogWheelControlChannel::info, Qt::DirectConnection);
-    connect(m_dataChannel, &CogWheelDataChannel::warning, this, &CogWheelControlChannel::warning, Qt::DirectConnection);
 
 }
 
@@ -102,7 +99,7 @@ void CogWheelControlChannel::tearDownDataChannel()
 {
 
     if ( m_dataChannel == nullptr) {
-        error("Failure to destroy data channel as it does not exist.");
+        cogWheelError(socketHandle(),"Failure to destroy data channel as it does not exist.");
         return;
     }
 
@@ -126,7 +123,7 @@ bool CogWheelControlChannel::connectDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        cogWheelError(socketHandle(),"Data channel not active.");
         return(false);
     }
 
@@ -144,7 +141,7 @@ bool CogWheelControlChannel::connectDataChannel()
 void CogWheelControlChannel::uploadFileToDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        cogWheelError(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -162,7 +159,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 {
 
     if (m_dataChannel == nullptr) {
-        info("Data channel not active.");
+        cogWheelInfo(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -189,7 +186,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        cogWheelError(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -208,7 +205,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
 void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 {
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        cogWheelError(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -231,7 +228,7 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
     createDataChannel();
 
     if (m_dataChannel == nullptr) {
-        error("Data channel not active.");
+        cogWheelError(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -300,21 +297,21 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     m_socketHandle = socketHandle; // Inialise here as used logging
 
-    info("Open control channel for socket "+QString::number(socketHandle));
+    cogWheelInfo(socketHandle,"Open control channel for socket "+QString::number(socketHandle));
 
     // Create control channel socket
 
     m_controlChannelSocket = new QSslSocket();
 
     if (m_controlChannelSocket == nullptr) {
-        error("Failure to create control channel socket.");
+        cogWheelError(socketHandle,"Failure to create control channel socket.");
         return;
     }
 
     // Initialise socket from socket handle
 
     if (!m_controlChannelSocket->setSocketDescriptor(m_socketHandle)) {
-        error("Error setting up socket for control channel.");
+        cogWheelError(socketHandle,"Error setting up socket for control channel.");
         m_controlChannelSocket->deleteLater();
         return;
     }
@@ -329,8 +326,8 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
     m_serverIP = host.toString();
     m_serverIP.remove(0,QString("::ffff:").length());
 
-    info("Opened control channel from "+m_clientHostIP);
-    info("Opened control channel to "+m_serverIP);
+    cogWheelInfo(socketHandle,"Opened control channel from "+m_clientHostIP);
+    cogWheelInfo(socketHandle,"Opened control channel to "+m_serverIP);
 
     // Setup control channel signals/slots.
 
@@ -351,7 +348,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
         // Server unavailable
 
-        emit info ("Server disabled closing down control connection.");
+        cogWheelInfo(socketHandle, "Server disabled closing down control connection.");
 
         sendReplyCode(503, "Server unavailable at the moment.");
         closeConnection();
@@ -372,11 +369,11 @@ void CogWheelControlChannel::closeConnection()
     // Don't disconnect if already so
 
     if (!isConnected() || m_controlChannelSocket == nullptr) {
-        info("Control Channel already disconnected.");
+        cogWheelInfo(socketHandle(),"Control Channel already disconnected.");
         return;
     }
 
-    info ("Closing control on socket : "+ QString::number(m_socketHandle));
+    cogWheelInfo(socketHandle(),"Closing control on socket : "+ QString::number(m_socketHandle));
 
     // Set disconnected
 
@@ -407,42 +404,6 @@ void CogWheelControlChannel::transferFinished()
 }
 
 /**
- * @brief CogWheelControlChannel::error
- *
- * Produce error trace message.
- *
- * @param message   Message string.
- */
-void CogWheelControlChannel::error(const QString &message)
-{
-    qDebug() << QString("CONT[%1]E: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
-}
-
-/**
- * @brief CogWheelControlChannel::info
- *
- * Produce informational trace message.
- *
- * @param message   Message string.
- */
-void CogWheelControlChannel::info(const QString &message)
-{
-    qInfo() << QString("CONT[%1]I: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
-}
-
-/**
- * @brief CogWheelControlChannel::warning
- *
- * Produce warning trace message.
- *
- * @param message   Message string.
- */
-void CogWheelControlChannel::warning(const QString &message)
-{
-    qWarning() << QString("CONT[%1]W: %2").arg(QString::number(m_socketHandle), message).toStdString().c_str();
-}
-
-/**
  * @brief CogWheelControlChannel::passiveConnection
  *
  * Send entering passive mode reponse to client.
@@ -457,7 +418,7 @@ void CogWheelControlChannel::passiveConnection()
     passiveChannelAddress.append(","+QString::number(m_dataChannel->clientHostPort()&0xFF));
     sendReplyCode(227,"Entering Passive Mode (" + passiveChannelAddress + ").");
 
-    info("Entering Passive Mode (" + passiveChannelAddress + ").");
+    cogWheelInfo(socketHandle(),"Entering Passive Mode (" + passiveChannelAddress + ").");
 
 }
 
@@ -522,7 +483,7 @@ void CogWheelControlChannel::sslError(QList<QSslError> errors)
         errorStr.append(e.errorString());
     }
 
-    emit error(errorStr);
+    emit cogWheelError(socketHandle(),errorStr);
 
     m_controlChannelSocket->ignoreSslErrors();
 
@@ -534,7 +495,7 @@ void CogWheelControlChannel::sslError(QList<QSslError> errors)
 void CogWheelControlChannel::controlChannelEncrypted()
 {
 
-    emit info ("Control Channel now encrypted.");
+    cogWheelInfo(socketHandle(), "Control Channel now encrypted.");
 
     m_sslConnection=true;
 
@@ -595,7 +556,7 @@ void CogWheelControlChannel::sendOnDataChannel(const QByteArray &dataToSend)
  */
 void CogWheelControlChannel::connected()
 {
-    info("Control channel connected...");
+    cogWheelInfo(socketHandle(),"Control channel connected...");
 }
 
 /**
@@ -605,7 +566,7 @@ void CogWheelControlChannel::connected()
  */
 void CogWheelControlChannel::disconnected()
 {
-    info("Control channel disconnected.");
+    cogWheelInfo(socketHandle(),"Control channel disconnected.");
 
     // Close control channel.
 

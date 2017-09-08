@@ -23,6 +23,7 @@
 
 #include "cogwheelcontroller.h"
 #include "cogwheelserver.h"
+#include "cogwheellogger.h"
 
 // Server instance and Qt application pointer
 
@@ -74,7 +75,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
 
     m_server = new CogWheelServer(true);
     if (m_server==nullptr) {
-        qDebug() << "Unable to allocate server object.";
+       cogWheelError("Unable to allocate server object.");
     }
 
     // Save QtApplication data
@@ -136,16 +137,16 @@ void CogWheelController::connectUpControllerSocket()
 void CogWheelController::startController()
 {
 
-    qDebug() << "Start Controller....";
+    cogWheelInfo("Start Controller....");
 
     if (!listen(m_serverName)) {
-        qDebug() << "Controller unable listen on socket name: " << m_serverName;
+        cogWheelError("Controller unable listen on socket name: " + m_serverName);
         return;
     }
 
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
-        qDebug() << "Error in creating controller socket.";
+        cogWheelError("Error in creating controller socket.");
     }
 
     connectUpControllerSocket();
@@ -261,7 +262,7 @@ void CogWheelController::resetControllerSocket()
 void CogWheelController::incomingConnection(quintptr handle)
 {
 
-    qDebug() << "Incoming CogWheel Manager connection";
+    cogWheelInfo( "Incoming CogWheel Manager connection");
 
     if (m_controllerSocket) {
         resetControllerSocket();
@@ -269,12 +270,12 @@ void CogWheelController::incomingConnection(quintptr handle)
 
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
-        qDebug() << "Error: Could not create controller socket.";
+        cogWheelError("Error: Could not create controller socket.");
         return;
     }
 
     if (!m_controllerSocket->setSocketDescriptor(handle)) {
-        qDebug() << "Error setting up socket for control controller.";
+        cogWheelError("Error setting up socket for control controller.");
         m_controllerSocket->deleteLater();
         return;
     }
@@ -296,7 +297,7 @@ void CogWheelController::incomingConnection(quintptr handle)
 void CogWheelController::connected()
 {
 
-    qDebug() << "CogWheel manager connected to local controller.";
+   cogWheelInfo("CogWheel manager connected to local controller.");
 
 }
 
@@ -308,7 +309,7 @@ void CogWheelController::connected()
  */
 void CogWheelController::disconnected()
 {
-    qDebug() << "CogWheel manager disconnected from local controller.";
+    cogWheelInfo("CogWheel manager disconnected from local controller.");
 
     resetControllerSocket();
 
@@ -327,7 +328,7 @@ void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
         qInfo() << "Manager disconnected listen for a new connection....";
         return;
     }
-    qDebug() << "Controller socket error" << socketError;
+    cogWheelError( "Controller socket error "+ socketError);
 }
 
 /**
@@ -369,7 +370,7 @@ void CogWheelController::readyRead()
         (this->*m_managerCommandTable[command])(in);
         m_commandBlockSize=0;
     } else {
-        qDebug() << "Manager command [" << command << "] not valid.";
+       cogWheelWarning("Manager command [" + command + "] not valid.");
     }
 
 }
@@ -379,7 +380,7 @@ void CogWheelController::readyRead()
  */
 void CogWheelController::bytesWritten(qint64 bytes)
 {
-    qDebug() << "Controller bytesWritten" << bytes;
+   cogWheelInfo("Controller bytesWritten " + QString::number(bytes));
 }
 
 /**
@@ -388,7 +389,6 @@ void CogWheelController::bytesWritten(qint64 bytes)
  */
 void CogWheelController::updateConnectionList(const QStringList &connectionList)
 {
-    qDebug() << "New connction : [" << connectionList << "]";
 
     if (m_lastConnectionList != connectionList) {
         writeCommandToManager("CONNECTIONS", connectionList);
@@ -415,7 +415,7 @@ void CogWheelController::startServer(QDataStream &input)
     if (m_server==nullptr) {
         m_server = new CogWheelServer(true);
         if (m_server==nullptr) {
-            qDebug() << "Unable to allocate server object";
+            cogWheelError("Unable to allocate server object");
         }
         connect(m_server->connections(), &CogWheelConnections::updateConnectionList, this, &CogWheelController::updateConnectionList);
     } else {

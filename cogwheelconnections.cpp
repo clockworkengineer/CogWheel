@@ -25,6 +25,7 @@
 // =============
 
 #include "cogwheelconnections.h"
+#include "cogwheellogger.h"
 
 /**
  * @brief CogWheelConnections::CogWheelConnections
@@ -75,7 +76,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 {
 
     if (m_connections.contains(handle)) {
-        emit error("Connection already being used");
+        cogWheelError("Connection already being used");
         return;
     }
 
@@ -85,12 +86,12 @@ void CogWheelConnections::acceptConnection(qint64 handle)
     QScopedPointer<QThread> connectionThread { new QThread() };
 
     if (connection==nullptr) {
-        emit error("Failed to create connection.");
+        cogWheelError("Failed to create connection.");
         return;
     }
 
     if (connectionThread==nullptr) {
-        emit error("Failed to create connection thread.");
+        cogWheelError("Failed to create connection thread.");
         return;
     }
 
@@ -123,7 +124,7 @@ void CogWheelConnections::acceptConnection(qint64 handle)
 
     emit openConnection(handle);
 
-    emit info("Number of active connections now: "+QString::number(m_connections.size()));
+    cogWheelInfo("Number of active connections now: "+QString::number(m_connections.size()));
 
     // Set timer running for connection list update to manager
 
@@ -146,10 +147,10 @@ void CogWheelConnections::acceptConnection(qint64 handle)
  */
 void CogWheelConnections::finishedConnection(qint64 handle)
 {
-    emit info("Removing connection for handle : "+QString::number(handle));
+    cogWheelInfo("Removing connection for handle : "+QString::number(handle));
 
     if (!m_connections.contains(handle)) {
-        emit error("Connection not present for handle: "+QString::number(handle));
+        cogWheelError("Connection not present for handle: "+QString::number(handle));
         return;
     }
 
@@ -159,12 +160,12 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     connection->deleteLater();
 
     if (!m_connections.isEmpty()) {
-        emit info("Number of active connections: "+QString::number(m_connections.size()));
+        cogWheelInfo("Number of active connections: "+QString::number(m_connections.size()));
     } else {
         // Send empty connection list and reset/stop timer.
         connectionListToManager();
         resetConnectionListUpdateTimer();
-        emit info("No active connections on server.");
+        cogWheelInfo("No active connections on server.");
     }
 
 }
@@ -200,7 +201,7 @@ void CogWheelConnections::connectionListToManager()
  */
 void CogWheelConnections::abortedConnection(qint64 handle)
 {
-    emit error("Aborting connection for handle: "+QString::number(handle));
+    cogWheelError("Aborting connection for handle: "+QString::number(handle));
     finishedConnection(handle);
 }
 
