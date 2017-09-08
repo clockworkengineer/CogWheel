@@ -161,7 +161,7 @@ void CogWheelController::startController()
 
     resetControllerSocket();  // Reset socket
 
-    qInfo() << "CogWheel Controller Started on [" << m_serverName << "]";
+   cogWheelInfo("CogWheel Controller Started on ["+m_serverName+"]");
 
 }
 
@@ -173,7 +173,7 @@ void CogWheelController::startController()
  */
 void CogWheelController::stopController()
 {
-    qInfo() << "Stopping Controller";
+    cogWheelInfo("Stopping Controller");
 
     if (m_controllerSocket) {
         if (m_controllerSocket->state() == QLocalSocket::ConnectingState) {
@@ -325,10 +325,14 @@ void CogWheelController::disconnected()
 void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
 {
     if (socketError==QLocalSocket::PeerClosedError) {
-        qInfo() << "Manager disconnected listen for a new connection....";
+        cogWheelInfo("Manager disconnected listen for a new connection....");
         return;
     }
-    cogWheelError( "Controller socket error "+ socketError);
+    if (socketError==QLocalSocket::ServerNotFoundError) {
+        cogWheelInfo("Manager not running at present....");
+        return;
+    }
+    cogWheelError( static_cast<QLocalSocket*>(sender())->errorString());;
 }
 
 /**
@@ -419,7 +423,7 @@ void CogWheelController::startServer(QDataStream &input)
         }
         connect(m_server->connections(), &CogWheelConnections::updateConnectionList, this, &CogWheelController::updateConnectionList);
     } else {
-        qInfo() << "CogWheel Server already started.";
+        cogWheelWarning("CogWheel Server already started.");
     }
 
     writeCommandToManager("STATUS", "RUNNING");
@@ -443,7 +447,7 @@ void CogWheelController::stopServer(QDataStream &input)
         m_server->deleteLater();
         m_server=nullptr;
     } else {
-        qInfo() << "CogWheel Server already stopped.";
+       cogWheelWarning("CogWheel Server already stopped.");
     }
 
     writeCommandToManager("STATUS", "STOPPED");

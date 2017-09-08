@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
 
     if  (!alreadyRunning()) {
 
+        setLoggingLevel(CogWheelLogger::LoggingLevel::Info |
+                    CogWheelLogger::LoggingLevel::Error |
+                    CogWheelLogger::LoggingLevel::Warning);
+
         // Initialise Organisation and Application names
 
         QCoreApplication::setOrganizationName("ClockWorkEngineer");

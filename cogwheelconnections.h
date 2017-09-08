@@ -1,5 +1,5 @@
 /*
- * File:   cogwheelcconnections.h
+ * File:   cogwheelconnections.h
  *
  * Author: Robert Tizzard
  *

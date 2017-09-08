@@ -16,6 +16,7 @@
 #include "cogwheelusersettings.h"
 
 #include <stdexcept>
+#include <functional>
 
 #include <QMap>
 #include <QString>

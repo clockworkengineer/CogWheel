@@ -77,7 +77,7 @@ protected:
     // QTcpServer overrides
 
     void incomingConnection(qintptr handle);
-    void OnConnected();
+ //   void OnConnected();
 
 signals:
 

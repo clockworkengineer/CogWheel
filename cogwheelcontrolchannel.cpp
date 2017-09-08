@@ -159,7 +159,7 @@ void CogWheelControlChannel::disconnectDataChannel()
 {
 
     if (m_dataChannel == nullptr) {
-        cogWheelInfo(socketHandle(),"Data channel not active.");
+        cogWheelWarning(socketHandle(),"Data channel not active.");
         return;
     }
 
@@ -369,7 +369,7 @@ void CogWheelControlChannel::closeConnection()
     // Don't disconnect if already so
 
     if (!isConnected() || m_controlChannelSocket == nullptr) {
-        cogWheelInfo(socketHandle(),"Control Channel already disconnected.");
+        cogWheelWarning(socketHandle(),"Control Channel already disconnected.");
         return;
     }
 

@@ -127,7 +127,7 @@ bool CogWheelServerSettings::loadPrivateKeyAndCert()
         m_serverPrivateKey = serverKeyFile.readAll();
         serverKeyFile.close();
     } else {
-       qDebug() << "Error opening file " << serverKeyFileName() << ": " << serverKeyFile.errorString();
+       cogWheelError("Error opening file " + serverKeyFileName() + ": " + serverKeyFile.errorString());
        return(false);
     }
 
@@ -138,7 +138,7 @@ bool CogWheelServerSettings::loadPrivateKeyAndCert()
         m_serverCert = serveCertFile.readAll();
         serveCertFile.close();
     } else {
-       qDebug() << "Error opening file " << serverCertFileName() << ": " << serveCertFile.errorString();
+       cogWheelError("Error opening file " + serverCertFileName() + ": " + serveCertFile.errorString());
        return(false);
     }
 
