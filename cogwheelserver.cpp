@@ -110,7 +110,7 @@ void CogWheelServer::stopServer()
  * QTcpServer override for incoming connections. Here we just signal
  * the connections handler class with the socket handle.
  *
- * @param handle    Client connectin socket handle.
+ * @param handle    Client connecting socket handle.
  */
 void CogWheelServer::incomingConnection(qintptr handle)
 {

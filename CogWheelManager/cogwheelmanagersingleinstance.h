@@ -11,6 +11,8 @@
 #ifndef COGWHEELMANAGERSINGLEINSTANCE_H
 #define COGWHEELMANAGERSINGLEINSTANCE_H
 
+#include "../cogwheel.h"
+
 #include <QObject>
 #include <QLocalServer>
 #include <QLocalSocket>

@@ -24,7 +24,6 @@
 
 #include "cogwheelmanagermain.h"
 #include "cogwheelmanagersingleinstance.h"
-#include <QApplication>
 
 // ============================
 // ===== MAIN ENTRY POINT =====

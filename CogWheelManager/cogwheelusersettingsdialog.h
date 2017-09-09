@@ -12,6 +12,7 @@
 #ifndef COGWHEELUSERSETTINGSDIALOG_H
 #define COGWHEELUSERSETTINGSDIALOG_H
 
+#include "../cogwheel.h"
 #include "../cogwheelusersettings.h"
 
 #include <QDialog>

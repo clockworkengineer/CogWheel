@@ -12,6 +12,8 @@
 #ifndef COGWHEELDATACHANNEL_H
 #define COGWHEELDATACHANNEL_H
 
+#include "cogwheel.h"
+
 #include <QObject>
 #include <QString>
 #include <QHostAddress>
@@ -77,7 +79,6 @@ protected:
     // QTcpServer overrides
 
     void incomingConnection(qintptr handle);
- //   void OnConnected();
 
 signals:
 

@@ -12,6 +12,8 @@
 #ifndef COGWHEELUSERSETTINGS_H
 #define COGWHEELUSERSETTINGS_H
 
+#include "cogwheel.h"
+
 #include <QSettings>
 
 class CogWheelUserSettings

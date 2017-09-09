@@ -12,6 +12,7 @@
 #ifndef COGWHEELCONTROLCHANNEL_H
 #define COGWHEELCONTROLCHANNEL_H
 
+#include "cogwheel.h"
 #include "cogwheeldatachannel.h"
 #include "cogwheelserversettings.h"
 

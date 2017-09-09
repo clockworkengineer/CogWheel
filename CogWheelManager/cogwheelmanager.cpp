@@ -39,8 +39,8 @@ CogWheelManager::CogWheelManager(QObject *parent) : QLocalServer(parent)
 
     Q_UNUSED(parent);
 
-    m_controllerCommandTable.insert("STATUS", &CogWheelManager::serverStatus);
-    m_controllerCommandTable.insert("CONNECTIONS", &CogWheelManager::connectionList);
+    m_controllerCommandTable.insert(kCWCommandSTATUS, &CogWheelManager::serverStatus);
+    m_controllerCommandTable.insert(kCWCommandCONNECTIONS, &CogWheelManager::connectionList);
 
 }
 

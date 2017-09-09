@@ -24,16 +24,15 @@
 // INCLUDE FILES
 // =============
 
-
 #include "cogwheelcontroller.h"
 #include "cogwheelusersettings.h"
 #include "cogwheellogger.h"
 
-#include <QCoreApplication>
+//#include <QCoreApplication>
 
-#include <QString>
-#include <QLockFile>
-#include <QDir>
+//#include <QString>
+//#include <QLockFile>
+//#include <QDir>
 
 /**
  * @brief alreadyRunning
@@ -44,8 +43,7 @@
  */
 static bool alreadyRunning() {
 
-    QString tmpDir = QDir::tempPath();
-    static QLockFile lockFile(tmpDir + "/CogWheel.lock");
+    static QLockFile lockFile(QDir::tempPath() + "/"+QString(kCWApplicationName)+".lock" );
 
     if(!lockFile.tryLock(100)){
         return (true);
@@ -65,14 +63,14 @@ int main(int argc, char *argv[])
 
     if  (!alreadyRunning()) {
 
-        setLoggingLevel(CogWheelLogger::LoggingLevel::Info |
-                    CogWheelLogger::LoggingLevel::Error |
-                    CogWheelLogger::LoggingLevel::Warning);
+        // Set logging level
+
+        setLoggingLevel(CogWheelLogger::Channel | CogWheelLogger::Info);
 
         // Initialise Organisation and Application names
 
-        QCoreApplication::setOrganizationName("ClockWorkEngineer");
-        QCoreApplication::setApplicationName("CogWheel");
+        QCoreApplication::setOrganizationName(kCWOrganizationName);
+        QCoreApplication::setApplicationName(kCWApplicationName);
 
         // Server controller instance
 

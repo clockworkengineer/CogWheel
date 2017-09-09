@@ -12,6 +12,7 @@
 #ifndef COGWHEELSERVER_H
 #define COGWHEELSERVER_H
 
+#include "cogwheel.h"
 #include "cogwheelconnections.h"
 #include "cogwheelserversettings.h"
 #include "cogwheelftpcore.h"

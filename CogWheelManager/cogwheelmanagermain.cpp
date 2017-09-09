@@ -43,8 +43,8 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     // Initialise config parameters
 
-    QCoreApplication::setOrganizationName("ClockWorkEngineer");
-    QCoreApplication::setApplicationName("CogWheel");
+    QCoreApplication::setOrganizationName(kCWOrganizationName);
+    QCoreApplication::setApplicationName(kCWApplicationName);
 
     // Load manager config data
 
@@ -112,7 +112,7 @@ bool CogWheelManagerMain::launchServer()
 void CogWheelManagerMain::killServer()
 {
 
-    m_serverManager.writeCommandToController("KILL");
+    m_serverManager.writeCommandToController(kCWCommandKILL);
 
     if (m_serverProcess) {
         m_serverProcess->deleteLater();
@@ -161,7 +161,7 @@ void CogWheelManagerMain::on_actionEditUser_triggered()
  */
 void CogWheelManagerMain::on_startButton_clicked()
 {
-    m_serverManager.writeCommandToController("START");
+    m_serverManager.writeCommandToController(kCWCommandSTART);
 }
 
 /**
@@ -172,7 +172,7 @@ void CogWheelManagerMain::on_startButton_clicked()
  */
 void CogWheelManagerMain::on_stopButton_clicked()
 {
-    m_serverManager.writeCommandToController("STOP");
+    m_serverManager.writeCommandToController(kCWCommandSTOP);
 
 }
 
@@ -214,12 +214,12 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
 {
   qDebug() << "Server Status " << status;
 
-  if (status=="STOPPED") {
+  if (status==kCWStatusSTOPPED) {
       ui->serverStatus->setText("<b>Running but stopped.</b>");
       ui->startButton->setEnabled(true);
       ui->stopButton->setEnabled(false);
       ui->launchKillButton->setText("Kill");
-  } else if (status=="RUNNING") {
+  } else if (status==kCWStatusRUNNING) {
       ui->serverStatus->setText("<b>Running.</b>");
       ui->startButton->setEnabled(false);
       ui->stopButton->setEnabled(true);

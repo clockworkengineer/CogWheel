@@ -53,7 +53,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
 
     manager.beginGroup("Manager");
     if (!manager.childKeys().contains("servername")) {
-        manager.setValue("servername", "CogWheel");
+        manager.setValue("servername", kCWApplicationName);
     }
     manager.endGroup();
 
@@ -67,15 +67,15 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
 
     // Load command table
 
-    m_managerCommandTable.insert("START", &CogWheelController::startServer);
-    m_managerCommandTable.insert("STOP", &CogWheelController::stopServer);
-    m_managerCommandTable.insert("KILL", &CogWheelController::killServer);
+    m_managerCommandTable.insert(kCWCommandSTART, &CogWheelController::startServer);
+    m_managerCommandTable.insert(kCWCommandSTOP, &CogWheelController::stopServer);
+    m_managerCommandTable.insert(kCWCommandSTATUS, &CogWheelController::killServer);
 
     // Create server instance
 
     m_server = new CogWheelServer(true);
     if (m_server==nullptr) {
-       cogWheelError("Unable to allocate server object.");
+        cogWheelError("Unable to allocate server object.");
     }
 
     // Save QtApplication data
@@ -161,7 +161,7 @@ void CogWheelController::startController()
 
     resetControllerSocket();  // Reset socket
 
-   cogWheelInfo("CogWheel Controller Started on ["+m_serverName+"]");
+    cogWheelInfo("CogWheel Controller Started on ["+m_serverName+"]");
 
 }
 
@@ -282,7 +282,7 @@ void CogWheelController::incomingConnection(quintptr handle)
 
     connectUpControllerSocket();
 
-    writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
+    writeCommandToManager(kCWCommandSTATUS, (m_server) ? kCWStatusRUNNING : kCWStatusSTOPPED);
 
     m_lastConnectionList.clear();
 
@@ -297,7 +297,7 @@ void CogWheelController::incomingConnection(quintptr handle)
 void CogWheelController::connected()
 {
 
-   cogWheelInfo("CogWheel manager connected to local controller.");
+    cogWheelInfo("CogWheel manager connected to local controller.");
 
 }
 
@@ -374,7 +374,7 @@ void CogWheelController::readyRead()
         (this->*m_managerCommandTable[command])(in);
         m_commandBlockSize=0;
     } else {
-       cogWheelWarning("Manager command [" + command + "] not valid.");
+        cogWheelWarning("Manager command [" + command + "] not valid.");
     }
 
 }
@@ -384,7 +384,7 @@ void CogWheelController::readyRead()
  */
 void CogWheelController::bytesWritten(qint64 bytes)
 {
-   cogWheelInfo("Controller bytesWritten " + QString::number(bytes));
+    cogWheelInfo("Controller bytesWritten " + QString::number(bytes));
 }
 
 /**
@@ -395,7 +395,7 @@ void CogWheelController::updateConnectionList(const QStringList &connectionList)
 {
 
     if (m_lastConnectionList != connectionList) {
-        writeCommandToManager("CONNECTIONS", connectionList);
+        writeCommandToManager(kCWCommandCONNECTIONS, connectionList);
         m_lastConnectionList = connectionList;
     }
 
@@ -426,7 +426,7 @@ void CogWheelController::startServer(QDataStream &input)
         cogWheelWarning("CogWheel Server already started.");
     }
 
-    writeCommandToManager("STATUS", "RUNNING");
+    writeCommandToManager(kCWCommandSTATUS, kCWStatusRUNNING);
 
 }
 
@@ -447,10 +447,10 @@ void CogWheelController::stopServer(QDataStream &input)
         m_server->deleteLater();
         m_server=nullptr;
     } else {
-       cogWheelWarning("CogWheel Server already stopped.");
+        cogWheelWarning("CogWheel Server already stopped.");
     }
 
-    writeCommandToManager("STATUS", "STOPPED");
+    writeCommandToManager(kCWCommandSTATUS, kCWStatusSTOPPED);
 
 }
 

@@ -36,19 +36,19 @@ void CogWheelServerSettings::load()
 
     server.beginGroup("Server");
     if (!server.childKeys().contains("name")) {
-        server.setValue("name", "CogWheel");
+        server.setValue("name", kCWApplicationName);
     }
     if (!server.childKeys().contains("version")) {
         server.setValue("version", "0.5");
     }
     if (!server.childKeys().contains("port")) {
-        server.setValue("port", 2221);
+        server.setValue("port", kCWDefaultPort);
     }
     if (!server.childKeys().contains("allowSMNT")) {
         server.setValue("allowSMNT", false);
     }
     if (!server.childKeys().contains("writesize")) {
-        server.setValue("writesize", 32*1024);
+        server.setValue("writesize", kCWWriteBytesSize);
     }
     if (!server.childKeys().contains("enabled")) {
         server.setValue("enabled", true);
@@ -69,7 +69,7 @@ void CogWheelServerSettings::load()
         server.setValue("servercert", "./server.crt");
     }
     if (!server.childKeys().contains("connectionlistppdate")) {
-        server.setValue("connectionlistppdate", 5000);
+        server.setValue("connectionlistppdate", kCWConnListUpdateTime);
     }
     server.endGroup();
 
@@ -93,7 +93,7 @@ void CogWheelServerSettings::load()
 /**
  * @brief CogWheelServerSettings::save
  *
- * Save server settings (TO BE IMLEMENTED).
+ * Save server settings.
  *
  */
 void CogWheelServerSettings::save()
@@ -208,7 +208,7 @@ void CogWheelServerSettings::setServerAllowSMNT(bool allowSMNT)
  * @brief CogWheelServerSettings::serverPort
  * @return
  */
-qint64 CogWheelServerSettings::serverPort() const
+quint64 CogWheelServerSettings::serverPort() const
 {
     return m_serverPort;
 }
@@ -217,7 +217,7 @@ qint64 CogWheelServerSettings::serverPort() const
  * @brief CogWheelServerSettings::setServerPort
  * @param serverPort
  */
-void CogWheelServerSettings::setServerPort(const qint64 &serverPort)
+void CogWheelServerSettings::setServerPort(const quint64 &serverPort)
 {
     m_serverPort = serverPort;
 }
@@ -226,7 +226,7 @@ void CogWheelServerSettings::setServerPort(const qint64 &serverPort)
  * @brief CogWheelServerSettings::writeBytesSize
  * @return
  */
-qint64 CogWheelServerSettings::serverWriteBytesSize() const
+quint64 CogWheelServerSettings::serverWriteBytesSize() const
 {
     return m_serverWriteBytesSize;
 }
@@ -235,7 +235,7 @@ qint64 CogWheelServerSettings::serverWriteBytesSize() const
  * @brief CogWheelServerSettings::setWriteBytesSize
  * @param writeBytesSize
  */
-void CogWheelServerSettings::setServerWriteBytesSize(const qint64 &writeBytesSize)
+void CogWheelServerSettings::setServerWriteBytesSize(const quint64 &writeBytesSize)
 {
     m_serverWriteBytesSize = writeBytesSize;
 }

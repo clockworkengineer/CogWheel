@@ -138,10 +138,9 @@ private:
     static QHash<QString, FTPCommandFunction> m_ftpCommandTableExtended;  // Extended command table
 
     static QHash<quint16, QString> m_ftpServerResponse;   // Server response code table
-
     static QHash<QString,QString> m_featTailoredRespone;  // Tailored FEAT command responses
 
-    static CogWheelServerSettings m_serverSettings; // FTP server settinngs
+    static CogWheelServerSettings m_serverSettings;       // FTP server settinngs
 
 };
 

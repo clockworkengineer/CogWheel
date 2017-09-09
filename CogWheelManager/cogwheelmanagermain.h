@@ -12,6 +12,8 @@
 #ifndef COGWHEELMANAGERMAIN_H
 #define COGWHEELMANAGERMAIN_H
 
+#include "../cogwheel.h"
+
 #include "cogwheelmanager.h"
 #include <QMainWindow>
 #include <QProcess>

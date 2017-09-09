@@ -40,4 +40,5 @@ HEADERS += \
     cogwheelcontrolchannel.h \
     cogwheelserversettings.h \
     cogwheelcontroller.h \
-    cogwheellogger.h
+    cogwheellogger.h \
+    cogwheel.h

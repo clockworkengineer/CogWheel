@@ -11,6 +11,7 @@
 #ifndef COGWHEELCONTROLLER_H
 #define COGWHEELCONTROLLER_H
 
+#include "cogwheel.h"
 #include "cogwheelserver.h"
 
 #include <QObject>

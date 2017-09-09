@@ -11,6 +11,8 @@
 #ifndef COGWHEELUSERLISTDIALOG_H
 #define COGWHEELUSERLISTDIALOG_H
 
+#include "../cogwheel.h"
+
 #include <QDialog>
 #include <QSettings>
 

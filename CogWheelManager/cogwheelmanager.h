@@ -12,6 +12,8 @@
 #ifndef COGWHEELMANAGER_H
 #define COGWHEELMANAGER_H
 
+#include "../cogwheel.h"
+
 #include <QObject>
 #include <QLocalSocket>
 #include <QLocalServer>
@@ -101,7 +103,7 @@ private:
     QString m_serverName;                   // Manager socket name
 
     QLocalSocket *m_managerSocket;          // Manager socket
-    quint32 m_commandResponseBlockSize=0;   // Commanf reply block size.
+    quint32 m_commandResponseBlockSize=0;   // Command reply block size.
 
     // Controller command table
 
