@@ -74,7 +74,7 @@ private:
 
     // Setup tables
 
-    static void loadServerReponseTable();
+    static void loadServerReponseTables();
     static void loadFTPCommandTables();
 
     // Build list file line

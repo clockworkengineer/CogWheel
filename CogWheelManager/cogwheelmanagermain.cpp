@@ -52,7 +52,7 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     // Remove any old manager socket servers
 
-    QLocalServer::removeServer(m_serverManager.serverName()+"Manager");
+    QLocalServer::removeServer(m_serverManager.serverName()+kCWManagerPostfix);
 
     // Start manager
 

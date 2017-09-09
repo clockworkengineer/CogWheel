@@ -72,7 +72,7 @@ CogWheelFTPCore::CogWheelFTPCore()
 {
 
     loadFTPCommandTables();
-    loadServerReponseTable();
+    loadServerReponseTables();
 
 }
 
@@ -84,6 +84,13 @@ CogWheelFTPCore::~CogWheelFTPCore()
 
 }
 
+/**
+ * @brief CogWheelFTPCore::setupServer
+ *
+ * Configure server given passed in settings.
+ *
+ * @param serverSettings
+ */
 void CogWheelFTPCore::setupServer(const CogWheelServerSettings &serverSettings)
 {
     m_serverSettings = serverSettings;
@@ -107,7 +114,7 @@ void CogWheelFTPCore::setupServer(const CogWheelServerSettings &serverSettings)
  * Load server response table.
  *
  */
-void CogWheelFTPCore::loadServerReponseTable()
+void CogWheelFTPCore::loadServerReponseTables()
 {
 
     // Server reponse codes and text
@@ -155,7 +162,7 @@ void CogWheelFTPCore::loadServerReponseTable()
     }
 
     if (m_featTailoredRespone.empty()) {
-         m_featTailoredRespone.insert("AUTH", "AUTH TLS");
+        m_featTailoredRespone.insert("AUTH", "AUTH TLS");
     }
 
 }
@@ -433,7 +440,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
                 if (!m_serverSettings.serverPlainFTPEnabled()) {
                     if (m_serverSettings.serverSslEnabled() && !connection->IsSslConnection()) {
                         if ((command != "AUTH") || (arguments != "TLS")) {
-                             throw FtpServerErrorReply(550, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
+                            throw FtpServerErrorReply(550, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
                         }
                     } else if (!m_serverSettings.serverSslEnabled()){
                         throw FtpServerErrorReply(550, "No plain FTP allowed and TLS/SSL disabled.Server will not respond to commands.");
@@ -475,7 +482,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 /**
  * @brief CogWheelFTPCore::USER
  *
- * Login to server with a given user name. If the user is anonymous then the login set
+ * Login to server with a given user name. If the user is anonymous then the login
  * is set to anonymous. If the user name does not exist on the server then and error
  * response wil be returned otherwise a password required response (331). The standard
  * indicates that this command may be used at any time by the client to change user but
@@ -526,16 +533,23 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
     if (!connection->isAnonymous()) {
         connection->setRootDirectory(userSettings.getRootPath());
     } else {
-        connection->setRootDirectory("/tmp");
+        connection->setRootDirectory(QDir::tempPath());
     }
 
     // Start at root
 
     connection->setCurrentWorkingDirectory("");
 
-    // Ask for password
+    // Ask for password if it is not empty or anonymous login
+    // Otherwise set as authorized.
 
-    connection->sendReplyCode(331);
+    if (!connection->password().isEmpty()||connection->isAnonymous()) {
+        connection->sendReplyCode(331);
+    } else {
+        connection->sendReplyCode(230);
+        connection->setAuthorized(true);
+
+    }
 
 }
 
@@ -1074,7 +1088,7 @@ void CogWheelFTPCore::ACCT(CogWheelControlChannel *connection, const QString &ar
 {
 
     connection->setAccountName(arguments);
-    connection->sendReplyCode(200);
+    connection->sendReplyCode(202);
 
 }
 
@@ -1133,7 +1147,7 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &ar
         }
 
     }else{
-        throw FtpServerErrorReply("SMNT is not allowed.");
+        throw FtpServerErrorReply(202, "SMNT is not allowed.");
     }
 }
 
@@ -1300,7 +1314,9 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
 
     Q_UNUSED(arguments);
 
+    connection->setUserName("");
     connection->setAccountName("");
+    connection->setPassword("");
     connection->setAnonymous(false);
     connection->setAuthorized(false);
     connection->setClientHostIP("");
@@ -1311,7 +1327,15 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
     connection->setRestoreFilePostion(0);
     connection->setRootDirectory("");
     connection->setServerIP("");
-    connection->setUserName("");
+    connection->setWriteAccess(false);
+    connection->setTransferMode('S');
+    connection->setFileStructure('F');
+    connection->setTransferType('A');
+    connection->setTransferTypeFormat('N');
+    connection->setTransTypeByteSize(8);
+    connection->setRestoreFilePostion(0);
+    connection->setRenameFromFileName("");
+    connection->setDataChanelProtection('C');
 
     connection->sendReplyCode(250);
 
@@ -1424,7 +1448,7 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
         if (!m_featTailoredRespone.contains(key))  {
             featReply.append(" "+key+"\r\n");
         } else {
-           featReply.append(" "+m_featTailoredRespone[key]+"\r\n");
+            featReply.append(" "+m_featTailoredRespone[key]+"\r\n");
         }
     }
 

@@ -350,7 +350,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
         cogWheelInfo(socketHandle, "Server disabled closing down control connection.");
 
-        sendReplyCode(503, "Server unavailable at the moment.");
+        sendReplyCode(421);
         closeConnection();
 
     }

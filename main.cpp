@@ -28,11 +28,11 @@
 #include "cogwheelusersettings.h"
 #include "cogwheellogger.h"
 
-//#include <QCoreApplication>
+#include <QCoreApplication>
 
-//#include <QString>
-//#include <QLockFile>
-//#include <QDir>
+#include <QString>
+#include <QLockFile>
+#include <QDir>
 
 /**
  * @brief alreadyRunning
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
         // Set logging level
 
-        setLoggingLevel(CogWheelLogger::Channel | CogWheelLogger::Info);
+        setLoggingLevel(CogWheelLogger::All);
 
         // Initialise Organisation and Application names
 

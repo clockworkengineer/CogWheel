@@ -116,7 +116,7 @@ void CogWheelManager::startUpManager()
 
     // Setup socket listen
 
-    if (!listen(m_serverName+"Manager")) {
+    if (!listen(m_serverName+kCWManagerPostfix)) {
         qDebug() << "Manager unable listen on socket name: " << m_serverName;
         return;
     }

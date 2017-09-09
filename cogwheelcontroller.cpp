@@ -69,7 +69,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
 
     m_managerCommandTable.insert(kCWCommandSTART, &CogWheelController::startServer);
     m_managerCommandTable.insert(kCWCommandSTOP, &CogWheelController::stopServer);
-    m_managerCommandTable.insert(kCWCommandSTATUS, &CogWheelController::killServer);
+    m_managerCommandTable.insert(kCWCommandKILL, &CogWheelController::killServer);
 
     // Create server instance
 
@@ -151,7 +151,7 @@ void CogWheelController::startController()
 
     connectUpControllerSocket();
 
-    m_controllerSocket->connectToServer(m_serverName+"Manager");
+    m_controllerSocket->connectToServer(m_serverName+kCWManagerPostfix);
     m_controllerSocket->waitForConnected(-1);
 
     if (m_controllerSocket->state() == QLocalSocket::ConnectedState) {
