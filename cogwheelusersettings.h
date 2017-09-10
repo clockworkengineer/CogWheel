@@ -1,5 +1,5 @@
 /*
- * File:   cogwheelusersettings.cpp
+ * File:   cogwheelusersettings.h
  *
  * Author: Robert Tizzard
  *

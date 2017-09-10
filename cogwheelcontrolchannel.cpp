@@ -70,8 +70,8 @@ void CogWheelControlChannel::createDataChannel()
     // Channel already exists
 
     if ( m_dataChannel != nullptr) {
-        cogWheelError(socketHandle(),"Data channel already exists.");
-        throw CogWheelFTPCore::FtpServerReply("Data channel already exists.");
+        cogWheelError(socketHandle(), "Data channel already exists.");
+        return;
     }
 
     // Create data channel
@@ -79,8 +79,7 @@ void CogWheelControlChannel::createDataChannel()
     m_dataChannel = new CogWheelDataChannel(socketHandle());
 
     if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Failure to create data channel.");
-        throw CogWheelFTPCore::FtpServerReply("Failure to create data channel.");
+        throw CogWheelFtpServerReply("Failure to create data channel.");
     }
 
     // Setup signals and slots for channel

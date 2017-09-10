@@ -1,5 +1,5 @@
 /*
- * File:   cogwheelcontrolchannel.cpp
+ * File:   cogwheelcontrolchannel.h
  *
  * Author: Robert Tizzard
  *

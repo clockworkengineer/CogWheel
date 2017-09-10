@@ -41,4 +41,5 @@ HEADERS += \
     cogwheelserversettings.h \
     cogwheelcontroller.h \
     cogwheellogger.h \
-    cogwheel.h
+    cogwheel.h \
+    cogwheelftpserverreply.h

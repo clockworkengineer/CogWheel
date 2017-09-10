@@ -439,18 +439,17 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
                 if (!m_serverSettings.serverPlainFTPEnabled()) {
                     if (m_serverSettings.serverSslEnabled() && !connection->IsSslConnection()) {
                         if ((command != "AUTH") || (arguments != "TLS")) {
-                            throw FtpServerReply(550, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
+                            throw CogWheelFtpServerReply(550, "No plain FTP allowed. Please connect using explicit FTP over TLS.");
                         }
                     } else if (!m_serverSettings.serverSslEnabled()){
-                        throw FtpServerReply(550, "No plain FTP allowed and TLS/SSL disabled.Server will not respond to commands.");
+                        throw CogWheelFtpServerReply(550, "No plain FTP allowed and TLS/SSL disabled.Server will not respond to commands.");
                     }
                 }
 
                 commandFn=m_unauthCommandTable[command];
 
             } else {
-                cogWheelInfo(connection->socketHandle(),"Please login with USER and PASS.");
-                throw FtpServerReply(530, "Please login with USER and PASS.");
+                throw CogWheelFtpServerReply(530, "Please login with USER and PASS.");
             }
 
             Q_ASSERT(commandFn!=nullptr);
@@ -460,18 +459,22 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             }
 
         } else {
-            cogWheelWarning(connection->socketHandle(),"Unsupported FTP command ["+command+"]");
-            throw FtpServerReply(500);
+            throw CogWheelFtpServerReply(500, "Unsupported FTP command "+command+".");
         }
 
-    } catch (FtpServerReply response)  {
-        connection->sendReplyCode(response.getResponseCode(),response.getMessage());
-
+    } catch (CogWheelFtpServerReply response)  {
+        if (!response.getMessage().isEmpty()){
+            cogWheelError(connection->socketHandle(), response.getMessage());
+            connection->sendReplyCode(response.getResponseCode(),response.getMessage());
+        } else {
+            cogWheelError(connection->socketHandle(), getResponseText(response.getResponseCode()));
+            connection->sendReplyCode(response.getResponseCode());
+       }
     } catch (std::exception &err)  {
+        cogWheelError(connection->socketHandle(),err.what());
         connection->sendReplyCode(550, err.what());
-
     } catch(...) {
-        cogWheelError(connection->socketHandle(),"Unknown error handling " + command + " command.");
+        cogWheelError(connection->socketHandle(), "Unknown error handling " + command + " command.");
         connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
     }
 
@@ -501,7 +504,7 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
     // We asre already logged in
 
     if (connection->isAuthorized()) {
-        throw FtpServerReply(530, "User already logged in.");
+        throw CogWheelFtpServerReply(530, "User already logged in.");
     }
 
     // Anonymous login
@@ -511,14 +514,14 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
         if (m_serverSettings.serverAnonymousEnabled()) {
             connection->setAnonymous(true);
         } else {
-            throw FtpServerReply(530, "Anonymous logins are disabled.");
+            throw CogWheelFtpServerReply(530, "Anonymous logins are disabled.");
         }
 
     } else if (!CogWheelUserSettings::checkUserName(arguments)) {
 
         // User does not exist
 
-        throw FtpServerReply(530, "User name not valid.");
+        throw CogWheelFtpServerReply(530, "User name not valid.");
 
     }
 
@@ -576,7 +579,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
     // Argument does not exist
 
     if (!fileInfo.exists()) {
-        throw FtpServerReply("Requested path not found.");
+        throw CogWheelFtpServerReply("Requested path not found.");
     }
 
     // Connect up data channel
@@ -697,7 +700,7 @@ void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arg
     QDir path { cwdPath };
 
     if(!path.exists()) {
-        throw FtpServerReply("Requested path not found.");
+        throw CogWheelFtpServerReply("Requested path not found.");
     } else {
         connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, cwdPath));
         connection->sendReplyCode(250);
@@ -722,7 +725,7 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &ar
 
     if (!connection->isAnonymous()) {
         if (!CogWheelUserSettings::checkUserPassword(connection->password(), arguments)) {
-            throw FtpServerReply(530); // Failure
+            throw CogWheelFtpServerReply(530); // Failure
         }
         connection->sendReplyCode(230);     // Success then login
     } else {
@@ -747,7 +750,7 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &ar
     QDir path  { mapPathToLocal(connection, arguments) };
 
     if(!path.cdUp()) {
-        throw FtpServerReply("Requested path not found.");
+        throw CogWheelFtpServerReply("Requested path not found.");
     } else {
         connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, path.absolutePath()));
         connection->sendReplyCode(250);
@@ -770,13 +773,13 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
     QFile file { mapPathToLocal(connection, arguments) } ;
 
     if(!file.exists()){
-        throw FtpServerReply(450);
+        throw CogWheelFtpServerReply(450);
     }
 
     QFileInfo fileInfo { file };
 
     if(!fileInfo.isFile()){
-        throw FtpServerReply(450, "Requested object is not a file.");
+        throw CogWheelFtpServerReply(450, "Requested object is not a file.");
     }
 
     if (connection->connectDataChannel()) {
@@ -832,7 +835,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     // Check destination does not exist
@@ -843,7 +846,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     if(file.exists()) {
         if(!file.remove()) {
-            throw FtpServerReply(551, "File could not be overwritten.");
+            throw CogWheelFtpServerReply(551, "File could not be overwritten.");
         }
     }
 
@@ -941,7 +944,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
     // Check for directory that exists
 
     if (!fileInfo.exists() || !fileInfo.isDir()) {
-        throw FtpServerReply("Requested path not found.");
+        throw CogWheelFtpServerReply("Requested path not found.");
     }
 
     // Open data channel and send down file list
@@ -977,7 +980,7 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -985,9 +988,9 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
 
     if(!newDirectory.mkdir(path)){
         if (newDirectory.exists()) {
-            throw FtpServerReply(521, "Directory already exists.");
+            throw CogWheelFtpServerReply(521, "Directory already exists.");
         }  else {
-            throw FtpServerReply("Could not create directory.");
+            throw CogWheelFtpServerReply("Could not create directory.");
         }
     }else{
         connection->sendReplyCode(257);
@@ -1010,7 +1013,7 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -1021,11 +1024,11 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
         if(directoryToDelete.rmdir(path)){
             connection->sendReplyCode(250);
         }else{
-            throw FtpServerReply("Could not delete directory.");
+            throw CogWheelFtpServerReply("Could not delete directory.");
         }
 
     } else{
-        throw FtpServerReply("Directory not found.");
+        throw CogWheelFtpServerReply("Directory not found.");
     }
 
 }
@@ -1064,7 +1067,7 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     QFile fileToDelete { mapPathToLocal(connection, arguments) };
@@ -1074,10 +1077,10 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
         if(fileToDelete.remove()) {
             connection->sendReplyCode(250);
         } else {
-            throw FtpServerReply("Could not delete file.");
+            throw CogWheelFtpServerReply("Could not delete file.");
         }
     } else {
-        throw FtpServerReply("File not found.");
+        throw CogWheelFtpServerReply("File not found.");
     }
 
 }
@@ -1113,14 +1116,14 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     QString path { mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
 
     if(file.exists()) {
-        throw FtpServerReply(551, "File already exists.");
+        throw CogWheelFtpServerReply(551, "File already exists.");
     }
 
     if (connection->connectDataChannel()) {
@@ -1149,11 +1152,11 @@ void CogWheelFTPCore::SMNT(CogWheelControlChannel *connection, const QString &ar
             connection->setRootDirectory(newRootDirectory.absolutePath());
             connection->sendReplyCode(250, "SMNT command successful.");
         } else {
-            throw FtpServerReply("Could not change root directory.");
+            throw CogWheelFtpServerReply("Could not change root directory.");
         }
 
     }else{
-        throw FtpServerReply(202, "SMNT is not allowed.");
+        throw CogWheelFtpServerReply(202, "SMNT is not allowed.");
     }
 }
 
@@ -1204,7 +1207,7 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     QString path { mapPathToLocal(connection, arguments) };
@@ -1215,7 +1218,7 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
 
     QFileInfo fileToRename { path };
     if(!fileToRename.exists()){
-        throw FtpServerReply("Could not find '" + arguments + "'");
+        throw CogWheelFtpServerReply("Could not find '" + arguments + "'");
     } else{
         connection->setRenameFromFileName(path);
         connection->sendReplyCode(350);
@@ -1239,13 +1242,13 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     // No source set
 
     if(connection->renameFromFileName() == "") {
-        throw FtpServerReply(503);
+        throw CogWheelFtpServerReply(503);
     }
 
     // Rename file
@@ -1283,7 +1286,7 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &ar
         connection->sendReplyCode(350,"Restarting at "+arguments+". Send STORE or RETRIEVE.");
     } else{
         connection->setRestoreFilePostion(0);
-        throw FtpServerReply(500);
+        throw CogWheelFtpServerReply(500);
     }
 
 }
@@ -1362,7 +1365,7 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
     // User does not have write access to server
 
     if (!connection->writeAccess()) {
-        throw FtpServerReply("User needs write access to perform command.");
+        throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
     if (connection->connectDataChannel()) {
@@ -1484,7 +1487,7 @@ void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &ar
     QFileInfo fileInfo { file };
 
     if (!fileInfo.exists()) {
-        throw FtpServerReply("Requested file not found.");
+        throw CogWheelFtpServerReply("Requested file not found.");
     }
 
     if (!fileInfo.lastModified().toString("zzz").isEmpty()){
@@ -1511,7 +1514,7 @@ void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &ar
     QFileInfo fileInfo { file };
 
     if (!fileInfo.exists()) {
-        throw FtpServerReply("Requested file not found.");
+        throw CogWheelFtpServerReply("Requested file not found.");
     }
 
     cogWheelInfo(connection->socketHandle(),"File [" + file + "] Size [" + QString::number(fileInfo.size()) + "]");

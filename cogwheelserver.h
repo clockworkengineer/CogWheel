@@ -1,5 +1,5 @@
 /*
- * File:   cogwheelserver.cpp
+ * File:   cogwheelserver.h
  *
  * Author: Robert Tizzard
  *

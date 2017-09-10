@@ -1,3 +1,14 @@
+/*
+ * File:   cogwheelserversettings.h
+ *
+ * Author: Robert Tizzard
+ *
+ * Created on August 10, 2017
+ *
+ * Copyright 2017.
+ *
+ */
+
 #ifndef COGWHEELSERVERSETTINGS_H
 #define COGWHEELSERVERSETTINGS_H
 
