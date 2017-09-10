@@ -22,9 +22,9 @@
 // INCLUDE FILES
 // =============
 
-#include "cogwheelftpcore.h"
 #include "cogwheeldatachannel.h"
 #include "cogwheelcontrolchannel.h"
+#include "cogwheelftpcore.h"
 #include "cogwheellogger.h"
 
 /**

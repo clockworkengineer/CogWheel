@@ -31,7 +31,6 @@ class CogWheelFTPCore
 
 public:
 
-
     //
     // Used to signal a program error and to trigger a reply to server. Three constructors
     // are provided for object creation with the default code of 550 being used if none is supplied

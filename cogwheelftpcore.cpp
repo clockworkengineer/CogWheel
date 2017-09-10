@@ -33,7 +33,6 @@
 
 #include "cogwheelftpcore.h"
 #include "cogwheellogger.h"
-#include "cogwheelusersettings.h"
 
 #include <QDir>
 #include <QDateTime>
