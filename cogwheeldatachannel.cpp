@@ -22,6 +22,7 @@
 // INCLUDE FILES
 // =============
 
+#include "cogwheelftpcore.h"
 #include "cogwheeldatachannel.h"
 #include "cogwheelcontrolchannel.h"
 #include "cogwheellogger.h"
@@ -44,7 +45,7 @@ CogWheelDataChannel::CogWheelDataChannel(qintptr controlSocketHandle, QObject *p
 
     if (m_dataChannelSocket==nullptr) {
         cogWheelError(m_controlSocketHandle,"Error trying to create data channel socket.");
-        return;
+        throw CogWheelFTPCore::FtpServerReply("Error trying to create data channel socket.");
     }
 
     connect(m_dataChannelSocket, &QSslSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
@@ -198,8 +199,8 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
         }
         emit passiveConnection();
         m_listening=true;
-    }catch(QString err) {
-        cogWheelError(m_controlSocketHandle,err);
+    }catch(std::exception &err) {
+        cogWheelError(m_controlSocketHandle,err.what());
     }catch(...) {
         cogWheelError(m_controlSocketHandle,"Unknown error in listenForConnection().");
     }
@@ -222,7 +223,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
 
         if (m_fileBeingTransferred==nullptr) {
             cogWheelError(m_controlSocketHandle,"QFile instance for "+fileName+" could not be created.");
-            return;
+            throw CogWheelFTPCore::FtpServerReply(451, "QFile instance for "+fileName+" could not be created.");
         }
 
         // Open the file
@@ -230,7 +231,7 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
         if(!m_fileBeingTransferred->open(QFile::ReadOnly)) {
             fileTransferCleanup();
             cogWheelError(m_controlSocketHandle,"Error: File "+fileName+" could not be opened.");
-            return;
+            throw CogWheelFTPCore::FtpServerReply(451, "Error: File "+fileName+" could not be opened.");
         }
 
         cogWheelInfo(m_controlSocketHandle,"Downloading file "+fileName+".");
@@ -253,12 +254,14 @@ void CogWheelDataChannel::downloadFile(CogWheelControlChannel *connection, const
             bytesWritten(0);   // File is zero length (close connection/signal success)
         }
 
-    } catch(QString err) {
+    } catch(std::exception &err) {
         fileTransferCleanup();
-        cogWheelError(m_controlSocketHandle,err);
+        cogWheelError(m_controlSocketHandle,err.what());
+        throw CogWheelFTPCore::FtpServerReply(451, err.what());
     } catch(...) {
         fileTransferCleanup();
         cogWheelError(m_controlSocketHandle,"Unknown error in downloadFile().");
+        throw CogWheelFTPCore::FtpServerReply(451,"Unown error in downloadFile().");
     }
 
 }
@@ -280,13 +283,13 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
 
     if (m_fileBeingTransferred==nullptr) {
         cogWheelError(m_controlSocketHandle,"QFile instance for "+fileName+" could not be cretaed.");
-        return;
+        throw CogWheelFTPCore::FtpServerReply(451, "QFile instance for "+fileName+" could not be cretaed.");
     }
 
     if(!m_fileBeingTransferred->open(QFile::Append)) {
-        cogWheelError(m_controlSocketHandle,"File "+fileName+" could not be opened.");
         fileTransferCleanup();
-        return;
+        cogWheelError(m_controlSocketHandle,"File "+fileName+" could not be opened.");
+        throw CogWheelFTPCore::FtpServerReply(451, "File "+fileName+" could not be opened.");
     }
 
     // Truncate the file if needed
@@ -295,7 +298,7 @@ void CogWheelDataChannel::uploadFile(CogWheelControlChannel *connection, const Q
         if(!m_fileBeingTransferred->resize(connection->restoreFilePostion()))  {
             cogWheelError(m_controlSocketHandle,"File "+fileName+" could not be truncated.");
             fileTransferCleanup();
-            return;
+            throw CogWheelFTPCore::FtpServerReply(451, "File "+fileName+" could not be truncated.");
         }
     }
 

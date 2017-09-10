@@ -96,21 +96,21 @@ inline void cogWheelWarning(const QString &message) { if (getLogLevel() & CogWhe
 inline void cogWheelInfo (qintptr handle, const QString &message)
 {
     if (getLogLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().info(QString("CONT[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().info(QString("CHANNEL[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelError (qintptr handle, const QString &message)
 {
     if (getLogLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().error(QString("CONT[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().error(QString("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelWarning (qintptr handle, const QString &message)
 {
     if (getLogLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().warning(QString("CONT[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().warning(QString("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 

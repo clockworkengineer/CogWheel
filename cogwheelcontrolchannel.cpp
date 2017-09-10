@@ -22,6 +22,7 @@
 // INCLUDE FILES
 // =============
 
+#include "cogwheelftpcore.h"
 #include "cogwheelcontrolchannel.h"
 #include "cogwheellogger.h"
 #include "cogwheelftpcore.h"
@@ -69,8 +70,8 @@ void CogWheelControlChannel::createDataChannel()
     // Channel already exists
 
     if ( m_dataChannel != nullptr) {
-        cogWheelError(socketHandle(),"Data channel already exists.");;
-        return;
+        cogWheelError(socketHandle(),"Data channel already exists.");
+        throw CogWheelFTPCore::FtpServerReply("Data channel already exists.");
     }
 
     // Create data channel
@@ -79,7 +80,7 @@ void CogWheelControlChannel::createDataChannel()
 
     if (m_dataChannel == nullptr) {
         cogWheelError(socketHandle(),"Failure to create data channel.");
-        return;
+        throw CogWheelFTPCore::FtpServerReply("Failure to create data channel.");
     }
 
     // Setup signals and slots for channel
@@ -530,7 +531,6 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
  */
 void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
 {
-
     sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
 }
 
@@ -586,11 +586,11 @@ void CogWheelControlChannel::readyRead()
     // Read all available data and append to read buffer
     // When end of line found execute command and clear buffer.
 
-    m_readBufer.append(m_controlChannelSocket->readAll());
+    m_readBuffer.append(m_controlChannelSocket->readAll());
 
-    if (m_readBufer.endsWith('\n')) {
-        processFTPCommand(m_readBufer);
-        m_readBufer.clear();
+    if (m_readBuffer.endsWith('\n')) {
+        processFTPCommand(m_readBuffer);
+        m_readBuffer.clear();
     }
 
 }
