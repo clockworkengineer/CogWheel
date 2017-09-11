@@ -469,7 +469,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         } else {
             cogWheelError(connection->socketHandle(), getResponseText(response.getResponseCode()));
             connection->sendReplyCode(response.getResponseCode());
-       }
+        }
     } catch (std::exception &err)  {
         cogWheelError(connection->socketHandle(),err.what());
         connection->sendReplyCode(550, err.what());
@@ -582,7 +582,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("Requested path not found.");
     }
 
-    // Connect up data channel
+    // Connect up data channel and send file list
 
     if (connection->connectDataChannel()) {
 
@@ -603,12 +603,15 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             listing.append(buildListLine(fileInfo));
         }
 
-        // Send listing to client and close data channel
+        // Send listing to clients
 
         connection->sendOnDataChannel(listing.toUtf8().data());
-        connection->disconnectDataChannel();
 
     }
+
+    // Disconnect data channel (cleanup on connect failure)
+
+    connection->disconnectDataChannel();
 
 }
 
@@ -782,8 +785,13 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply(450, "Requested object is not a file.");
     }
 
+    // Connect up data channel and download file
+
     if (connection->connectDataChannel()) {
         connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
+    } else {
+        // Disconnect data channel (cleanup on connect failure)
+        connection->disconnectDataChannel();
     }
 
 }
@@ -850,10 +858,13 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
         }
     }
 
-    // Open data channel and upload file.
+    // Connect up  data channel and upload file.
 
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel( mapPathToLocal(connection,arguments) );
+    } else {
+        // Disconnect data channel (cleanup on connect failure)
+        connection->disconnectDataChannel();
     }
 
 }
@@ -947,7 +958,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("Requested path not found.");
     }
 
-    // Open data channel and send down file list
+    // Connect up data channel and send file list
 
     if (connection->connectDataChannel()) {
 
@@ -959,9 +970,13 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
         }
 
         connection->sendOnDataChannel(listing.toUtf8().data());
-        connection->disconnectDataChannel();
 
     }
+
+    // Disconnect data channel (cleanup on connect failure)
+
+    connection->disconnectDataChannel();
+
 
 }
 
@@ -1126,8 +1141,13 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply(551, "File already exists.");
     }
 
+    // Connect up data channel and upload file
+
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel(path);
+    } else {
+        // Disconnect data channel (cleanup on connect failure)
+        connection->disconnectDataChannel();
     }
 
 }
@@ -1368,8 +1388,13 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
+    // Connect up data channel and upload file
+
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel(mapPathToLocal(connection,arguments) );
+    } else {
+        // Disconnect data channel (cleanup on connect failure)
+        connection->disconnectDataChannel();
     }
 
 }
