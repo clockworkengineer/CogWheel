@@ -44,7 +44,7 @@ CogWheelDataChannel::CogWheelDataChannel(qintptr controlSocketHandle, QObject *p
     m_dataChannelSocket = new QSslSocket();
 
     if (m_dataChannelSocket==nullptr) {
-        throw CogWheelFtpServerReply("Error trying to create data channel socket.");
+        throw CogWheelFtpServerReply(425, "Error trying to create data channel socket.");
     }
 
     connect(m_dataChannelSocket, &QSslSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
@@ -58,16 +58,14 @@ CogWheelDataChannel::CogWheelDataChannel(qintptr controlSocketHandle, QObject *p
 
 /**
  * @brief CogWheelDataChannel::~CogWheelDataChannel
+ *
+ * Data channel destructor. Release all data accessed though pointers.
+ *
  */
 CogWheelDataChannel::~CogWheelDataChannel()
 {
-    if (m_dataChannelSocket) {
-        if (m_dataChannelSocket->isOpen()) {
-            m_dataChannelSocket->close();
-        }
-        m_dataChannelSocket->deleteLater();
-        m_dataChannelSocket=nullptr;
-    }
+    fileTransferCleanup();
+    dataChannelSocketCleanup();
 }
 
 /**
@@ -110,19 +108,23 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
     }
 
 
-    m_connected=true;
-
-    // Data channel protection set to private switch on SSL
+    // Data channel protection set to private so switch on SSL
 
     if (connection->dataChanelProtection()=='P') {
         enbleDataChannelTLSSupport(connection);
     }
 
+    // Set write size
+
     m_writeBytesSize = connection->writeBytesSize();
+
+    // Re-check connected status and return error if not
 
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
          throw CogWheelFtpServerReply(425, "Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
     }
+
+    m_connected=true;
 
     return(m_connected);
 
@@ -139,12 +141,12 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
 {
 
     if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
-        m_dataChannelSocket->flush();
+        m_dataChannelSocket->flush();   // Flush any buffered data
         m_dataChannelSocket->disconnectFromHost();
         if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
             m_dataChannelSocket->waitForDisconnected(-1);
         }
-        connection->sendReplyCode(226);
+        connection->sendReplyCode(226); // Data channel closed reply
     }
     m_connected=false;
 
@@ -332,6 +334,9 @@ void CogWheelDataChannel::enbleDataChannelTLSSupport(CogWheelControlChannel *con
 
 /**
  * @brief CogWheelDataChannel::sslError
+ *
+ * Report any ssl related errors.
+ *
  * @param errors
  */
 void CogWheelDataChannel::sslError(QList<QSslError> errors)
@@ -359,16 +364,6 @@ void CogWheelDataChannel::dataChannelEncrypted()
 
     m_sslConnection=true;
 
-}
-
-bool CogWheelDataChannel::IsSslConnection() const
-{
-    return m_sslConnection;
-}
-
-void CogWheelDataChannel::setSslConnection(bool sslConnection)
-{
-    m_sslConnection = sslConnection;
 }
 
 /**
@@ -454,7 +449,7 @@ void CogWheelDataChannel::bytesWritten(qint64 numBytes)
  * @brief CogWheelDataChannel::fileTransferCleanup
  *
  * File upload/download cleanup code. This includes
- * closing any file and deleting its data.
+ * closing any file and deleting its object instance.
  */
 void CogWheelDataChannel::fileTransferCleanup()
 {
@@ -465,6 +460,25 @@ void CogWheelDataChannel::fileTransferCleanup()
         m_fileBeingTransferred->deleteLater();
         m_fileBeingTransferred=nullptr;
         m_downloadFileSize=0;
+    }
+}
+
+/**
+ * @brief CogWheelDataChannel::dataChannelSocketCleanup
+ *
+ * Data channel socket cleanup. This includes closing if open
+ * and deleting its object instance.
+ *
+ */
+void CogWheelDataChannel::dataChannelSocketCleanup()
+{
+
+    if (m_dataChannelSocket) {
+        if (m_dataChannelSocket->isOpen()) {
+            m_dataChannelSocket->close();
+        }
+        m_dataChannelSocket->deleteLater();
+        m_dataChannelSocket=nullptr;
     }
 }
 
@@ -502,6 +516,16 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
+
+bool CogWheelDataChannel::IsSslConnection() const
+{
+    return m_sslConnection;
+}
+
+void CogWheelDataChannel::setSslConnection(bool sslConnection)
+{
+    m_sslConnection = sslConnection;
+}
 
 /**
  * @brief CogWheelDataChannel::dataChannelSocket

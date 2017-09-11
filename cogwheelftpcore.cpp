@@ -463,6 +463,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         }
 
     } catch (CogWheelFtpServerReply response)  {
+        connection->disconnectDataChannel();
         if (!response.getMessage().isEmpty()){
             cogWheelError(connection->socketHandle(), response.getMessage());
             connection->sendReplyCode(response.getResponseCode(),response.getMessage());
@@ -471,9 +472,11 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             connection->sendReplyCode(response.getResponseCode());
         }
     } catch (std::exception &err)  {
+        connection->disconnectDataChannel();
         cogWheelError(connection->socketHandle(),err.what());
         connection->sendReplyCode(550, err.what());
     } catch(...) {
+        connection->disconnectDataChannel();
         cogWheelError(connection->socketHandle(), "Unknown error handling " + command + " command.");
         connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
     }
@@ -607,11 +610,12 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
 
         connection->sendOnDataChannel(listing.toUtf8().data());
 
+        // Disconnect data channel
+
+        connection->disconnectDataChannel();
+
     }
 
-    // Disconnect data channel (cleanup on connect failure)
-
-    connection->disconnectDataChannel();
 
 }
 
@@ -789,9 +793,6 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
         connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
-    } else {
-        // Disconnect data channel (cleanup on connect failure)
-        connection->disconnectDataChannel();
     }
 
 }
@@ -862,9 +863,6 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel( mapPathToLocal(connection,arguments) );
-    } else {
-        // Disconnect data channel (cleanup on connect failure)
-        connection->disconnectDataChannel();
     }
 
 }
@@ -971,12 +969,11 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 
         connection->sendOnDataChannel(listing.toUtf8().data());
 
+        // Disconnect data channel
+
+        connection->disconnectDataChannel();
+
     }
-
-    // Disconnect data channel (cleanup on connect failure)
-
-    connection->disconnectDataChannel();
-
 
 }
 
@@ -1145,9 +1142,6 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel(path);
-    } else {
-        // Disconnect data channel (cleanup on connect failure)
-        connection->disconnectDataChannel();
     }
 
 }
@@ -1392,9 +1386,6 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
         connection->uploadFileToDataChannel(mapPathToLocal(connection,arguments) );
-    } else {
-        // Disconnect data channel (cleanup on connect failure)
-        connection->disconnectDataChannel();
     }
 
 }

@@ -74,6 +74,10 @@ private:
 
     void fileTransferCleanup();
 
+    // Cleanup data channel socket
+
+    void dataChannelSocketCleanup();
+
 protected:
 
     // QTcpServer overrides
