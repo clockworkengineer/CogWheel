@@ -49,10 +49,8 @@ CogWheelDataChannel::CogWheelDataChannel(qintptr controlSocketHandle, QObject *p
 
     connect(m_dataChannelSocket, &QSslSocket::connected, this, &CogWheelDataChannel::connected, Qt::DirectConnection);
     connect(m_dataChannelSocket, &QSslSocket::disconnected, this, &CogWheelDataChannel::disconnected, Qt::DirectConnection);
-    connect(m_dataChannelSocket, &QSslSocket::stateChanged, this, &CogWheelDataChannel::stateChanged, Qt::DirectConnection);
     connect(m_dataChannelSocket, &QSslSocket::bytesWritten, this, &CogWheelDataChannel::bytesWritten, Qt::DirectConnection);
     connect(m_dataChannelSocket, &QSslSocket::readyRead, this, &CogWheelDataChannel::readyRead, Qt::DirectConnection);
-
     connect(m_dataChannelSocket, static_cast<void (QSslSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
             this, &CogWheelDataChannel::socketError, Qt::DirectConnection);
 
@@ -123,7 +121,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
     m_writeBytesSize = connection->writeBytesSize();
 
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-        cogWheelError(m_controlSocketHandle,"Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
+         throw CogWheelFtpServerReply(425, "Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
     }
 
     return(m_connected);
@@ -199,9 +197,9 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
         emit passiveConnection();
         m_listening=true;
     }catch(std::exception &err) {
-        cogWheelError(m_controlSocketHandle,err.what());
+        throw CogWheelFtpServerReply(425, err.what());
     }catch(...) {
-        cogWheelError(m_controlSocketHandle,"Unknown error in listenForConnection().");
+        throw CogWheelFtpServerReply(425,"Unknown error in listenForConnection().");
     }
 }
 
@@ -387,7 +385,7 @@ void CogWheelDataChannel::incomingConnection(qintptr handle)
     cogWheelInfo(m_controlSocketHandle,"--- Incoming connection for data channel --- "+QString::number(handle));
 
     if(!m_dataChannelSocket->setSocketDescriptor(handle)){
-        cogWheelError(m_controlSocketHandle, "Error binding socket: "+m_dataChannelSocket->errorString());
+        throw CogWheelFtpServerReply(425, "Error binding socket: "+m_dataChannelSocket->errorString());
     } else {
         cogWheelInfo(m_controlSocketHandle,"Data channel socket connected for handle : "+QString::number(handle));
     }
@@ -425,18 +423,6 @@ void CogWheelDataChannel::disconnected()
         emit transferFinished();
     }
 
-}
-
-/**
- * @brief CogWheelDataChannel::stateChanged
- *
- * Data channel socket state changed slot function.
- *
- * @param socketState   New socket state.
- */
-void CogWheelDataChannel::stateChanged(QAbstractSocket::SocketState socketState)
-{
-    Q_UNUSED(socketState);
 }
 
 /**
@@ -502,15 +488,13 @@ void CogWheelDataChannel::readyRead()
 /**
  * @brief CogWheelDataChannel::socketError
  *
- * ata channel socket error slot function.
+ * data channel socket error slot function.
  *
  * @param socketError   Socket error.
  */
 void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
 {
-    if (socketError==QAbstractSocket::RemoteHostClosedError) {
-        cogWheelInfo(m_controlSocketHandle,"Client closed data connection.");
-    } else {
+    if (socketError!=QAbstractSocket::RemoteHostClosedError) {
         cogWheelError(m_controlSocketHandle,"Data channel socket error: "+QString::number(socketError));
     }
 }

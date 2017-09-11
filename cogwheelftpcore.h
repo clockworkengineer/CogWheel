@@ -25,12 +25,6 @@
 class CogWheelFTPCore
 {
 
-private:
-
-    // FTP command function pointer
-
-    typedef std::function<void (CogWheelControlChannel *, const QString &) > FTPCommandFunction;
-
 public:
 
     // Constructor / Destructor
@@ -51,6 +45,10 @@ public:
     static void performCommand(CogWheelControlChannel *connection, const QString &command, const QString &arguments);
 
 private:
+
+    // FTP command function pointer
+
+    typedef std::function<void (CogWheelControlChannel *, const QString &) > FTPCommandFunction;
 
     // Setup tables
 

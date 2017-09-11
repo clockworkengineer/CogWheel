@@ -78,8 +78,10 @@ void CogWheelControlChannel::createDataChannel()
 
     m_dataChannel = new CogWheelDataChannel(socketHandle());
 
+    // If could not ceate send error to client
+
     if (m_dataChannel == nullptr) {
-        throw CogWheelFtpServerReply("Failure to create data channel.");
+        throw CogWheelFtpServerReply(425);
     }
 
     // Setup signals and slots for channel
@@ -118,12 +120,10 @@ void CogWheelControlChannel::tearDownDataChannel()
 bool CogWheelControlChannel::connectDataChannel()
 {
 
-    // Create data channel
-
-    createDataChannel();
+    // If data channel does not exist then send error to client
 
     if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Data channel not active.");
+        sendReplyCode(425);
         return(false);
     }
 
@@ -140,13 +140,7 @@ bool CogWheelControlChannel::connectDataChannel()
  */
 void CogWheelControlChannel::uploadFileToDataChannel(const QString &file)
 {
-    if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Data channel not active.");
-        return;
-    }
-
     m_dataChannel->uploadFile(this, file);
-
 }
 
 /**
@@ -185,11 +179,6 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
 
     createDataChannel();
 
-    if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Data channel not active.");
-        return;
-    }
-
     m_dataChannel->setClientHostIP(ipAddressAndPort[0]+"."+ipAddressAndPort[1]+"."+ipAddressAndPort[2]+"."+ipAddressAndPort[3]);
     m_dataChannel->setClientHostPort((ipAddressAndPort[4].toInt()<<8)|ipAddressAndPort[5].toInt());
 
@@ -204,13 +193,7 @@ void CogWheelControlChannel::setHostPortForDataChannel(const QStringList &ipAddr
  */
 void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 {
-    if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Data channel not active.");
-        return;
-    }
-
     m_dataChannel->downloadFile(this, file);
-
 }
 
 /**
@@ -226,11 +209,6 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
     // Create data channel
 
     createDataChannel();
-
-    if (m_dataChannel == nullptr) {
-        cogWheelError(socketHandle(),"Data channel not active.");
-        return;
-    }
 
     m_dataChannel->listenForConnection(m_serverIP);
 
@@ -295,9 +273,9 @@ void CogWheelControlChannel::processFTPCommand(QString commandLine)
 void CogWheelControlChannel::openConnection(qint64 socketHandle)
 {
 
-    m_socketHandle = socketHandle; // Inialise here as used logging
-
     cogWheelInfo(socketHandle,"Open control channel for socket "+QString::number(socketHandle));
+
+    m_socketHandle = socketHandle;
 
     // Create control channel socket
 

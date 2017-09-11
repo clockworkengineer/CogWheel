@@ -421,7 +421,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
     try {
 
-        cogWheelInfo(connection->socketHandle(),"COMMAND : ["+command+"]  ARGUMENT ["+arguments+"]");
+        cogWheelInfo(connection->socketHandle(),"COMMAND : ["+command+"]  ARGUMENTS ["+arguments+"]");
 
         if (m_ftpCommandTable.contains(command)) {
 
@@ -488,7 +488,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
  * @brief CogWheelFTPCore::USER
  *
  * Login to server with a given user name. If the user is anonymous then the login
- * is set to anonymous. If the user name does not exist on the server then and error
+ * is set to anonymous. If the user name does not exist on the server then an error
  * response wil be returned otherwise a password required response (331). The standard
  * indicates that this command may be used at any time by the client to change user but
  * this server does not support this action.

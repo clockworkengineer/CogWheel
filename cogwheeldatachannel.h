@@ -93,7 +93,6 @@ public slots:
 
     void connected();
     void disconnected();
-    void stateChanged(QAbstractSocket::SocketState socketState);
     void bytesWritten(qint64 numBytes);
     void readyRead();
     void socketError(QAbstractSocket::SocketError socketError);
