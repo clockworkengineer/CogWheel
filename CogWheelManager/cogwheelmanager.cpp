@@ -41,6 +41,7 @@ CogWheelManager::CogWheelManager(QObject *parent) : QLocalServer(parent)
 
     m_controllerCommandTable.insert(kCWCommandSTATUS, &CogWheelManager::serverStatus);
     m_controllerCommandTable.insert(kCWCommandCONNECTIONS, &CogWheelManager::connectionList);
+    m_controllerCommandTable.insert("LOGOUTPUT",&CogWheelManager::logOutput);
 
 }
 
@@ -345,6 +346,31 @@ void CogWheelManager::writeCommandToController(const QString &command)
 }
 
 /**
+ * @brief CogWheelManager::
+ *
+ * Write command to server on manager socket. These are just simple
+ * text strings with no parameters at present.
+ *
+ * @param command   Command.
+ *
+ */
+void CogWheelManager::writeCommandToController(const QString &command, const QString &param1)
+{
+    if (m_managerSocket) {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_7);
+        out << (quint32)0;
+        out << command;
+        out << param1;
+        out.device()->seek(0);
+        out << (quint32)(block.size() - sizeof(quint32));
+        m_managerSocket->write(block);
+        m_managerSocket->flush();
+    }
+}
+
+/**
  * @brief CogWheelManager::serverStatus
  *
  * Server status command recieved from controller.
@@ -375,6 +401,17 @@ void CogWheelManager::connectionList(QDataStream &input)
     input >> connections;
 
     emit connectionListUpdate(connections);
+
+}
+
+void CogWheelManager::logOutput(QDataStream &input)
+{
+
+    QStringList logBuffer;
+
+    input >> logBuffer;
+
+    emit logWindowUpdate(logBuffer);
 
 }
 

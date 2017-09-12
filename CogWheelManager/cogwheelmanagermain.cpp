@@ -24,6 +24,7 @@
 #include "ui_cogwheelmanagermain.h"
 #include "cogwheelserversettingsdialog.h"
 #include "cogwheeluserlistdialog.h"
+#include "cogwheelmanagerloggingdialog.h"
 
 /**
  * @brief CogWheelManagerMain::CogWheelManagerMain
@@ -244,3 +245,21 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 
 }
 
+/**
+ * @brief CogWheelManagerMain::on_actionLogging_triggered
+ */
+
+void CogWheelManagerMain::on_actionLogging_triggered()
+{
+
+    // New
+
+    CogWheelManagerLoggingDialog logWindow;
+
+    connect(&m_serverManager,&CogWheelManager::logWindowUpdate, &logWindow, &CogWheelManagerLoggingDialog::logWindowUpdate);
+
+    m_serverManager.writeCommandToController("LOGGING", "ON");
+    logWindow.exec();
+    m_serverManager.writeCommandToController("LOGGING", "OFF");
+
+}

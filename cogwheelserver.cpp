@@ -34,9 +34,11 @@
 CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(parent)
 {
 
-    cogWheelInfo("Loading CogWheel FTP Server Settings...");
-
     m_serverSettings.load();
+
+    CogWheelLogger::getInstance().setLoggingEnabled(m_serverSettings.serverLoggingEnabled());
+
+    cogWheelInfo("Loaded CogWheel FTP Server Settings...");
 
     if (m_serverSettings.serverSslEnabled()) {
         if (m_serverSettings.loadPrivateKeyAndCert()) {

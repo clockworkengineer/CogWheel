@@ -71,6 +71,7 @@ void CogWheelUserSettingsDialog::populateDialog()
     ui->enabledUser->setChecked(m_settings.getEnabled());
     ui->writeAccess->setChecked(m_settings.getWriteAccess());
 
+
 }
 
 /**

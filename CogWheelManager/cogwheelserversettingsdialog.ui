@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>381</height>
+    <width>413</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>330</y>
+     <y>350</y>
      <width>203</width>
      <height>41</height>
     </rect>
@@ -45,10 +45,17 @@
      <x>30</x>
      <y>0</y>
      <width>351</width>
-     <height>308</height>
+     <height>337</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QCheckBox" name="serverEnabled">
+      <property name="text">
+       <string>enabled</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -95,24 +102,10 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="0">
-     <widget class="QCheckBox" name="serverPlainFTPEnabled">
-      <property name="text">
-       <string>Plain FTP</string>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="0">
      <widget class="QCheckBox" name="serverAllowSMNT">
       <property name="text">
        <string>Allow SMNT</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QCheckBox" name="serverEnabled">
-      <property name="text">
-       <string>enabled</string>
       </property>
      </widget>
     </item>
@@ -124,6 +117,34 @@
      </widget>
     </item>
     <item row="7" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_14">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Server Key File:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="serverKeyFile"/>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <widget class="QCheckBox" name="serverPlainFTPEnabled">
+      <property name="text">
+       <string>Plain FTP</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QCheckBox" name="serverAnonymousEnabled">
+      <property name="text">
+       <string>Anonymous Login</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <widget class="QLabel" name="label">
@@ -138,23 +159,9 @@
      </layout>
     </item>
     <item row="6" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_14">
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Server Key File:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="serverKeyFile"/>
-      </item>
-     </layout>
-    </item>
-    <item row="5" column="0">
-     <widget class="QCheckBox" name="serverAnonymousEnabled">
+     <widget class="QCheckBox" name="serverLoggingEnabled">
       <property name="text">
-       <string>Anonymous Login</string>
+       <string>Logging Enabled</string>
       </property>
      </widget>
     </item>

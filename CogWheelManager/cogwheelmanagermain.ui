@@ -97,6 +97,7 @@
    </attribute>
    <addaction name="actionEditServerSettings"/>
    <addaction name="actionEditUser"/>
+   <addaction name="actionLogging"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionEditUser">
@@ -107,6 +108,11 @@
   <action name="actionEditServerSettings">
    <property name="text">
     <string>Server</string>
+   </property>
+  </action>
+  <action name="actionLogging">
+   <property name="text">
+    <string>Logging</string>
    </property>
   </action>
  </widget>

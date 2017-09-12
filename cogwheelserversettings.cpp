@@ -71,6 +71,9 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("connectionlistppdate")) {
         server.setValue("connectionlistppdate", kCWConnListUpdateTime);
     }
+    if (!server.childKeys().contains("loggingenabled")) {
+        server.setValue("loggingenabled", false);
+    }
     server.endGroup();
 
     server.beginGroup("Server");
@@ -86,6 +89,7 @@ void CogWheelServerSettings::load()
     setServerKeyFileName(server.value("serverkey").toString());
     setServerCertFileName(server.value("servercert").toString());
     setConnectionListUpdateTime(server.value("connectionlistppdate").toInt()); // NO UI
+    setServerLoggingEnabled(server.value("loggingenabled").toBool());
     server.endGroup();
 
 }
@@ -113,6 +117,7 @@ void CogWheelServerSettings::save()
     server.setValue("anonymous", serverAnonymousEnabled());
     server.setValue("serverkey", serverKeyFileName());
     server.setValue("servercert",serverCertFileName());
+    server.setValue("loggingenabled",serverLoggingEnabled());
     server.endGroup();
 
 }
@@ -337,4 +342,15 @@ void CogWheelServerSettings::setConnectionListUpdateTime(const quint64 &connecti
 {
     m_connectionListUpdateTime = connectionListUpdateTime;
 }
+
+bool CogWheelServerSettings::serverLoggingEnabled() const
+{
+    return m_serverLoggingEnabled;
+}
+
+void CogWheelServerSettings::setServerLoggingEnabled(bool serverLoggingEnabled)
+{
+    m_serverLoggingEnabled = serverLoggingEnabled;
+}
+
 

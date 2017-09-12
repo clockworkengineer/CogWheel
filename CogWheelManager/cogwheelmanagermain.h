@@ -53,6 +53,8 @@ private slots:
     void serverStatusUpdate(const QString status);
     void connectionListUpdate(const QStringList &connections);
 
+    void on_actionLogging_triggered();
+
 private:
 
     Ui::CogWheelManagerMain *ui;        // Qt window data

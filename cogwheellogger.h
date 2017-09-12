@@ -13,7 +13,7 @@
 #define COGWHEELLOGGER_H
 
 #include <QString>
-#include <QDebug>
+#include <QMutex>
 
 class CogWheelLogger
 {
@@ -28,7 +28,6 @@ public:
         Warning = 2,
         Error = 4,
         Channel = 8,
-        Command = 16,
         All = ~0
     };
 
@@ -55,7 +54,14 @@ public:
     friend void cogWheelWarning(const QString &message);
     friend void cogWheelWarning(qintptr handle, const QString &message);
     friend void setLoggingLevel(const quint64 &logLevel);
-    friend quint64 getLogLevel();
+    friend void clearLoggingBuffer();
+    friend quint64 getLoggingLevel();
+
+    // Private data accessors
+
+    QStringList getLoggingBuffer() const { return m_loggingBuffer; }
+    bool getLoggingEnabled() const { return m_enabled; }
+    void setLoggingEnabled(bool enabled)  { m_enabled = enabled; }
 
 private:
 
@@ -63,13 +69,24 @@ private:
 
     CogWheelLogger() {};
 
+    // Append message to buffer
+
+    void appendMessageToLogBuffer(const QString &message) {
+        m_loggingBufferMutex.lock();
+        m_loggingBuffer.append(message);
+        m_loggingBufferMutex.unlock();
+    }
+
     // Base line logging (USES QDebug variants at present).
 
-    void info(const QString &message) { qInfo() << message.toStdString().c_str(); }
-    void error(const QString &message) { qDebug() << message.toStdString().c_str(); }
-    void warning(const QString &message) { qWarning() << message.toStdString().c_str(); }
+    void info(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message); }
+    void error(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
+    void warning(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
 
-    quint64 m_logLevel;
+    bool m_enabled=true;
+    quint64 m_loggingLevel;
+    QMutex m_loggingBufferMutex;
+    QStringList m_loggingBuffer;
 
 
 };
@@ -77,44 +94,48 @@ private:
 // Set logging level
 
 inline void setLoggingLevel(const quint64 &logLevel) {
-    CogWheelLogger::getInstance().m_logLevel = logLevel;
+    CogWheelLogger::getInstance().m_loggingLevel = logLevel;
 }
 
-inline quint64 getLogLevel()
+inline quint64 getLoggingLevel()
 {
-    return CogWheelLogger::getInstance().m_logLevel;
+    return CogWheelLogger::getInstance().m_loggingLevel;
+}
+
+inline void clearLoggingBuffer()
+{
+    CogWheelLogger::getInstance().m_loggingBufferMutex.lock();
+    CogWheelLogger::getInstance().m_loggingBuffer.clear();
+    CogWheelLogger::getInstance().m_loggingBufferMutex.unlock();
 }
 
 // Base string logging
 
-inline void cogWheelInfo(const QString &message) { if (getLogLevel() & CogWheelLogger::Info) CogWheelLogger::getInstance().info(message); }
-inline void cogWheelError(const QString &message) { if (getLogLevel() & CogWheelLogger::Error) CogWheelLogger::getInstance().error(message); }
-inline void cogWheelWarning(const QString &message) { if (getLogLevel() & CogWheelLogger::Warning) CogWheelLogger::getInstance().warning(message); }
+inline void cogWheelInfo(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Info) CogWheelLogger::getInstance().info(message); }
+inline void cogWheelError(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Error) CogWheelLogger::getInstance().error(message); }
+inline void cogWheelWarning(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Warning) CogWheelLogger::getInstance().warning(message); }
 
 // Command channel logging (socket handle for command channel is passed in)
 
 inline void cogWheelInfo (qintptr handle, const QString &message)
 {
-    if (getLogLevel() & CogWheelLogger::Channel) {
+    if (getLoggingLevel() & CogWheelLogger::Channel) {
         CogWheelLogger::getInstance().info(QString("CHANNEL[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelError (qintptr handle, const QString &message)
 {
-    if (getLogLevel() & CogWheelLogger::Channel) {
+    if (getLoggingLevel() & CogWheelLogger::Channel) {
         CogWheelLogger::getInstance().error(QString("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelWarning (qintptr handle, const QString &message)
 {
-    if (getLogLevel() & CogWheelLogger::Channel) {
+    if (getLoggingLevel() & CogWheelLogger::Channel) {
         CogWheelLogger::getInstance().warning(QString("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
-
 #endif // COGWHEELLOGGER_H
-
-
 

@@ -65,6 +65,7 @@ private:
     void startServer(QDataStream &input);
     void stopServer(QDataStream &input);
     void killServer(QDataStream &input);
+    void logServer(QDataStream &input);
 
 protected:
 
@@ -85,6 +86,7 @@ public slots:
     // Command slots
 
     void updateConnectionList(const QStringList &connections);
+    void flushLogToManager();
 
 private:
 
@@ -92,6 +94,7 @@ private:
     QLocalSocket *m_controllerSocket=nullptr;   // Controller local socket
     quint32 m_commandBlockSize=0;               // Current command block size.
     QStringList m_lastConnectionList;           // Last connection list sent
+    QTimer *m_logFlushTimer=nullptr;            // Log buffer flush timer
 
     static QCoreApplication *m_cogWheelApplication;  // Qt Application object
     static CogWheelServer *m_server;                 // FTP Server instance

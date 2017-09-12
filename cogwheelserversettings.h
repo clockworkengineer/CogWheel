@@ -61,6 +61,8 @@ public:
     void setServerAnonymousEnabled(bool serverAnonymousEnabled);
     quint64 connectionListUpdateTime() const;
     void setConnectionListUpdateTime(const quint64 &connectionListUpdateTime);
+    bool serverLoggingEnabled() const;
+    void setServerLoggingEnabled(bool serverLoggingEnabled);
 
 private:
 
@@ -76,6 +78,7 @@ private:
     QString m_serverKeyFileName;                             // Server private key file name
     QString m_serverCertFileName;                            // Server certifucate file
     quint64 m_connectionListUpdateTime=kCWConnListUpdateTime;// Connection list update timer
+    bool m_serverLoggingEnabled=false;                             // == true logging enabled
     QByteArray m_serverPrivateKey;                           // Server private key
     QByteArray m_serverCert;                                 // Server Certificate
 

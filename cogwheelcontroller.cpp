@@ -71,6 +71,10 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
     m_managerCommandTable.insert(kCWCommandSTOP, &CogWheelController::stopServer);
     m_managerCommandTable.insert(kCWCommandKILL, &CogWheelController::killServer);
 
+    if ( CogWheelLogger::getInstance().getLoggingEnabled()) {
+        m_managerCommandTable.insert("LOGGING", &CogWheelController::logServer);
+    }
+
     // Create server instance
 
     m_server = new CogWheelServer(true);
@@ -124,7 +128,6 @@ void CogWheelController::connectUpControllerSocket()
     connect(m_controllerSocket,&QLocalSocket::disconnected, this, &CogWheelController::disconnected);
     connect(m_controllerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelController::error);
     connect(m_controllerSocket,&QLocalSocket::readyRead, this, &CogWheelController::readyRead);
-    connect(m_controllerSocket,&QLocalSocket::bytesWritten, this, &CogWheelController::bytesWritten);
 
 }
 
@@ -401,6 +404,19 @@ void CogWheelController::updateConnectionList(const QStringList &connectionList)
 
 }
 
+/**
+ * @brief CogWheelController::flushLogToManager
+ */
+void CogWheelController::flushLogToManager()
+{
+
+    if (!CogWheelLogger::getInstance().getLoggingBuffer().isEmpty()) {
+        writeCommandToManager("LOGOUTPUT", CogWheelLogger::getInstance().getLoggingBuffer());
+        clearLoggingBuffer();
+    }
+
+}
+
 // ===================
 // CONTROLLER COMMANDS
 // ===================
@@ -454,10 +470,41 @@ void CogWheelController::stopServer(QDataStream &input)
 
 }
 
+/**
+ * @brief CogWheelController::killServer
+ * @param input
+ */
 void CogWheelController::killServer(QDataStream &input)
 {
     stopServer(input);
     m_cogWheelApplication->quit();
+}
+
+/**
+ * @brief CogWheelController::logServer
+ * @param input
+ */
+void CogWheelController::logServer(QDataStream &input)
+{
+
+    QString flag;
+
+    input >> flag;
+
+    if (flag=="ON") {
+        qDebug() << "LOGGGING ON";
+        m_logFlushTimer = new QTimer();
+        connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLogToManager);
+        m_logFlushTimer->start(200);
+    }  else if (flag=="OFF") {
+        qDebug() << "LOGGGING OFF";
+        if (m_logFlushTimer) {
+            m_logFlushTimer->stop();
+            m_logFlushTimer->deleteLater();
+            m_logFlushTimer=nullptr;
+        }
+    }
+
 }
 
 // ============================

@@ -64,7 +64,7 @@ public slots:
     void connectionListToManager();         // Send connection list to manager
 
 private:
-    QTimer *m_connectionListUpdateTimer=nullptr;            // Timer for sending connectionupdates to manager
+    QTimer *m_connectionListUpdateTimer=nullptr;            // Timer for sending connection updates to manager
     QMap<qint64, CogWheelControlChannel *> m_connections;   // Socket Handle connection mapping
     CogWheelServerSettings m_serverSettings;                // Server settings
 

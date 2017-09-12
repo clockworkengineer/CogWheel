@@ -47,6 +47,7 @@ CogWheelServerSettingsDialog::CogWheelServerSettingsDialog(QWidget *parent) :
     ui->serverAnonymousEnabled->setChecked(m_settings.serverAnonymousEnabled());
     ui->serverKeyFile->setText(m_settings.serverKeyFileName());
     ui->serverCertFile->setText(m_settings.serverCertFileName());
+    ui->serverLoggingEnabled->setChecked(m_settings.serverLoggingEnabled());
 
 }
 
@@ -77,7 +78,8 @@ void CogWheelServerSettingsDialog::on_saveButton_clicked()
     m_settings.setServerAllowSMNT(ui->serverAllowSMNT->checkState() == Qt::Checked);
     m_settings.setServerSslEnabled(ui->serverTlsSslEnabled->checkState() == Qt::Checked);
     m_settings.setServerPlainFTPEnabled(ui->serverPlainFTPEnabled->checkState() == Qt::Checked);
-    m_settings.setServerAnonymousEnabled(ui->serverAnonymousEnabled->checkState() == Qt::Checked);
+    m_settings.setServerAnonymousEnabled(ui->serverAnonymousEnabled->checkState() == Qt::Checked);   
+    m_settings.setServerLoggingEnabled(ui->serverLoggingEnabled->checkState() == Qt::Checked);
     m_settings.setServerKeyFileName(ui->serverKeyFile->text());
     m_settings.setServerCertFileName(ui->serverCertFile->text());
 
