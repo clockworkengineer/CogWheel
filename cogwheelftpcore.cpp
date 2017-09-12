@@ -463,7 +463,7 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         }
 
     } catch (CogWheelFtpServerReply response)  {
-        connection->disconnectDataChannel();
+        connection->disconnectDataChannel(); // Disconnect any data channel
         if (!response.getMessage().isEmpty()){
             cogWheelError(connection->socketHandle(), response.getMessage());
             connection->sendReplyCode(response.getResponseCode(),response.getMessage());
@@ -472,11 +472,11 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
             connection->sendReplyCode(response.getResponseCode());
         }
     } catch (std::exception &err)  {
-        connection->disconnectDataChannel();
+        connection->disconnectDataChannel(); // Disconnect any data channel
         cogWheelError(connection->socketHandle(),err.what());
         connection->sendReplyCode(550, err.what());
     } catch(...) {
-        connection->disconnectDataChannel();
+        connection->disconnectDataChannel(); // Disconnect any data channel
         cogWheelError(connection->socketHandle(), "Unknown error handling " + command + " command.");
         connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
     }
@@ -833,7 +833,8 @@ void CogWheelFTPCore::MODE(CogWheelControlChannel *connection, const QString &ar
  * @brief CogWheelFTPCore::STOR
  *
  * Upload the specified from client to server. An error is sent to client if the user
- * does not have write access (user setting) or the desination fiel already exists.
+ * does not have write access (user setting) or the destination file already exists and
+ * can't be removed.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1367,7 +1368,7 @@ void CogWheelFTPCore::REIN(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::APPE
  *
- * Transfer file to server. If the file alreayd exists then the data is appended on to
+ * Transfer file to server. If the file already exists then the data is appended on to
  * it end. Returns an error to client if the user does not have write access.
  *
  * @param connection   Pointer to control channel instance.

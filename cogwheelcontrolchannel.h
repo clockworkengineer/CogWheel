@@ -49,7 +49,7 @@ public:
     void abortOnDataChannel();
     void sendOnDataChannel(const QByteArray &dataToSend);
 
-    // Control channel send response and data
+    // Control channel send response code+message and data functions
 
     void sendReplyCode(quint16 replyCode, const QString &message);
     void sendReplyCode(quint16 replyCode);

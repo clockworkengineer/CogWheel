@@ -121,7 +121,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
     // Re-check connected status and return error if not
 
     if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
-         throw CogWheelFtpServerReply(425, "Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
+        throw CogWheelFtpServerReply(425, "Data channel did not connect. Socket Error: "+m_dataChannelSocket->errorString());
     }
 
     m_connected=true;
@@ -140,13 +140,15 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connection)
 {
 
-    if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
-        m_dataChannelSocket->flush();   // Flush any buffered data
-        m_dataChannelSocket->disconnectFromHost();
-        if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
-            m_dataChannelSocket->waitForDisconnected(-1);
+    if (m_dataChannelSocket) {
+        if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
+            m_dataChannelSocket->flush();   // Flush any buffered data
+            m_dataChannelSocket->disconnectFromHost();
+            if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
+                m_dataChannelSocket->waitForDisconnected(-1);
+            }
+            connection->sendReplyCode(226); // Data channel closed reply
         }
-        connection->sendReplyCode(226); // Data channel closed reply
     }
     m_connected=false;
 
