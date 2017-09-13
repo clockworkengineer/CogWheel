@@ -70,7 +70,7 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     ui->stopButton->setEnabled(false);
     ui->launchKillButton->setText("Launch");
     ui->serverStatus->setText("<b>Not Running.</b>");
-
+    ui->actionLogging->setEnabled(false);
 
 }
 
@@ -83,6 +83,21 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 CogWheelManagerMain::~CogWheelManagerMain()
 {
     delete ui;
+}
+
+/**
+ * @brief CogWheelManagerMain::loggingEnableDisable
+ *
+ * Set logging UI action button depending on wether it is enabled.
+ *
+ */
+void CogWheelManagerMain::loggingEnableDisable()
+{
+
+    CogWheelServerSettings    serverSettings;
+    serverSettings.load();
+    ui->actionLogging->setEnabled(serverSettings.serverLoggingEnabled());
+
 }
 
 /**
@@ -113,6 +128,8 @@ bool CogWheelManagerMain::launchServer()
 void CogWheelManagerMain::killServer()
 {
 
+    ui->actionLogging->setEnabled(false);
+
     m_serverManager.writeCommandToController(kCWCommandKILL);
 
     if (m_serverProcess) {
@@ -136,6 +153,8 @@ void CogWheelManagerMain::on_actionEditServerSettings_triggered()
     CogWheelServerSettingsDialog    serverSettings;
 
     serverSettings.exec();
+
+ //   loggingEnableDisable();
 
 }
 
@@ -213,21 +232,22 @@ void CogWheelManagerMain::on_launchKillButton_clicked()
 
 void CogWheelManagerMain::serverStatusUpdate(const QString status)
 {
-  qDebug() << "Server Status " << status;
+    qDebug() << "Server Status " << status;
 
-  if (status==kCWStatusSTOPPED) {
-      ui->serverStatus->setText("<b>Running but stopped.</b>");
-      ui->startButton->setEnabled(true);
-      ui->stopButton->setEnabled(false);
-      ui->launchKillButton->setText("Kill");
-  } else if (status==kCWStatusRUNNING) {
-      ui->serverStatus->setText("<b>Running.</b>");
-      ui->startButton->setEnabled(false);
-      ui->stopButton->setEnabled(true);
-      ui->launchKillButton->setText("Kill");
-  }
+    if (status==kCWStatusSTOPPED) {
+        ui->serverStatus->setText("<b>Running but stopped.</b>");
+        ui->startButton->setEnabled(true);
+        ui->stopButton->setEnabled(false);
+        ui->launchKillButton->setText("Kill");
+    } else if (status==kCWStatusRUNNING) {
+        ui->serverStatus->setText("<b>Running.</b>");
+        ui->startButton->setEnabled(false);
+        ui->stopButton->setEnabled(true);
+        ui->launchKillButton->setText("Kill");
+        loggingEnableDisable();
+    }
 
-   ui->connectionList->clear();
+    ui->connectionList->clear();
 
 }
 
@@ -247,19 +267,22 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 
 /**
  * @brief CogWheelManagerMain::on_actionLogging_triggered
+ *
+ * Switch on server logging and display window. Switching it off again when window
+ * is closed.
  */
 
 void CogWheelManagerMain::on_actionLogging_triggered()
 {
 
-    // New
-
     CogWheelManagerLoggingDialog logWindow;
 
     connect(&m_serverManager,&CogWheelManager::logWindowUpdate, &logWindow, &CogWheelManagerLoggingDialog::logWindowUpdate);
 
-    m_serverManager.writeCommandToController("LOGGING", "ON");
+    m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWLoggingON);
+
     logWindow.exec();
-    m_serverManager.writeCommandToController("LOGGING", "OFF");
+
+    m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWkLoggingOFF);
 
 }

@@ -98,7 +98,6 @@ public slots:
     void disconnected();
     void error(QLocalSocket::LocalSocketError socketError);
     void readyRead();
-    void bytesWritten(qint64 bytes);
 
 private:
 

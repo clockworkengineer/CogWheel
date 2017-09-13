@@ -98,3 +98,8 @@ void CogWheelServerSettingsDialog::on_cancelButton_clicked()
 {
     this->close();
 }
+
+CogWheelServerSettings CogWheelServerSettingsDialog::settings() const
+{
+    return m_settings;
+}

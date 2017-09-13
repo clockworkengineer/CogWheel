@@ -20,7 +20,9 @@ public slots:
     void  logWindowUpdate(const QStringList &logBuffer);
 
 private:
-    Ui::CogWheelManagerLoggingDialog *ui;
+
+    Ui::CogWheelManagerLoggingDialog *ui;   // Qt dialog data
+
 };
 
 #endif // COGWHEELMANAGERLOGGINGDIALOG_H

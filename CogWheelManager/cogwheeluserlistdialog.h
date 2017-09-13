@@ -51,7 +51,8 @@ private slots:
 
 private:
 
-    Ui::CogWheelUserListDialog *ui;     // Q dialog data
+    Ui::CogWheelUserListDialog *ui;     // Qt dialog data
+
     QStringList m_userList;             // User list
 
 };

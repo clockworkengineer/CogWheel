@@ -72,7 +72,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
     m_managerCommandTable.insert(kCWCommandKILL, &CogWheelController::killServer);
 
     if ( CogWheelLogger::getInstance().getLoggingEnabled()) {
-        m_managerCommandTable.insert("LOGGING", &CogWheelController::logServer);
+        m_managerCommandTable.insert(kCWCommandLOGGING, &CogWheelController::logServer);
     }
 
     // Create server instance
@@ -190,7 +190,7 @@ void CogWheelController::stopController()
 /**
  * @brief CogWheelController::writeRespnseToManager
  *
- * Write command to manager.
+ * Write command to manager (one QString parameter).
  *
  * @param command
  * @param param1
@@ -215,7 +215,7 @@ void CogWheelController::writeCommandToManager(const QString &command, const QSt
 /**
  * @brief CogWheelController::writeRespnseToManager
  *
- * Write command to manager.
+ * Write command to manager. (one QStringList parameter).
  *
  * @param command
  * @param param1
@@ -381,14 +381,6 @@ void CogWheelController::readyRead()
     }
 
 }
-/**
- * @brief CogWheelController::bytesWritten
- * @param bytes
- */
-void CogWheelController::bytesWritten(qint64 bytes)
-{
-    cogWheelInfo("Controller bytesWritten " + QString::number(bytes));
-}
 
 /**
  * @brief CogWheelController::updateConnectionList
@@ -406,12 +398,15 @@ void CogWheelController::updateConnectionList(const QStringList &connectionList)
 
 /**
  * @brief CogWheelController::flushLogToManager
+ *
+ * Flush loggin buffer to server.
+ *
  */
 void CogWheelController::flushLogToManager()
 {
 
     if (!CogWheelLogger::getInstance().getLoggingBuffer().isEmpty()) {
-        writeCommandToManager("LOGOUTPUT", CogWheelLogger::getInstance().getLoggingBuffer());
+        writeCommandToManager(kCWCommandLOGOUTPUT, CogWheelLogger::getInstance().getLoggingBuffer());
         clearLoggingBuffer();
     }
 
@@ -482,6 +477,9 @@ void CogWheelController::killServer(QDataStream &input)
 
 /**
  * @brief CogWheelController::logServer
+ *
+ * Switch logging buffer flushing on/off.
+ *
  * @param input
  */
 void CogWheelController::logServer(QDataStream &input)
@@ -491,13 +489,11 @@ void CogWheelController::logServer(QDataStream &input)
 
     input >> flag;
 
-    if (flag=="ON") {
-        qDebug() << "LOGGGING ON";
+    if (flag==kCWLoggingON) {
         m_logFlushTimer = new QTimer();
         connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLogToManager);
-        m_logFlushTimer->start(200);
-    }  else if (flag=="OFF") {
-        qDebug() << "LOGGGING OFF";
+        m_logFlushTimer->start(kCWLoggingFlushTimer);
+    }  else if (flag==kCWkLoggingOFF) {
         if (m_logFlushTimer) {
             m_logFlushTimer->stop();
             m_logFlushTimer->deleteLater();

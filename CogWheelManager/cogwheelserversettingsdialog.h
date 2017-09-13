@@ -33,12 +33,17 @@ public:
     explicit CogWheelServerSettingsDialog(QWidget *parent = 0);
     ~CogWheelServerSettingsDialog();
 
+    // Private data accsessors
+
+    CogWheelServerSettings settings() const;
+
 private slots:
 
     // Dialog controls
 
     void on_saveButton_clicked();
     void on_cancelButton_clicked();
+
 
 private:
 

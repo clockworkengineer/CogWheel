@@ -41,7 +41,7 @@ CogWheelManager::CogWheelManager(QObject *parent) : QLocalServer(parent)
 
     m_controllerCommandTable.insert(kCWCommandSTATUS, &CogWheelManager::serverStatus);
     m_controllerCommandTable.insert(kCWCommandCONNECTIONS, &CogWheelManager::connectionList);
-    m_controllerCommandTable.insert("LOGOUTPUT",&CogWheelManager::logOutput);
+    m_controllerCommandTable.insert(kCWCommandLOGOUTPUT,&CogWheelManager::logOutput);
 
 }
 
@@ -71,7 +71,7 @@ void CogWheelManager::load()
 
     manager.beginGroup("Manager");
     if (!manager.childKeys().contains("servername")) {
-        manager.setValue("servername", "CogWheel");
+        manager.setValue("servername", kCWApplicationName);
     }
     if (!manager.childKeys().contains("serverpath")) {
         manager.setValue("serverpath", "");
@@ -98,7 +98,6 @@ void CogWheelManager::connectUpManagerSocket()
     connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
     connect(m_managerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelManager::error);
     connect(m_managerSocket,&QLocalSocket::readyRead, this, &CogWheelManager::readyRead);
-    connect(m_managerSocket,&QLocalSocket::bytesWritten, this, &CogWheelManager::bytesWritten);
 }
 
 /**
@@ -131,7 +130,7 @@ void CogWheelManager::startUpManager()
 /**
  * @brief CogWheelManager::disconnectFromServer
  *
- * Disconnect manager socket.
+ * Disconnect manager socket if present.
  *
  */
 void CogWheelManager::disconnectFromServer()
@@ -310,19 +309,7 @@ void CogWheelManager::readyRead()
 }
 
 /**
- * @brief CogWheelManager::bytesWritten
- *
- * Bytes written on the manager socket.
- *
- * @param bytes
- */
-void CogWheelManager::bytesWritten(qint64 bytes)
-{
-    qDebug() << "Manager bytesWritten" << bytes;
-}
-
-/**
- * @brief CogWheelManager::
+ * @brief CogWheelManager::writeCommandToController
  *
  * Write command to server on manager socket. These are just simple
  * text strings with no parameters at present.
@@ -346,7 +333,7 @@ void CogWheelManager::writeCommandToController(const QString &command)
 }
 
 /**
- * @brief CogWheelManager::
+ * @brief CogWheelManager::writeCommandToController
  *
  * Write command to server on manager socket. These are just simple
  * text strings with no parameters at present.

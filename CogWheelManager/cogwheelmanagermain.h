@@ -38,6 +38,9 @@ public:
     bool launchServer();
     void killServer();
 
+private:
+    void loggingEnableDisable();
+
 private slots:
 
     // Window  controls
@@ -47,13 +50,12 @@ private slots:
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_launchKillButton_clicked();
+    void on_actionLogging_triggered();
 
     // Controller command
 
     void serverStatusUpdate(const QString status);
     void connectionListUpdate(const QStringList &connections);
-
-    void on_actionLogging_triggered();
 
 private:
 

@@ -38,6 +38,10 @@ public:
 
     void populateDialog();
 
+    // Private data accessors
+
+    CogWheelUserSettings settings() const;
+
 private slots:
 
     // Dialog controls
@@ -45,11 +49,11 @@ private slots:
     void on_saveButton_clicked();
     void on_cancelButton_clicked();
 
-public:
-    CogWheelUserSettings m_settings;     // User settings (TO DO: MAKE PRIVATE)
-
 private:
-    Ui::CogWheelUserSettingsDialog *ui; // Qt dialog data
+
+    Ui::CogWheelUserSettingsDialog *ui;  // Qt dialog data
+
+    CogWheelUserSettings m_settings;     // User settings
 
 };
 

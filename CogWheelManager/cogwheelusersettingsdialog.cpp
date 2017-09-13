@@ -105,3 +105,8 @@ void CogWheelUserSettingsDialog::on_cancelButton_clicked()
 {
     this->close();
 }
+
+CogWheelUserSettings CogWheelUserSettingsDialog::settings() const
+{
+    return m_settings;
+}

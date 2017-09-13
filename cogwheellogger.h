@@ -69,7 +69,7 @@ private:
 
     CogWheelLogger() {};
 
-    // Append message to buffer
+    // Append message to buffer (use mutex as logging can happen on many threads).
 
     void appendMessageToLogBuffer(const QString &message) {
         m_loggingBufferMutex.lock();
@@ -83,10 +83,10 @@ private:
     void error(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
     void warning(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
 
-    bool m_enabled=true;
-    quint64 m_loggingLevel;
-    QMutex m_loggingBufferMutex;
-    QStringList m_loggingBuffer;
+    bool m_enabled=true;            // == true loggin enabled
+    quint64 m_loggingLevel;         // Logging level
+    QMutex m_loggingBufferMutex;    // Loggin buffer mutex
+    QStringList m_loggingBuffer;    // Logging buffer
 
 
 };
@@ -97,10 +97,14 @@ inline void setLoggingLevel(const quint64 &logLevel) {
     CogWheelLogger::getInstance().m_loggingLevel = logLevel;
 }
 
+// Get loggin level
+
 inline quint64 getLoggingLevel()
 {
     return CogWheelLogger::getInstance().m_loggingLevel;
 }
+
+// Clear loggin buffer
 
 inline void clearLoggingBuffer()
 {

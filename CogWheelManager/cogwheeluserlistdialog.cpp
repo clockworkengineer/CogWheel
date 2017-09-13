@@ -112,7 +112,7 @@ void CogWheelUserListDialog::on_newButton_clicked()
 
     userSettings.exec();
 
-    QString userName = userSettings.m_settings.getUserName();
+    QString userName = userSettings.settings().getUserName();
     if (!userName.isEmpty()) {
         this->m_userList.append(userName);
         this->populateUserList();
