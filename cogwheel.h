@@ -53,7 +53,7 @@ constexpr const quint64 kCWConnListUpdateTime=5000;
 
 // Loggingbufefr flush timer
 
-constexpr const quint64 kCWLoggingFlushTimer=2000;
+constexpr const quint64 kCWLoggingFlushTimer=500;
 
 // Default server connection port
 

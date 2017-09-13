@@ -64,6 +64,8 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
     connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
 
+    connect(&m_serverManager,&CogWheelManager::logWindowUpdate, &m_logWindow, &CogWheelManagerLoggingDialog::logWindowUpdate);
+
     // Setup window initial state
 
     ui->startButton->setEnabled(false);
@@ -139,6 +141,7 @@ void CogWheelManagerMain::killServer()
 
     m_serverManager.disconnectFromServer();
 
+
 }
 
 /**
@@ -153,8 +156,6 @@ void CogWheelManagerMain::on_actionEditServerSettings_triggered()
     CogWheelServerSettingsDialog    serverSettings;
 
     serverSettings.exec();
-
- //   loggingEnableDisable();
 
 }
 
@@ -275,14 +276,8 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 void CogWheelManagerMain::on_actionLogging_triggered()
 {
 
-    CogWheelManagerLoggingDialog logWindow;
-
-    connect(&m_serverManager,&CogWheelManager::logWindowUpdate, &logWindow, &CogWheelManagerLoggingDialog::logWindowUpdate);
-
     m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWLoggingON);
-
-    logWindow.exec();
-
+    m_logWindow.exec();
     m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWkLoggingOFF);
 
 }

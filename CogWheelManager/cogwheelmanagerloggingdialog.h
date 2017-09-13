@@ -2,6 +2,7 @@
 #define COGWHEELMANAGERLOGGINGDIALOG_H
 
 #include <QDialog>
+#include <QStringListModel>
 
 namespace Ui {
 class CogWheelManagerLoggingDialog;
@@ -15,6 +16,8 @@ public:
     explicit CogWheelManagerLoggingDialog(QWidget *parent = 0);
     ~CogWheelManagerLoggingDialog();
 
+    static void clearLoggingBuffer();
+
 public slots:
 
     void  logWindowUpdate(const QStringList &logBuffer);
@@ -22,6 +25,8 @@ public slots:
 private:
 
     Ui::CogWheelManagerLoggingDialog *ui;   // Qt dialog data
+
+    static QStringListModel m_loggingBuffer;
 
 };
 

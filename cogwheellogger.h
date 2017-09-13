@@ -45,6 +45,21 @@ public:
     CogWheelLogger(const CogWheelLogger && orig) = delete;
     CogWheelLogger& operator=(CogWheelLogger other) = delete;
 
+    // Clear loggin buffer
+
+    void clearLoggingBuffer()
+    {
+        CogWheelLogger::getInstance().m_loggingBufferMutex.lock();
+        CogWheelLogger::getInstance().m_loggingBuffer.clear();
+        CogWheelLogger::getInstance().m_loggingBufferMutex.unlock();
+    }
+
+    // Private data accessors
+
+    QStringList getLoggingBuffer() const { return m_loggingBuffer; }
+    bool getLoggingEnabled() const { return m_enabled; }
+    void setLoggingEnabled(bool enabled)  { m_enabled = enabled; }
+
     // Friend functions
 
     friend void cogWheelInfo(const QString &message);
@@ -56,12 +71,6 @@ public:
     friend void setLoggingLevel(const quint64 &logLevel);
     friend void clearLoggingBuffer();
     friend quint64 getLoggingLevel();
-
-    // Private data accessors
-
-    QStringList getLoggingBuffer() const { return m_loggingBuffer; }
-    bool getLoggingEnabled() const { return m_enabled; }
-    void setLoggingEnabled(bool enabled)  { m_enabled = enabled; }
 
 private:
 
@@ -102,15 +111,6 @@ inline void setLoggingLevel(const quint64 &logLevel) {
 inline quint64 getLoggingLevel()
 {
     return CogWheelLogger::getInstance().m_loggingLevel;
-}
-
-// Clear loggin buffer
-
-inline void clearLoggingBuffer()
-{
-    CogWheelLogger::getInstance().m_loggingBufferMutex.lock();
-    CogWheelLogger::getInstance().m_loggingBuffer.clear();
-    CogWheelLogger::getInstance().m_loggingBufferMutex.unlock();
 }
 
 // Base string logging

@@ -6,23 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
-    <height>413</height>
+    <width>1053</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CogWheel Server Log</string>
+   <string>CogWheel Server Log Window</string>
   </property>
-  <widget class="QTextEdit" name="logTextArea">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>531</width>
-     <height>391</height>
-    </rect>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QListView" name="logListView"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

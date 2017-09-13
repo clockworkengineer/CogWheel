@@ -23,6 +23,8 @@
 #include "cogwheelmanagerloggingdialog.h"
 #include "ui_cogwheelmanagerloggingdialog.h"
 
+QStringListModel CogWheelManagerLoggingDialog::m_loggingBuffer;
+
 /**
  * @brief CogWheelManagerLoggingDialog::CogWheelManagerLoggingDialog
  *
@@ -36,6 +38,7 @@ CogWheelManagerLoggingDialog::CogWheelManagerLoggingDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->logListView->setModel(&m_loggingBuffer);
 
 }
 
@@ -51,16 +54,31 @@ CogWheelManagerLoggingDialog::~CogWheelManagerLoggingDialog()
 }
 
 /**
+ * @brief CogWheelManagerLoggingDialog::clearLoggingBuffer
+ *
+ * Clear local logging buffer view.
+ *
+ */
+void CogWheelManagerLoggingDialog::clearLoggingBuffer()
+{
+    m_loggingBuffer.setStringList( QStringList{} );
+}
+
+/**
  * @brief CogWheelManagerLoggingDialog::logWindowUpdate
  *
- * Append recieved logging buufer contents to dialog text area.
- * (NEED TO MAKE THIS A VIEW SO DONT LOOSE CONTENTS).
+ * Append recieved logging buffer contents to dialog text area.
  *
  * @param logBuffer
  */
 void CogWheelManagerLoggingDialog::logWindowUpdate(const QStringList &logBuffer)
 {
     for (auto line : logBuffer) {
-        ui->logTextArea->append(line);
+        m_loggingBuffer.insertRow(m_loggingBuffer.rowCount());
+        QModelIndex index = m_loggingBuffer.index(m_loggingBuffer.rowCount()-1);
+        m_loggingBuffer.setData(index, line);
     }
+
+    ui->logListView->setCurrentIndex(m_loggingBuffer.index(m_loggingBuffer.rowCount()-1));
+
 }

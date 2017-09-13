@@ -407,7 +407,7 @@ void CogWheelController::flushLogToManager()
 
     if (!CogWheelLogger::getInstance().getLoggingBuffer().isEmpty()) {
         writeCommandToManager(kCWCommandLOGOUTPUT, CogWheelLogger::getInstance().getLoggingBuffer());
-        clearLoggingBuffer();
+        CogWheelLogger::getInstance().clearLoggingBuffer();
     }
 
 }
