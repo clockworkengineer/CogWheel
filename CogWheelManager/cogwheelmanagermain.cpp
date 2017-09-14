@@ -269,15 +269,11 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 /**
  * @brief CogWheelManagerMain::on_actionLogging_triggered
  *
- * Switch on server logging and display window. Switching it off again when window
- * is closed.
+ * Display server logging window.
+ *
  */
 
 void CogWheelManagerMain::on_actionLogging_triggered()
 {
-
-    m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWLoggingON);
     m_logWindow.exec();
-    m_serverManager.writeCommandToController(kCWCommandLOGGING, kCWkLoggingOFF);
-
 }

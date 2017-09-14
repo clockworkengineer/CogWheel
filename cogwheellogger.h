@@ -15,6 +15,13 @@
 #include <QString>
 #include <QMutex>
 
+//
+// Class: CogWheelLogger
+//
+// Description: Used to provide server logging to manager program. If is an singleton
+// class whose inerface and implementaion is provided in this single includ file.
+//
+
 class CogWheelLogger
 {
 
@@ -45,13 +52,13 @@ public:
     CogWheelLogger(const CogWheelLogger && orig) = delete;
     CogWheelLogger& operator=(CogWheelLogger other) = delete;
 
-    // Clear loggin buffer
+    // Clear logging buffer
 
     void clearLoggingBuffer()
     {
-        CogWheelLogger::getInstance().m_loggingBufferMutex.lock();
-        CogWheelLogger::getInstance().m_loggingBuffer.clear();
-        CogWheelLogger::getInstance().m_loggingBufferMutex.unlock();
+        m_loggingBufferMutex.lock();
+        m_loggingBuffer.clear();
+        m_loggingBufferMutex.unlock();
     }
 
     // Private data accessors
@@ -82,6 +89,9 @@ private:
 
     void appendMessageToLogBuffer(const QString &message) {
         m_loggingBufferMutex.lock();
+        if (m_loggingBuffer.size() > kCWLoggingBufferLineMax) {
+            m_loggingBuffer.clear();
+        }
         m_loggingBuffer.append(message);
         m_loggingBufferMutex.unlock();
     }
@@ -92,7 +102,7 @@ private:
     void error(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
     void warning(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
 
-    bool m_enabled=true;            // == true loggin enabled
+    bool m_enabled=false;           // == true logging enabled
     quint64 m_loggingLevel;         // Logging level
     QMutex m_loggingBufferMutex;    // Loggin buffer mutex
     QStringList m_loggingBuffer;    // Logging buffer

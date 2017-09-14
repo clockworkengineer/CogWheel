@@ -33,8 +33,8 @@ public:
     quint16 getResponseCode() const { return responseCode; }
 
 private:
-    QString message;    // Default ""
-    quint16 responseCode=550; // Default code: error action not taken.
+    QString message;           // Default ""
+    quint16 responseCode=550;  // Default code: error action not taken.
 
 };
 

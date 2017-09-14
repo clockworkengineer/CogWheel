@@ -60,12 +60,19 @@ private:
 
     void resetControllerSocket();
 
+    // Reset logging flush timer
+
+    void resetLoggingFlushTimer();
+
+    // Start/Stop logging to Manager
+
+    void enableLoggingToManager(bool enable);
+
     // Controller commands
 
     void startServer(QDataStream &input);
     void stopServer(QDataStream &input);
     void killServer(QDataStream &input);
-    void logServer(QDataStream &input);
 
 protected:
 

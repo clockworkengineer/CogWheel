@@ -59,9 +59,7 @@ private:
     CogWheelConnections m_connections;          // Connections handler
     CogWheelServerSettings m_serverSettings;    // Server settings
     CogWheelFTPCore m_ftpServer;                // FTP server core
-
-    bool m_running=false;   // == true server running
-
+    bool m_running=false;                       // == true server running
 
 };
 

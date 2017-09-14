@@ -39,7 +39,6 @@ public:
     CogWheelServerSettings serverSettings() const;
     void setServerSettings(const CogWheelServerSettings &serverSettings);
 
-
 private:
 
     // Reset connection list update timer
@@ -69,5 +68,4 @@ private:
     CogWheelServerSettings m_serverSettings;                // Server settings
 
 };
-
 #endif // COGWHEELCONNECTIONS_H

@@ -71,10 +71,6 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
     m_managerCommandTable.insert(kCWCommandSTOP, &CogWheelController::stopServer);
     m_managerCommandTable.insert(kCWCommandKILL, &CogWheelController::killServer);
 
-    if ( CogWheelLogger::getInstance().getLoggingEnabled()) {
-        m_managerCommandTable.insert(kCWCommandLOGGING, &CogWheelController::logServer);
-    }
-
     // Create server instance
 
     m_server = new CogWheelServer(true);
@@ -82,7 +78,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
         cogWheelError("Unable to allocate server object.");
     }
 
-    // Save QtApplication data
+    // Save QtApplication object instance
 
     m_cogWheelApplication = cogWheelApp;
 
@@ -100,6 +96,10 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
  */
 CogWheelController::~CogWheelController()
 {
+
+    // Remove logging timer if still around
+
+    resetLoggingFlushTimer();
 
     // Stop controller
 
@@ -157,12 +157,12 @@ void CogWheelController::startController()
     m_controllerSocket->connectToServer(m_serverName+kCWManagerPostfix);
     m_controllerSocket->waitForConnected(-1);
 
-    if (m_controllerSocket->state() == QLocalSocket::ConnectedState) {
-        writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
+    if (m_controllerSocket->state() != QLocalSocket::ConnectedState) {
+        resetControllerSocket();  // Error reset socket and return
         return;
     }
 
-    resetControllerSocket();  // Reset socket
+    writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
 
     cogWheelInfo("CogWheel Controller Started on ["+m_serverName+"]");
 
@@ -256,6 +256,44 @@ void CogWheelController::resetControllerSocket()
 }
 
 /**
+ * @brief CogWheelController::resetLoggingFlushTimer
+ *
+ * Stop and remove any logging flush timer.
+ *
+ */
+void CogWheelController::resetLoggingFlushTimer()
+{
+
+    if (m_logFlushTimer) {
+        m_logFlushTimer->stop();
+        m_logFlushTimer->deleteLater();
+        m_logFlushTimer=nullptr;
+    }
+}
+
+/**
+ * @brief CogWheelController::enableLoggingToManager
+ *
+ * Enable/Disable serve logging to connected manager.
+ *
+ * @param enable    == true enable
+ */
+void CogWheelController::enableLoggingToManager(bool enable)
+{
+
+    if (CogWheelLogger::getInstance().getLoggingEnabled()) {
+        if (enable) {
+            m_logFlushTimer = new QTimer();
+            connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLogToManager);
+            m_logFlushTimer->start(kCWLoggingFlushTimer);
+        } else {
+            resetLoggingFlushTimer();
+        }
+    }
+
+}
+
+/**
  * @brief CogWheelController::incomingConnection
  *
  * Handle incoming manager connection.
@@ -267,9 +305,9 @@ void CogWheelController::incomingConnection(quintptr handle)
 
     cogWheelInfo( "Incoming CogWheel Manager connection");
 
-    if (m_controllerSocket) {
-        resetControllerSocket();
-    }
+    // Reset  though should be uncessary
+
+    //resetControllerSocket();
 
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
@@ -283,10 +321,11 @@ void CogWheelController::incomingConnection(quintptr handle)
         return;
     }
 
+    // Connect up signals/slots, enable logging, send status to manager and clear local conenction list
+
     connectUpControllerSocket();
-
+    enableLoggingToManager(true);
     writeCommandToManager(kCWCommandSTATUS, (m_server) ? kCWStatusRUNNING : kCWStatusSTOPPED);
-
     m_lastConnectionList.clear();
 
 }
@@ -302,6 +341,8 @@ void CogWheelController::connected()
 
     cogWheelInfo("CogWheel manager connected to local controller.");
 
+    enableLoggingToManager(true);
+
 }
 
 /**
@@ -313,6 +354,8 @@ void CogWheelController::connected()
 void CogWheelController::disconnected()
 {
     cogWheelInfo("CogWheel manager disconnected from local controller.");
+
+    enableLoggingToManager(false);
 
     resetControllerSocket();
 
@@ -399,7 +442,7 @@ void CogWheelController::updateConnectionList(const QStringList &connectionList)
 /**
  * @brief CogWheelController::flushLogToManager
  *
- * Flush loggin buffer to server.
+ * Flush loggin buffer to server and then clear it.
  *
  */
 void CogWheelController::flushLogToManager()
@@ -467,40 +510,15 @@ void CogWheelController::stopServer(QDataStream &input)
 
 /**
  * @brief CogWheelController::killServer
+ *
+ * Kill server process.
+ *
  * @param input
  */
 void CogWheelController::killServer(QDataStream &input)
 {
     stopServer(input);
     m_cogWheelApplication->quit();
-}
-
-/**
- * @brief CogWheelController::logServer
- *
- * Switch logging buffer flushing on/off.
- *
- * @param input
- */
-void CogWheelController::logServer(QDataStream &input)
-{
-
-    QString flag;
-
-    input >> flag;
-
-    if (flag==kCWLoggingON) {
-        m_logFlushTimer = new QTimer();
-        connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLogToManager);
-        m_logFlushTimer->start(kCWLoggingFlushTimer);
-    }  else if (flag==kCWkLoggingOFF) {
-        if (m_logFlushTimer) {
-            m_logFlushTimer->stop();
-            m_logFlushTimer->deleteLater();
-            m_logFlushTimer=nullptr;
-        }
-    }
-
 }
 
 // ============================

@@ -185,7 +185,7 @@ private:
     QThread *m_connectionThread=nullptr;            // Connection thread
     QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket
     CogWheelDataChannel *m_dataChannel=nullptr;     // Data channel
-    QString m_readBuffer;                            // Control channel read buffer
+    QString m_readBuffer;                           // Control channel read buffer
     qintptr m_socketHandle;                         // Control channel socket handle
     bool m_sslConnection=false;                     // == true connection is SSL
 

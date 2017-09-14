@@ -53,9 +53,7 @@ CogWheelManager::CogWheelManager(QObject *parent) : QLocalServer(parent)
  */
 CogWheelManager::~CogWheelManager()
 {
-
     disconnectFromServer();
-
 }
 
 /**
@@ -151,13 +149,15 @@ void CogWheelManager::disconnectFromServer()
 void CogWheelManager::connectToServer()
 {
 
-    // Create manager sockets
+    // Create manager socket
 
     m_managerSocket = new QLocalSocket();
     if (m_managerSocket==nullptr) {
         qDebug() << "Error in creating manager socket.";
         return;
     }
+
+    // COnnectup its signals/slots
 
     connectUpManagerSocket();
 
