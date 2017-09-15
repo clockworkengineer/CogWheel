@@ -12,6 +12,10 @@
 #ifndef COGWHEEL_H
 #define COGWHEEL_H
 
+//
+// Description: CogWheel server and manager common definitions and constants.
+//
+
 #include <QtGlobal>
 
 // Organization/Application name for config

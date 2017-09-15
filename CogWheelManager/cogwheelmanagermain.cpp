@@ -269,7 +269,6 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 /**
  * @brief CogWheelManagerMain::on_actionLogging_triggered
  *
- * Display server logging window.
  *
  */
 

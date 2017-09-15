@@ -12,6 +12,21 @@
 #ifndef COGWHEELCONNECTIONS_H
 #define COGWHEELCONNECTIONS_H
 
+//
+// Class: CogWheelConnections
+//
+// Description: Class to accept new FTP connections from the
+// server, create an instance of  control channel, a new thread
+// to run the channel on and open the channel. The connection is
+// removed on the reciept of a signal to the finshedConnection slot
+// function which removes the connection from the list of current
+// connections.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 #include "cogwheelcontrolchannel.h"
 #include "cogwheelserversettings.h"
@@ -19,13 +34,17 @@
 #include <QObject>
 #include <QTimer>
 
+// =================
+// CLASS DECLARATION
+// =================
+
 class CogWheelConnections : public QObject
 {
     Q_OBJECT
 
 public:
 
-    // Constructor/Destructor
+    // Constructor/ Destructor
 
     explicit CogWheelConnections(QObject *parent = nullptr);
     ~CogWheelConnections();
@@ -57,6 +76,7 @@ signals:
     void updateConnectionList(const QStringList &connections);
 
 public slots:
+
     void acceptConnection(qint64 handle);   // Accept client connection
     void finishedConnection(qint64 handle); // Connection finished
     void abortedConnection(qint64 handle);  // Connection aborted

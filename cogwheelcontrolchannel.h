@@ -12,6 +12,19 @@
 #ifndef COGWHEELCONTROLCHANNEL_H
 #define COGWHEELCONTROLCHANNEL_H
 
+//
+// Class: CogWheelControlChannel
+//
+// Description: Class to provide FTP server control channel functionality
+// for the receiving of commands to be processed and the sending of any reponses.
+// It passes any commands to the FTP core object to be processed and also
+// creates/destroys the data channel as and when it is needed.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 #include "cogwheeldatachannel.h"
 #include "cogwheelserversettings.h"
@@ -22,23 +35,27 @@
 #include <QSslKey>
 #include <QThread>
 
+// =================
+// CLASS DECLARATION
+// =================
+
 class CogWheelControlChannel : public QObject
 {
     Q_OBJECT
 
 public:
 
-    // Constructor / Destructors
+    // Constructor / Destructor
 
     explicit CogWheelControlChannel(CogWheelServerSettings serverSettings, QObject *parent = nullptr);
     ~CogWheelControlChannel();
 
-    // Data channel creation/destrucion
+    // Data channel creation / destrucion
 
     void createDataChannel();
     void tearDownDataChannel();
 
-    // Data channel
+    // Data channel functions
 
     bool connectDataChannel();
     void uploadFileToDataChannel(const QString &file);
@@ -121,7 +138,10 @@ public:
     void setServerEnabled(bool serverEnabled);
 
 private:
-    void processFTPCommand(QString commandLine);    // Process FTP command
+
+    // Process FTP command
+
+    void processFTPCommand(QString commandLine);
 
 signals:
 

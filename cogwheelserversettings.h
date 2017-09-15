@@ -12,10 +12,24 @@
 #ifndef COGWHEELSERVERSETTINGS_H
 #define COGWHEELSERVERSETTINGS_H
 
+//
+// Class: CogWheelServerSettings
+//
+// Description: Class to load and save the server settings.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 
 #include <QSettings>
 #include <QFile>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelServerSettings
 {

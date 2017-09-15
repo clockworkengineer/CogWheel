@@ -12,15 +12,25 @@
 #ifndef COGWHEELLOGGER_H
 #define COGWHEELLOGGER_H
 
-#include <QString>
-#include <QMutex>
-
 //
 // Class: CogWheelLogger
 //
-// Description: Used to provide server logging to manager program. If is an singleton
-// class whose inerface and implementaion is provided in this single includ file.
+// Description: Used to provide server logging to manager program. It is an singleton
+// class whose interface and implementaion is provided in this single include file.
+// Note: If the server is not connected to the manager only the last kCWLoggingBufferLineMax
+// lines are kept in the buffer (for simplicity and space).
 //
+
+// =============
+// INCLUDE FILES
+// =============
+
+#include <QString>
+#include <QMutex>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelLogger
 {
@@ -85,12 +95,13 @@ private:
 
     CogWheelLogger() {};
 
-    // Append message to buffer (use mutex as logging can happen on many threads).
+    // Append message to buffer (use mutex as logging can happen on different threads).
 
     void appendMessageToLogBuffer(const QString &message) {
         m_loggingBufferMutex.lock();
-        if (m_loggingBuffer.size() > kCWLoggingBufferLineMax) {
-            m_loggingBuffer.clear();
+        if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
+            m_loggingBuffer.removeFirst();
+           // m_loggingBuffer.clear();
         }
         m_loggingBuffer.append(message);
         m_loggingBufferMutex.unlock();

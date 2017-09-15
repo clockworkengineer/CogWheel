@@ -12,9 +12,24 @@
 #ifndef COGWHEELUSERSETTINGS_H
 #define COGWHEELUSERSETTINGS_H
 
+//
+// Class: CogWheelUserSettings
+//
+// Description: Class to load and save the user settings. It also
+// validates a user exists and authenticates their password.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 
 #include <QSettings>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelUserSettings
 {

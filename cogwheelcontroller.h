@@ -11,6 +11,18 @@
 #ifndef COGWHEELCONTROLLER_H
 #define COGWHEELCONTROLLER_H
 
+//
+// Class: CogWheelController
+//
+// Description: Class to control CogWheel server by recieving commands from
+// the CogWheelManager and also sending replies back. Note: This class creates
+// and destroys the server instance.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 #include "cogwheelserver.h"
 
@@ -19,6 +31,10 @@
 #include <QLocalSocket>
 #include <QDataStream>
 #include <QCoreApplication>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelController : public QLocalServer
 {

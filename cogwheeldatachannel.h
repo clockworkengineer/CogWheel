@@ -12,6 +12,20 @@
 #ifndef COGWHEELDATACHANNEL_H
 #define COGWHEELDATACHANNEL_H
 
+
+//
+// Class: CogWheelDataChannel
+//
+// Description: Class to provide FTP server data channel functionality.
+// The channel to created and destroyed on an as needed basis and can operate
+// in the default active mode where the server creates it or in passive mode
+// where the server waits for a connection from the client on a specified port.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 
 #include <QObject>
@@ -23,7 +37,13 @@
 #include <QSslKey>
 #include <QFile>
 
+// Forward declaration for control channel
+
 class CogWheelControlChannel;
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelDataChannel : public QTcpServer
 {

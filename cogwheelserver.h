@@ -12,6 +12,17 @@
 #ifndef COGWHEELSERVER_H
 #define COGWHEELSERVER_H
 
+//
+// Class: CogWheelServer
+//
+// Description: Base server class that loads any settings, listens for
+// connections and passes them to the connections handler class.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheel.h"
 #include "cogwheelconnections.h"
 #include "cogwheelserversettings.h"
@@ -19,6 +30,10 @@
 
 #include <QObject>
 #include <QTcpServer>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelServer : public QTcpServer
 {

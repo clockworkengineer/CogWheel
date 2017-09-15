@@ -12,6 +12,28 @@
 #ifndef COGWHEELFTPCORE_H
 #define COGWHEELFTPCORE_H
 
+//
+// Class: CogWheelFTPCore
+//
+// Description: Class to provide core FTP command processing. It supports all
+// the commands in the rfc959 standard. The command functions are static and have
+// two parameters the first which is a pointer to the control channel instance and
+// the second a string containing the commands arguments.
+//
+// Note: Two tables exist that are indexed by command string onto the relevant
+// command. The first tabel contains the commands that maybe used in an unauthorised
+// mode (minimum) and the second which contains all commands (full) for when a user
+// has been authorised either through USER/PASSWORD or logging on anonymously.
+//
+// A third table has been added for FTP command extensions and kept separate but entries
+// are copied to the main table on initialisation.
+//
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "cogwheelcontrolchannel.h"
 #include "cogwheelusersettings.h"
 #include "cogwheelftpserverreply.h"
@@ -21,6 +43,10 @@
 #include <QMap>
 #include <QString>
 #include <QFileInfo>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelFTPCore
 {

@@ -11,8 +11,6 @@
 #ifndef COGWHEELFTPSERVERREPLY_H
 #define COGWHEELFTPSERVERREPLY_H
 
-#include <stdexcept>
-
 //
 // Class: CogWheelFtpServerReply
 //
@@ -20,6 +18,16 @@
 // are provided for object creation with the default code of 550 being used if none is supplied
 // and a message is empty if that isn't passed.
 //
+
+// =============
+// INCLUDE FILES
+// =============
+
+#include <stdexcept>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelFtpServerReply : public std::exception {
 
