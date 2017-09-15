@@ -139,5 +139,4 @@ private:
     bool m_sslConnection=false;           // == true connection is SSL
 
 };
-
 #endif // COGWHEELDATACHANNEL_H

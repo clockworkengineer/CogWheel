@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
         // Set logging level
 
-        setLoggingLevel(CogWheelLogger::Info |
+        setLoggingLevel(CogWheelLogger::All |
                         CogWheelLogger::Error |
                         CogWheelLogger::Warning);
 

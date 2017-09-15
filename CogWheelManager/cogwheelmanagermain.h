@@ -15,6 +15,7 @@
 #include "../cogwheel.h"
 
 #include "cogwheelmanager.h"
+#include "cogwheelmanagerloggingdialog.h"
 #include <QMainWindow>
 #include <QProcess>
 
@@ -61,6 +62,7 @@ private:
 
     Ui::CogWheelManagerMain *ui;        // Qt window data
 
+    CogWheelManagerLoggingDialog m_logWindow;   // server Logging Window
     CogWheelManager m_serverManager;            // Server manager
     QProcess *m_serverProcess=nullptr;          // Server process
 
