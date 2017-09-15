@@ -103,7 +103,7 @@ private:
             m_loggingBuffer.removeFirst();
            // m_loggingBuffer.clear();
         }
-        m_loggingBuffer.append(message);
+        m_loggingBuffer.append("<b>"+message+"</b>");
         m_loggingBufferMutex.unlock();
     }
 

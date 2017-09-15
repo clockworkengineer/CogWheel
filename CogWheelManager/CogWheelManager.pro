@@ -32,8 +32,7 @@ SOURCES += \
     ../cogwheelserversettings.cpp \
     ../cogwheelusersettings.cpp \
     cogwheelmanager.cpp \
-    cogwheelmanagersingleinstance.cpp \
-    cogwheelmanagerloggingdialog.cpp
+    cogwheelmanagersingleinstance.cpp
 
 HEADERS += \
         cogwheelmanagermain.h \
@@ -41,12 +40,10 @@ HEADERS += \
     cogwheeluserlistdialog.h \
     cogwheelusersettingsdialog.h \
     cogwheelmanager.h \
-    cogwheelmanagersingleinstance.h \
-    cogwheelmanagerloggingdialog.h
+    cogwheelmanagersingleinstance.h
 
 FORMS += \
         cogwheelmanagermain.ui \
     cogwheelserversettingsdialog.ui \
     cogwheeluserlistdialog.ui \
-    cogwheelusersettingsdialog.ui \
-    cogwheelmanagerloggingdialog.ui
+    cogwheelusersettingsdialog.ui

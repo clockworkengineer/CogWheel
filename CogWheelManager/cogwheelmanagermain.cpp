@@ -24,7 +24,6 @@
 #include "ui_cogwheelmanagermain.h"
 #include "cogwheelserversettingsdialog.h"
 #include "cogwheeluserlistdialog.h"
-#include "cogwheelmanagerloggingdialog.h"
 
 /**
  * @brief CogWheelManagerMain::CogWheelManagerMain
@@ -64,7 +63,9 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     connect(&m_serverManager,&CogWheelManager::serverStatusUpdate, this, &CogWheelManagerMain::serverStatusUpdate);
     connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
 
-    connect(&m_serverManager,&CogWheelManager::logWindowUpdate, &m_logWindow, &CogWheelManagerLoggingDialog::logWindowUpdate);
+    connect(&m_serverManager,&CogWheelManager::logWindowUpdate, this, &CogWheelManagerMain::logWindowUpdate);
+
+    ui->logListView->setModel(&m_loggingBuffer);
 
     // Setup window initial state
 
@@ -72,7 +73,6 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     ui->stopButton->setEnabled(false);
     ui->launchKillButton->setText("Launch");
     ui->serverStatus->setText("<b>Not Running.</b>");
-    ui->actionLogging->setEnabled(false);
 
 }
 
@@ -85,21 +85,6 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 CogWheelManagerMain::~CogWheelManagerMain()
 {
     delete ui;
-}
-
-/**
- * @brief CogWheelManagerMain::loggingEnableDisable
- *
- * Set logging UI action button depending on wether it is enabled.
- *
- */
-void CogWheelManagerMain::loggingEnableDisable()
-{
-
-    CogWheelServerSettings    serverSettings;
-    serverSettings.load();
-    ui->actionLogging->setEnabled(serverSettings.serverLoggingEnabled());
-
 }
 
 /**
@@ -129,8 +114,6 @@ bool CogWheelManagerMain::launchServer()
  */
 void CogWheelManagerMain::killServer()
 {
-
-    ui->actionLogging->setEnabled(false);
 
     m_serverManager.writeCommandToController(kCWCommandKILL);
 
@@ -245,7 +228,6 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
         ui->startButton->setEnabled(false);
         ui->stopButton->setEnabled(true);
         ui->launchKillButton->setText("Kill");
-        loggingEnableDisable();
     }
 
     ui->connectionList->clear();
@@ -267,12 +249,31 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 }
 
 /**
- * @brief CogWheelManagerMain::on_actionLogging_triggered
+ * @brief CogWheelManagerLoggingDialog::logWindowUpdate
  *
+ * Append recieved logging buffer contents to dialog text area.
  *
+ * @param logBuffer
  */
-
-void CogWheelManagerMain::on_actionLogging_triggered()
+void CogWheelManagerMain::logWindowUpdate(const QStringList &logBuffer)
 {
-    m_logWindow.exec();
+    for (auto line : logBuffer) {
+        m_loggingBuffer.insertRow(m_loggingBuffer.rowCount());
+        QModelIndex index = m_loggingBuffer.index(m_loggingBuffer.rowCount()-1);
+        m_loggingBuffer.setData(index, line);
+    }
+
+    ui->logListView->setCurrentIndex(m_loggingBuffer.index(m_loggingBuffer.rowCount()-1));
+
 }
+
+///**
+// * @brief CogWheelManagerMain::on_actionLogging_triggered
+// *
+// *
+// */
+
+//void CogWheelManagerMain::on_actionLogging_triggered()
+//{
+//    m_logWindow.exec();
+//}
