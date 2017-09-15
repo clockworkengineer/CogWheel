@@ -12,12 +12,26 @@
 #ifndef COGWHEELUSERSETTINGSDIALOG_H
 #define COGWHEELUSERSETTINGSDIALOG_H
 
+//
+// Class: CogWheelUserSettingsDialog
+//
+// Description: Class to display user settings dialog.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 #include "../cogwheelusersettings.h"
 
 #include <QDialog>
 #include <QString>
 #include <QSettings>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 namespace Ui {
 class CogWheelUserSettingsDialog;

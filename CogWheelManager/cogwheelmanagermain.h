@@ -12,12 +12,27 @@
 #ifndef COGWHEELMANAGERMAIN_H
 #define COGWHEELMANAGERMAIN_H
 
+//
+// Class: CogWheelManagerMain
+//
+// Description: Class for CogManager main window. It creates, uses and destroys
+// the manager/controller socket used to control the server.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 
 #include "cogwheelmanager.h"
 #include "cogwheelmanagerloggingdialog.h"
 #include <QMainWindow>
 #include <QProcess>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 namespace Ui {
 class CogWheelManagerMain;

@@ -12,11 +12,25 @@
 #ifndef COGWHEELSERVERSETTINGSDIALOG_H
 #define COGWHEELSERVERSETTINGSDIALOG_H
 
+//
+// Class: CogWheelServerSettingsDialog
+//
+// Description: Class to display server settings dialog.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 #include "../cogwheelserversettings.h"
 
 #include <QDialog>
 #include <QSettings>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 namespace Ui {
 class CogWheelServerSettingsDialog;

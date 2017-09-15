@@ -12,6 +12,18 @@
 #ifndef COGWHEELMANAGER_H
 #define COGWHEELMANAGER_H
 
+//
+// Class: CogWheelManager
+//
+// Description: Class to open up a local socket to server and send commands
+// to control it. At present this is just stop, start and kill. It also supports
+// commands sent from the server (controller) such as update connection list.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 
 #include <QObject>
@@ -19,6 +31,10 @@
 #include <QLocalServer>
 #include <QDataStream>
 #include <QSettings>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelManager : public QLocalServer
 {

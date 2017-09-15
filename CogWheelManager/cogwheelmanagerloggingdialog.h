@@ -1,8 +1,23 @@
 #ifndef COGWHEELMANAGERLOGGINGDIALOG_H
 #define COGWHEELMANAGERLOGGINGDIALOG_H
 
+//
+// Class: CogWheelManagerLoggingDialog
+//
+// Description: Class to display server logging window and place any logging
+// text received from the server into it.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include <QDialog>
 #include <QStringListModel>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 namespace Ui {
 class CogWheelManagerLoggingDialog;

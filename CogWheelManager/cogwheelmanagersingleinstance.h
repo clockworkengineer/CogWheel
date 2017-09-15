@@ -11,6 +11,20 @@
 #ifndef COGWHEELMANAGERSINGLEINSTANCE_H
 #define COGWHEELMANAGERSINGLEINSTANCE_H
 
+//
+// Class: CogWheelManagerSingleInstance
+//
+// Description: Class for making sure that olny one instance of the CogWheelManager
+// is run at a time. It tries to connect to a given QLocal socket and if it fails then call
+// listen() to wait for any connects from new instances. If connect does succeed then
+// the manager is already running. Note: The Incoming connection override for the main
+// instance brings the program to the front on an connection attempt.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 
 #include <QObject>
@@ -18,6 +32,10 @@
 #include <QLocalSocket>
 #include <QApplication>
 #include <QMainWindow>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 class CogWheelManagerSingleInstance : public QLocalServer
 {

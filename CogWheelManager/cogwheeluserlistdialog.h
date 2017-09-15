@@ -11,10 +11,24 @@
 #ifndef COGWHEELUSERLISTDIALOG_H
 #define COGWHEELUSERLISTDIALOG_H
 
+//
+// Class: CogWheelUserListDialog
+//
+// Description: Class to display user list dialog.
+//
+
+// =============
+// INCLUDE FILES
+// =============
+
 #include "../cogwheel.h"
 
 #include <QDialog>
 #include <QSettings>
+
+// =================
+// CLASS DECLARATION
+// =================
 
 namespace Ui {
 class CogWheelUserListDialog;
