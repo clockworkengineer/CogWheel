@@ -32,6 +32,8 @@
 #include <QDataStream>
 #include <QCoreApplication>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -43,9 +45,19 @@ class CogWheelController : public QLocalServer
 
     // Controller command function pointer
 
-    typedef void (CogWheelController::*CommandFunction) (QDataStream & input);
+    typedef void (CogWheelController::*CommandFunction) (QDataStream &controllerInputStream);
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelController Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Constructor / Destructor
 
@@ -86,9 +98,9 @@ private:
 
     // Controller commands
 
-    void startServer(QDataStream &input);
-    void stopServer(QDataStream &input);
-    void killServer(QDataStream &input);
+    void startServer(QDataStream &controllerInputStream);
+    void stopServer(QDataStream &controllerInputStream);
+    void killServer(QDataStream &controllerInputStream);
 
 protected:
 

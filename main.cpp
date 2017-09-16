@@ -63,27 +63,41 @@ int main(int argc, char *argv[])
 
     if  (!alreadyRunning()) {
 
-        // Set logging level
+        try {
 
-        setLoggingLevel(CogWheelLogger::Info |
-                        CogWheelLogger::Error |
-                        CogWheelLogger::Warning);
+            // Set logging level
 
-        // Initialise Organisation and Application names
+            setLoggingLevel(CogWheelLogger::Info |
+                            CogWheelLogger::Error |
+                            CogWheelLogger::Warning);
 
-        QCoreApplication::setOrganizationName(kCWOrganizationName);
-        QCoreApplication::setApplicationName(kCWApplicationName);
+            // Initialise Organisation and Application names
 
-        // Server controller instance
+            QCoreApplication::setOrganizationName(kCWOrganizationName);
+            QCoreApplication::setApplicationName(kCWApplicationName);
 
-        CogWheelController controller(&cogWheelServerApplication);
+            // Server controller instance
 
-        controller.startController();
+            CogWheelController controller(&cogWheelServerApplication);
 
-        if (controller.server() && controller.server()->isRunning()) {
-            return cogWheelServerApplication.exec();
-        } else {
-            cogWheelInfo("CogWheel FTP Server not started.");
+            controller.startController();
+
+            if (controller.server() && controller.server()->isRunning()) {
+                return cogWheelServerApplication.exec();
+            } else {
+                cogWheelInfo("CogWheel FTP Server not started.");
+            }
+
+        // Controller errors
+
+        } catch (const CogWheelController::Exception &err) {
+            qDebug() << err.what();
+            exit(EXIT_FAILURE);
+
+        // Fall through
+
+        } catch (...) {
+            cogWheelError("CogWheel FTP Server Exception.");
         }
 
     } else {

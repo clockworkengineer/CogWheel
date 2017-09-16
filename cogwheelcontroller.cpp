@@ -52,14 +52,12 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
     QSettings manager;
 
     manager.beginGroup("Manager");
-    if (!manager.childKeys().contains("servername")) {
-        manager.setValue("servername", kCWApplicationName);
-    }
-    manager.endGroup();
-
-    manager.beginGroup("Manager");
     m_serverName = manager.value("servername").toString();
     manager.endGroup();
+
+    if (m_serverName.isEmpty()) {
+        throw CogWheelController::Exception("Empty local socket server name.");
+    }
 
     // Remove any previous instance of cotroller server name
 
@@ -75,7 +73,7 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
 
     m_server = new CogWheelServer(true);
     if (m_server==nullptr) {
-        cogWheelError("Unable to allocate server object.");
+        throw CogWheelController::Exception("Unable to allocate server object.");
     }
 
     // Save QtApplication object instance
@@ -143,13 +141,12 @@ void CogWheelController::startController()
     cogWheelInfo("Start Controller....");
 
     if (!listen(m_serverName)) {
-        cogWheelError("Controller unable listen on socket name: " + m_serverName);
-        return;
+        throw CogWheelController::Exception("Controller unable listen on socket name: " + m_serverName);
     }
 
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
-        cogWheelError("Error in creating controller socket.");
+        throw CogWheelController::Exception("Error in creating controller socket.");
     }
 
     connectUpControllerSocket();
@@ -159,7 +156,7 @@ void CogWheelController::startController()
 
     if (m_controllerSocket->state() != QLocalSocket::ConnectedState) {
         resetControllerSocket();  // Error reset socket and return
-        return;
+        cogWheelInfo("Error could not connect server controller.");
     }
 
     writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
@@ -199,15 +196,15 @@ void CogWheelController::writeCommandToManager(const QString &command, const QSt
 {
 
     if (m_controllerSocket) {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_7);
-        out << (quint32)0;
-        out << command;
-        out << param1;
-        out.device()->seek(0);
-        out << (quint32)(block.size() - sizeof(quint32));
-        m_controllerSocket->write(block);
+        QByteArray blockToWrite;
+        QDataStream controllerWriteStream(&blockToWrite, QIODevice::WriteOnly);
+        controllerWriteStream.setVersion(QDataStream::Qt_4_7);
+        controllerWriteStream << (quint32)0;
+        controllerWriteStream << command;
+        controllerWriteStream << param1;
+        controllerWriteStream.device()->seek(0);
+        controllerWriteStream << (quint32)(blockToWrite.size() - sizeof(quint32));
+        m_controllerSocket->write(blockToWrite);
         m_controllerSocket->flush();
     }
 
@@ -224,15 +221,15 @@ void CogWheelController::writeCommandToManager(const QString &command, const QSt
 {
 
     if (m_controllerSocket) {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_7);
-        out << (quint32)0;
-        out << command;
-        out << param1;
-        out.device()->seek(0);
-        out << (quint32)(block.size() - sizeof(quint32));
-        m_controllerSocket->write(block);
+        QByteArray blockToWrite;
+        QDataStream controllerWriteStream(&blockToWrite, QIODevice::WriteOnly);
+        controllerWriteStream.setVersion(QDataStream::Qt_4_7);
+        controllerWriteStream << (quint32)0;
+        controllerWriteStream << command;
+        controllerWriteStream << param1;
+        controllerWriteStream.device()->seek(0);
+        controllerWriteStream << (quint32)(blockToWrite.size() - sizeof(quint32));
+        m_controllerSocket->write(blockToWrite);
         m_controllerSocket->flush();
     }
 
@@ -305,27 +302,24 @@ void CogWheelController::incomingConnection(quintptr handle)
 
     cogWheelInfo( "Incoming CogWheel Manager connection");
 
-    // Reset  though should be uncessary
-
-    //resetControllerSocket();
-
     m_controllerSocket = new QLocalSocket();
     if (m_controllerSocket==nullptr) {
-        cogWheelError("Error: Could not create controller socket.");
-        return;
+        throw CogWheelController::Exception("Could not create controller socket.");
     }
 
     if (!m_controllerSocket->setSocketDescriptor(handle)) {
-        cogWheelError("Error setting up socket for control controller.");
         m_controllerSocket->deleteLater();
-        return;
+        throw CogWheelController::Exception("Setting up socket for control controller.");
     }
 
     // Connect up signals/slots, enable logging, send status to manager and clear local conenction list
 
     connectUpControllerSocket();
+
     enableLoggingToManager(true);
+
     writeCommandToManager(kCWCommandSTATUS, (m_server) ? kCWStatusRUNNING : kCWStatusSTOPPED);
+
     m_lastConnectionList.clear();
 
 }
@@ -398,8 +392,8 @@ void CogWheelController::readyRead()
 
         // Datastream for commands
 
-        QDataStream in(m_controllerSocket);
-        in.setVersion(QDataStream::Qt_4_7);
+        QDataStream controllerReadStream(m_controllerSocket);
+        controllerReadStream.setVersion(QDataStream::Qt_4_7);
 
         // Read blocksize header
 
@@ -407,12 +401,12 @@ void CogWheelController::readyRead()
             if (m_controllerSocket->bytesAvailable() < (int)sizeof(quint32)) {
                 return;
             }
-            in >> m_commandBlockSize;
+            controllerReadStream >> m_commandBlockSize;
         }
 
         // Bytes still to read
 
-        if (m_controllerSocket->bytesAvailable() < m_commandBlockSize || in.atEnd()) {
+        if (m_controllerSocket->bytesAvailable() < m_commandBlockSize || controllerReadStream.atEnd()) {
             return;
         }
 
@@ -420,10 +414,10 @@ void CogWheelController::readyRead()
         // enable any command parameters to be processed.
 
         QString command;
-        in >> command;
+        controllerReadStream >> command;
 
         if (m_managerCommandTable.contains(command)) {
-            (this->*m_managerCommandTable[command])(in);
+            (this->*m_managerCommandTable[command])(controllerReadStream);
             m_commandBlockSize=0;
         } else {
             cogWheelWarning("Manager command [" + command + "] not valid.");
@@ -472,16 +466,16 @@ void CogWheelController::flushLogToManager()
  *
  * Start FTP Server.
  *
- * @param input
+ * @param controllerInputStream
  */
-void CogWheelController::startServer(QDataStream &input)
+void CogWheelController::startServer(QDataStream &controllerInputStream)
 {
-    Q_UNUSED(input);
+    Q_UNUSED(controllerInputStream);
 
     if (m_server==nullptr) {
         m_server = new CogWheelServer(true);
         if (m_server==nullptr) {
-            cogWheelError("Unable to allocate server object");
+            throw CogWheelController::Exception("Unable to allocate server object");
         }
         connect(m_server->connections(), &CogWheelConnections::updateConnectionList, this, &CogWheelController::updateConnectionList);
     } else {
@@ -497,12 +491,12 @@ void CogWheelController::startServer(QDataStream &input)
  *
  * Stop FTP Server.
  *
- * @param input
+ * @param controllerInputStream
  */
-void CogWheelController::stopServer(QDataStream &input)
+void CogWheelController::stopServer(QDataStream &controllerInputStream)
 {
 
-    Q_UNUSED(input);
+    Q_UNUSED(controllerInputStream);
 
     if (m_server) {
         m_server->stopServer();
@@ -521,11 +515,11 @@ void CogWheelController::stopServer(QDataStream &input)
  *
  * Kill server process.
  *
- * @param input
+ * @param controllerInputStream
  */
-void CogWheelController::killServer(QDataStream &input)
+void CogWheelController::killServer(QDataStream &controllerInputStream)
 {
-    stopServer(input);
+    stopServer(controllerInputStream);
     m_cogWheelApplication->quit();
 }
 
