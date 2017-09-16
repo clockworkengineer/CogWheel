@@ -267,44 +267,55 @@ void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
 /**
  * @brief CogWheelManager::readyRead
  *
- * Bytes received on manager socket (controller commands).
+ * Bytes received on manager socket (controller commands).Even if a command
+ * has successfully been processed there still may be buffered commands
+ * so loop.
  *
  */
 void CogWheelManager::readyRead()
 {
 
-    // Datastream for commands
+    while (m_managerSocket->bytesAvailable()) {
 
-    QDataStream in(m_managerSocket);
-    in.setVersion(QDataStream::Qt_4_7);
+        // Datastream for commands
 
-    // Read blocksize header
+        QDataStream in(m_managerSocket);
+        in.setVersion(QDataStream::Qt_4_7);
 
-    if (m_commandResponseBlockSize == 0) {
-        if (m_managerSocket->bytesAvailable() < (int)sizeof(quint32)) {
+        // Read blocksize header
+
+        if (m_commandResponseBlockSize == 0) {
+            if (m_managerSocket->bytesAvailable() < (int)sizeof(quint32)) {
+                return;
+            }
+            in >> m_commandResponseBlockSize;
+        }
+
+        // Bytes still to read
+
+        if (m_managerSocket->bytesAvailable() < m_commandResponseBlockSize || in.atEnd()) {
             return;
         }
-        in >> m_commandResponseBlockSize;
+
+        // Read response and if valid process. Note data stream passed to command function to
+        // enable any response parameters to be processed.
+
+        QString command;
+        in >> command;
+
+        if (m_controllerCommandTable.contains(command)) {
+            (this->*m_controllerCommandTable[command])(in);
+            m_commandResponseBlockSize=0;
+        } else {
+            qDebug() << "Controller command [" << command << "] not valid.";
+        }
+
+        if (m_managerSocket->bytesAvailable()) {
+            qDebug() << "Still Bytes To Read" << m_managerSocket->bytesAvailable();
+        }
+
     }
 
-    // Bytes still to read
-
-    if (m_managerSocket->bytesAvailable() < m_commandResponseBlockSize || in.atEnd()) {
-        return;
-    }
-
-    // Read response and if valid process. Note data stream passed to command function to
-    // enable any response parameters to be processed.
-
-    QString command;
-    in >> command;
-
-    if (m_controllerCommandTable.contains(command)) {
-        (this->*m_controllerCommandTable[command])(in);
-        m_commandResponseBlockSize=0;
-    } else {
-        qDebug() << "Controller command [" << command << "] not valid.";
-    }
 
 }
 

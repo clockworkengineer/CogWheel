@@ -101,9 +101,8 @@ private:
         m_loggingBufferMutex.lock();
         if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
             m_loggingBuffer.removeFirst();
-           // m_loggingBuffer.clear();
         }
-        m_loggingBuffer.append("<b>"+message+"</b>");
+        m_loggingBuffer.append(message);
         m_loggingBufferMutex.unlock();
     }
 
@@ -117,7 +116,6 @@ private:
     quint64 m_loggingLevel;         // Logging level
     QMutex m_loggingBufferMutex;    // Loggin buffer mutex
     QStringList m_loggingBuffer;    // Logging buffer
-
 
 };
 

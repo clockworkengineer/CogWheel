@@ -384,43 +384,51 @@ void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
 /**
  * @brief CogWheelController::readyRead
  *
- * Read CogWheel Manager commands sent to controller.
+ * Read CogWheel Manager commands sent to controller. Even if a command
+ * has successfully been processed there still may be buffered commands
+ * so loop.
  *
  */
 void CogWheelController::readyRead()
 {
 
-    // Datastream for commands
+    // Loop while bytes avaialable
 
-    QDataStream in(m_controllerSocket);
-    in.setVersion(QDataStream::Qt_4_7);
+    while (m_controllerSocket->bytesAvailable()) {
 
-    // Read blocksize header
+        // Datastream for commands
 
-    if (m_commandBlockSize == 0) {
-        if (m_controllerSocket->bytesAvailable() < (int)sizeof(quint32)) {
+        QDataStream in(m_controllerSocket);
+        in.setVersion(QDataStream::Qt_4_7);
+
+        // Read blocksize header
+
+        if (m_commandBlockSize == 0) {
+            if (m_controllerSocket->bytesAvailable() < (int)sizeof(quint32)) {
+                return;
+            }
+            in >> m_commandBlockSize;
+        }
+
+        // Bytes still to read
+
+        if (m_controllerSocket->bytesAvailable() < m_commandBlockSize || in.atEnd()) {
             return;
         }
-        in >> m_commandBlockSize;
-    }
 
-    // Bytes still to read
+        // Read command and if valid process. Note data stream passed to command function to
+        // enable any command parameters to be processed.
 
-    if (m_controllerSocket->bytesAvailable() < m_commandBlockSize || in.atEnd()) {
-        return;
-    }
+        QString command;
+        in >> command;
 
-    // Read command and if valid process. Note data stream passed to command function to
-    // enable any command parameters to be processed.
+        if (m_managerCommandTable.contains(command)) {
+            (this->*m_managerCommandTable[command])(in);
+            m_commandBlockSize=0;
+        } else {
+            cogWheelWarning("Manager command [" + command + "] not valid.");
+        }
 
-    QString command;
-    in >> command;
-
-    if (m_managerCommandTable.contains(command)) {
-        (this->*m_managerCommandTable[command])(in);
-        m_commandBlockSize=0;
-    } else {
-        cogWheelWarning("Manager command [" + command + "] not valid.");
     }
 
 }
