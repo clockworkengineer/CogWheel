@@ -71,12 +71,14 @@ int main(int argc, char *argv[])
                             CogWheelLogger::Error |
                             CogWheelLogger::Warning);
 
+            CogWheelLogger::getInstance().setLogFileName("/home/robt/CogWheel.txt");
+
             // Initialise Organisation and Application names
 
             QCoreApplication::setOrganizationName(kCWOrganizationName);
             QCoreApplication::setApplicationName(kCWApplicationName);
 
-            // Server controller instance
+             // Server controller instance
 
             CogWheelController controller(&cogWheelServerApplication);
 
@@ -87,6 +89,8 @@ int main(int argc, char *argv[])
             } else {
                 cogWheelInfo("CogWheel FTP Server not started.");
             }
+
+            flushLoggingFile();
 
         // Controller errors
 

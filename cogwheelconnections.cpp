@@ -86,13 +86,11 @@ void CogWheelConnections::acceptConnection(qint64 handle)
     QScopedPointer<QThread> connectionThread { new QThread() };
 
     if (connection==nullptr) {
-        cogWheelError("Failed to create connection.");
-        return;
+        throw CogWheelConnections::Exception("Could not create connection object.");
     }
 
     if (connectionThread==nullptr) {
-        cogWheelError("Failed to create connection thread.");
-        return;
+        throw CogWheelConnections::Exception("Could not create thread for conenction.");
     }
 
     // Create thread and run control channel on it.
@@ -150,8 +148,7 @@ void CogWheelConnections::finishedConnection(qint64 handle)
     cogWheelInfo("Removing connection for handle : "+QString::number(handle));
 
     if (!m_connections.contains(handle)) {
-        cogWheelError("Connection not present for handle: "+QString::number(handle));
-        return;
+        throw CogWheelConnections::Exception("Connection not present for handle: "+QString::number(handle));;
     }
 
     CogWheelControlChannel *connection = m_connections[handle];

@@ -27,6 +27,7 @@
 
 #include <QString>
 #include <QMutex>
+#include <QFile>
 
 #include <stdexcept>
 
@@ -83,6 +84,18 @@ public:
         m_loggingBufferMutex.unlock();
     }
 
+    QString getLogFileName() const
+    {
+        return m_logFileName;
+    }
+
+    void setLogFileName(const QString &logFileName)
+    {
+        m_logFileName = logFileName;
+        m_logFile.setFileName(m_logFileName);
+        m_logFile.open(QFile::Append);
+    }
+
     // Private data accessors
 
     QStringList getLoggingBuffer() const { return m_loggingBuffer; }
@@ -100,6 +113,7 @@ public:
     friend void setLoggingLevel(const quint64 &logLevel);
     friend void clearLoggingBuffer();
     friend quint64 getLoggingLevel();
+    friend inline void flushLoggingFile();
 
 private:
 
@@ -116,6 +130,10 @@ private:
         }
         m_loggingBuffer.append(message);
         m_loggingBufferMutex.unlock();
+        if (m_logFile.isOpen()) {
+            m_logFile.write(message.toUtf8()+"\n");
+            m_logFile.flush();
+        }
     }
 
     // Base line logging (USES QDebug variants at present).
@@ -126,8 +144,10 @@ private:
 
     bool m_enabled=false;           // == true logging enabled
     quint64 m_loggingLevel;         // Logging level
-    QMutex m_loggingBufferMutex;    // Loggin buffer mutex
+    QMutex m_loggingBufferMutex;    // Logging buffer mutex
     QStringList m_loggingBuffer;    // Logging buffer
+    QString m_logFileName;          // Logging file name
+    QFile m_logFile;                // Logging file
 
 };
 
@@ -142,6 +162,15 @@ inline void setLoggingLevel(const quint64 &logLevel) {
 inline quint64 getLoggingLevel()
 {
     return CogWheelLogger::getInstance().m_loggingLevel;
+}
+
+// Flush logging to file
+
+inline void flushLoggingFile()
+{
+    if (CogWheelLogger::getInstance().m_logFile.isOpen())  {
+        CogWheelLogger::getInstance().m_logFile.flush();
+    }
 }
 
 // Base string logging

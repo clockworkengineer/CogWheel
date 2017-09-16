@@ -76,7 +76,7 @@ CogWheelDataChannel::~CogWheelDataChannel()
  *
  * @param connection    Pointer to control channel instance.
  *
- * @return  true on sucessful connection
+ * @return  == true on sucessful connection
  */
 bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 {
