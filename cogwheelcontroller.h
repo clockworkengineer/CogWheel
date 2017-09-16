@@ -30,6 +30,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDataStream>
+#include <QBuffer>
 #include <QCoreApplication>
 
 #include <stdexcept>
@@ -129,6 +130,10 @@ private:
     quint32 m_commandBlockSize=0;               // Current command block size.
     QStringList m_lastConnectionList;           // Last connection list sent
     QTimer *m_logFlushTimer=nullptr;            // Log buffer flush timer
+    QByteArray m_writeRawDataBuffer;            // Write raw data buffer
+    QBuffer m_writeQBuffer;                     // Write QBuffer
+    QDataStream m_controllerWriteStream;        // Write data stream
+    QDataStream m_controllerReadStream;         // Read data stream
 
     static QCoreApplication *m_cogWheelApplication;  // Qt Application object
     static CogWheelServer *m_server;                 // FTP Server instance
