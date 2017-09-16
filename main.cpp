@@ -94,6 +94,18 @@ int main(int argc, char *argv[])
             qDebug() << err.what();
             exit(EXIT_FAILURE);
 
+        // Server errors
+
+        } catch (const CogWheelServer::Exception &err) {
+            qDebug() << err.what();
+            exit(EXIT_FAILURE);
+
+        // Connection errors
+
+        } catch (const CogWheelConnections::Exception &err) {
+            qDebug() << err.what();
+            exit(EXIT_FAILURE);
+
         // Fall through
 
         } catch (...) {

@@ -37,6 +37,8 @@
 #include <QSslKey>
 #include <QFile>
 
+#include <stdexcept>
+
 // Forward declaration for control channel
 
 class CogWheelControlChannel;
@@ -50,6 +52,16 @@ class CogWheelDataChannel : public QTcpServer
     Q_OBJECT
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelDataChannel Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Constructor / Destructor
 

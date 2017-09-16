@@ -27,6 +27,8 @@
 #include <QSettings>
 #include <QFile>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -35,6 +37,16 @@ class CogWheelServerSettings
 {
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelServerSettings Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Load and save settings
 

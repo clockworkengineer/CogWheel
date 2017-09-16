@@ -84,7 +84,8 @@ void CogWheelServer::startServer()
         connect(this,&CogWheelServer::accept, &m_connections, &CogWheelConnections::acceptConnection);
         setRunning(true);
     } else {
-        cogWheelError("CogWheel Server listen failure: "+errorString());
+//        cogWheelError("CogWheel Server listen failure: "+errorString());
+        throw CogWheelServer::Exception("CogWheel Server listen failure: "+errorString());
     }
 
 }

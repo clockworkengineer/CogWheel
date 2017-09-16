@@ -38,11 +38,12 @@
 #include "cogwheelusersettings.h"
 #include "cogwheelftpserverreply.h"
 
-#include <functional>
-
 #include <QMap>
 #include <QString>
 #include <QFileInfo>
+
+#include <stdexcept>
+#include <functional>
 
 // =================
 // CLASS DECLARATION
@@ -52,6 +53,16 @@ class CogWheelFTPCore
 {
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelFTPCore Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Constructor / Destructor
 

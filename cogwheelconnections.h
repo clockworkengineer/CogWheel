@@ -34,6 +34,8 @@
 #include <QObject>
 #include <QTimer>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -43,6 +45,16 @@ class CogWheelConnections : public QObject
     Q_OBJECT
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelConnections Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Constructor/ Destructor
 

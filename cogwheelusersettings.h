@@ -27,6 +27,8 @@
 
 #include <QSettings>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -35,6 +37,16 @@ class CogWheelUserSettings
 {
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelUserSettings Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // User validation and authentication
 

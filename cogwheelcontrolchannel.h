@@ -35,6 +35,8 @@
 #include <QSslKey>
 #include <QThread>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -44,6 +46,16 @@ class CogWheelControlChannel : public QObject
     Q_OBJECT
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelControlChannel Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Constructor / Destructor
 

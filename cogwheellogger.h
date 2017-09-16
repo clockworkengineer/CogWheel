@@ -28,6 +28,8 @@
 #include <QString>
 #include <QMutex>
 
+#include <stdexcept>
+
 // =================
 // CLASS DECLARATION
 // =================
@@ -36,6 +38,16 @@ class CogWheelLogger
 {
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelLogger Failure: " + messageStr).toStdString()) {
+        }
+
+    };
 
     // Logging levels
 
