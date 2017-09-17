@@ -576,7 +576,10 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QString path { mapPathToLocal(connection, arguments) } ;
+    // Some clients use "LIST -a" to list . files but as server does it automatically
+    // set argument to empty string (current workign directory)
+
+    QString path { mapPathToLocal(connection, (arguments!="-a") ? arguments : "") } ;
     QFileInfo fileInfo { path };
 
     // Argument does not exist
