@@ -89,12 +89,7 @@ public:
         return m_logFileName;
     }
 
-    void setLogFileName(const QString &logFileName)
-    {
-        m_logFileName = logFileName;
-        m_logFile.setFileName(m_logFileName);
-        m_logFile.open(QFile::Append);
-    }
+
 
     // Private data accessors
 
@@ -110,10 +105,11 @@ public:
     friend void cogWheelError(qintptr handle, const QString &message);
     friend void cogWheelWarning(const QString &message);
     friend void cogWheelWarning(qintptr handle, const QString &message);
-    friend void setLoggingLevel(const quint64 &logLevel);
+    friend void setLoggingLevel(const QStringList &logLevels);
     friend void clearLoggingBuffer();
     friend quint64 getLoggingLevel();
-    friend inline void flushLoggingFile();
+    friend void flushLoggingFile();
+    friend void  setLogFileName(const QString &logFileName);
 
 private:
 
@@ -132,11 +128,11 @@ private:
         m_loggingBufferMutex.unlock();
         if (m_logFile.isOpen()) {
             m_logFile.write(message.toUtf8()+"\n");
-            m_logFile.flush();
+            m_logFile.flush();  // THIS IS INEFFICIENT AND NEEDS TO BE CHANGED
         }
     }
 
-    // Base line logging (USES QDebug variants at present).
+    // Base line logging.
 
     void info(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message); }
     void error(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
@@ -151,10 +147,29 @@ private:
 
 };
 
-// Set logging level
+// Set logging level (could do this with a table)
 
-inline void setLoggingLevel(const quint64 &logLevel) {
-    CogWheelLogger::getInstance().m_loggingLevel = logLevel;
+inline void setLoggingLevel(const QStringList &logLevels) {
+
+    CogWheelLogger::getInstance().m_loggingLevel=CogWheelLogger::None;
+
+    for (auto level : logLevels) {
+        if (level=="None") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::None;
+        } else if (level =="Warning") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Warning;
+        } else if (level =="Info") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Info;
+        } else if (level =="Error") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Error;
+        } else if (level =="Channel") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Channel;
+        }else if (level =="All") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::All;
+        }
+
+    }
+
 }
 
 // Get loggin level
@@ -170,6 +185,15 @@ inline void flushLoggingFile()
 {
     if (CogWheelLogger::getInstance().m_logFile.isOpen())  {
         CogWheelLogger::getInstance().m_logFile.flush();
+    }
+}
+
+inline void  setLogFileName(const QString &logFileName)
+{
+    if (!logFileName.isEmpty()) {
+        CogWheelLogger::getInstance().m_logFileName = logFileName;
+        CogWheelLogger::getInstance().m_logFile.setFileName(logFileName);
+        CogWheelLogger::getInstance().m_logFile.open(QFile::Append);
     }
 }
 

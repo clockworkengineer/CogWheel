@@ -121,7 +121,7 @@ public slots:
     // Command slots
 
     void updateConnectionList(const QStringList &connections);
-    void flushLogToManager();
+    void flushLoggingBufferToManager();
 
 private:
 

@@ -89,6 +89,10 @@ public:
     void setConnectionListUpdateTime(const quint64 &connectionListUpdateTime);
     bool serverLoggingEnabled() const;
     void setServerLoggingEnabled(bool serverLoggingEnabled);
+    QString serverLoggingFileName() const;
+    void setServerLoggingFileName(const QString &serverLoggingFileName);
+    QStringList serverLoggingLevels() const;
+    void setServerLoggingLevels(const QStringList &serverLoggingLevels);
 
 private:
 
@@ -105,6 +109,8 @@ private:
     QString m_serverCertFileName;                            // Server certifucate file
     quint64 m_connectionListUpdateTime=kCWConnListUpdateTime;// Connection list update timer
     bool m_serverLoggingEnabled=false;                       // == true logging enabled
+    QStringList m_serverLoggingLevels;                       // Server logging levels
+    QString m_serverLoggingFileName;                         // Name of file to which logging output goes
     QByteArray m_serverPrivateKey;                           // Server private key
     QByteArray m_serverCert;                                 // Server Certificate
 

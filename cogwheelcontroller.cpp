@@ -55,10 +55,6 @@ CogWheelController::CogWheelController(QCoreApplication *cogWheelApp, QObject *p
     m_serverName = manager.value("servername").toString();
     manager.endGroup();
 
-    if (m_serverName.isEmpty()) {
-        throw CogWheelController::Exception("Empty local socket server name.");
-    }
-
     // Remove any previous instance of cotroller server name
 
     QLocalServer::removeServer(m_serverName);
@@ -290,7 +286,7 @@ void CogWheelController::enableLoggingToManager(bool enable)
     if (CogWheelLogger::getInstance().getLoggingEnabled()) {
         if (enable) {
             m_logFlushTimer = new QTimer();
-            connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLogToManager);
+            connect(m_logFlushTimer, &QTimer::timeout, this, &CogWheelController::flushLoggingBufferToManager);
             m_logFlushTimer->start(kCWLoggingFlushTimer);
         } else {
             resetLoggingFlushTimer();
@@ -399,11 +395,6 @@ void CogWheelController::readyRead()
 
     while (m_controllerSocket->bytesAvailable()) {
 
-        // Datastream for commands
-
-        //        QDataStream controllerReadStream(m_controllerSocket);
-        //        controllerReadStream.setVersion(QDataStream::Qt_4_7);
-
         // Read blocksize header
 
         if (m_commandBlockSize == 0) {
@@ -451,17 +442,22 @@ void CogWheelController::updateConnectionList(const QStringList &connectionList)
 }
 
 /**
- * @brief CogWheelController::flushLogToManager
+ * @brief CogWheelController::flushLoggingBufferToManager
  *
- * Flush loggin buffer to server and then clear it.
+ * Flush logging buffer to server and then clear it.
+ * It also flushs data to any log file of it exists.
  *
  */
-void CogWheelController::flushLogToManager()
+void CogWheelController::flushLoggingBufferToManager()
 {
 
     if (!CogWheelLogger::getInstance().getLoggingBuffer().isEmpty()) {
         writeCommandToManager(kCWCommandLOGOUTPUT, CogWheelLogger::getInstance().getLoggingBuffer());
         CogWheelLogger::getInstance().clearLoggingBuffer();
+    }
+
+    if (!CogWheelLogger::getInstance().getLogFileName().isEmpty()) {
+        flushLoggingFile();
     }
 
 }

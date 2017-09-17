@@ -74,6 +74,12 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("loggingenabled")) {
         server.setValue("loggingenabled", false);
     }
+    if (!server.childKeys().contains("logginglevels")) {
+        server.setValue("logginglevels", "None");
+    }
+    if (!server.childKeys().contains("loggingfile")) {
+        server.setValue("loggingfile", "");
+    }
     server.endGroup();
 
     server.beginGroup("Server");
@@ -90,6 +96,8 @@ void CogWheelServerSettings::load()
     setServerCertFileName(server.value("servercert").toString());
     setConnectionListUpdateTime(server.value("connectionlistppdate").toInt()); // NO UI
     setServerLoggingEnabled(server.value("loggingenabled").toBool());
+    setServerLoggingLevels(server.value("logginglevels").toStringList());
+    setServerLoggingFileName(server.value("loggingfile").toString());
     server.endGroup();
 
 }
@@ -118,6 +126,8 @@ void CogWheelServerSettings::save()
     server.setValue("serverkey", serverKeyFileName());
     server.setValue("servercert",serverCertFileName());
     server.setValue("loggingenabled",serverLoggingEnabled());
+    server.setValue("logginglevels",serverLoggingLevels());
+    server.setValue("loggingfile",serverLoggingFileName());
     server.endGroup();
 
 }
@@ -351,6 +361,26 @@ bool CogWheelServerSettings::serverLoggingEnabled() const
 void CogWheelServerSettings::setServerLoggingEnabled(bool serverLoggingEnabled)
 {
     m_serverLoggingEnabled = serverLoggingEnabled;
+}
+
+QString CogWheelServerSettings::serverLoggingFileName() const
+{
+    return m_serverLoggingFileName;
+}
+
+void CogWheelServerSettings::setServerLoggingFileName(const QString &loggingFileName)
+{
+    m_serverLoggingFileName = loggingFileName;
+}
+
+QStringList CogWheelServerSettings::serverLoggingLevels() const
+{
+    return m_serverLoggingLevels;
+}
+
+void CogWheelServerSettings::setServerLoggingLevels(const QStringList &serverLoggingLevels)
+{
+    m_serverLoggingLevels = serverLoggingLevels;
 }
 
 

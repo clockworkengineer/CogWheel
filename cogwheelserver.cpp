@@ -34,9 +34,17 @@
 CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(parent)
 {
 
+    // Load server settings
+
     m_serverSettings.load();
 
+    // Set logging enabled flag, logging level, log file name
+
     CogWheelLogger::getInstance().setLoggingEnabled(m_serverSettings.serverLoggingEnabled());
+    setLoggingLevel(m_serverSettings.serverLoggingLevels());
+    setLogFileName(m_serverSettings.serverLoggingFileName());
+
+    // LOGGING STARTS HERE !!!
 
     cogWheelInfo("Loaded CogWheel FTP Server Settings...");
 

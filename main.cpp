@@ -65,14 +65,6 @@ int main(int argc, char *argv[])
 
         try {
 
-            // Set logging level
-
-            setLoggingLevel(CogWheelLogger::Info |
-                            CogWheelLogger::Error |
-                            CogWheelLogger::Warning);
-
-            CogWheelLogger::getInstance().setLogFileName("/home/robt/CogWheel.txt");
-
             // Initialise Organisation and Application names
 
             QCoreApplication::setOrganizationName(kCWOrganizationName);
