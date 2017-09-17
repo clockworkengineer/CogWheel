@@ -29,6 +29,7 @@
 #include <QString>
 #include <QMutex>
 #include <QFile>
+#include <QDateTime>
 
 #include <stdexcept>
 
@@ -123,10 +124,10 @@ private:
         if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
             m_loggingBuffer.removeFirst();
         }
-        m_loggingBuffer.append(message);
+        m_loggingBuffer.append(QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss")+" : "+message);
         m_loggingBufferMutex.unlock();
         if (m_logFile.isOpen()) {
-            m_logFile.write(message.toUtf8()+"\n");
+            m_logFile.write(m_loggingBuffer.front().toUtf8()+"\n");
             m_logFile.flush();  // THIS IS INEFFICIENT AND NEEDS TO BE CHANGED
         }
     }
