@@ -37,8 +37,6 @@
 #include <QSslKey>
 #include <QFile>
 
-#include <stdexcept>
-
 // Forward declaration for control channel
 
 class CogWheelControlChannel;

@@ -42,6 +42,17 @@ class CogWheelManagerSingleInstance : public QLocalServer
      Q_OBJECT
 
 public:
+
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelManagerSingleInstance Failure: " + messageStr).toStdString()) {
+        }
+
+    };
+
     CogWheelManagerSingleInstance(QApplication *appInstance, QObject *parent = nullptr);
     ~CogWheelManagerSingleInstance();
 

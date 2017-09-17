@@ -35,8 +35,6 @@
 #include <QSslKey>
 #include <QThread>
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================

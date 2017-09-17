@@ -42,9 +42,6 @@
 #include <QString>
 #include <QFileInfo>
 
-#include <stdexcept>
-#include <functional>
-
 // =================
 // CLASS DECLARATION
 // =================

@@ -47,6 +47,16 @@ class CogWheelManager : public QLocalServer
 
 public:
 
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelManager Failure: " + messageStr).toStdString()) {
+        }
+
+    };
+
     // Constructor / Destructor
 
     explicit CogWheelManager(QObject *parent = nullptr);
@@ -120,7 +130,7 @@ private:
 
     QString m_serverPath;                   // Path to CogWheel Server
     QString m_serverName;                   // Manager socket name
-    QLocalSocket *m_managerSocket;          // Manager socket
+    QLocalSocket *m_managerSocket=nullptr;  // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Command reply block size.
     QByteArray m_writeRawDataBuffer;        // Write raw data buffer
     QBuffer m_writeQBuffer;                 // Write QBuffer

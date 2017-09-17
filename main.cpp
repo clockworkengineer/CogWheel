@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 
         try {
 
+
             // Initialise Organisation and Application names
 
             QCoreApplication::setOrganizationName(kCWOrganizationName);
@@ -84,21 +85,9 @@ int main(int argc, char *argv[])
 
             flushLoggingFile();
 
-        // Controller errors
+        // Controller/Server/Conenction errors
 
-        } catch (const CogWheelController::Exception &err) {
-            qDebug() << err.what();
-            exit(EXIT_FAILURE);
-
-        // Server errors
-
-        } catch (const CogWheelServer::Exception &err) {
-            qDebug() << err.what();
-            exit(EXIT_FAILURE);
-
-        // Connection errors
-
-        } catch (const CogWheelConnections::Exception &err) {
+        } catch (const std::runtime_error &err) {
             qDebug() << err.what();
             exit(EXIT_FAILURE);
 

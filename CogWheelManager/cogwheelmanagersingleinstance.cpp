@@ -40,14 +40,14 @@ CogWheelManagerSingleInstance::CogWheelManagerSingleInstance(QApplication *appIn
 
     m_appInstanceSocket = new QLocalSocket();
 
-    m_appInstanceSocket->connectToServer("CogWheelManagerInstance");
+    m_appInstanceSocket->connectToServer(static_cast<QString>(kCWApplicationName)+"ManagerInstance");
     m_appInstanceSocket->waitForConnected(-1);
 
     // Failure then first time run so set up listen
 
     if (m_appInstanceSocket->state() ==  QLocalSocket::UnconnectedState) {
-        removeServer("CogWheelManagerInstance");
-        listen("CogWheelManagerInstance");
+        removeServer(static_cast<QString>(kCWApplicationName)+"ManagerInstance");
+        listen(static_cast<QString>(kCWApplicationName)+"ManagerInstance");
         return;
     }
 

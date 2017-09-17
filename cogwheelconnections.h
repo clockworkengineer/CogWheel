@@ -34,8 +34,6 @@
 #include <QObject>
 #include <QTimer>
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================

@@ -43,6 +43,16 @@ class CogWheelUserSettingsDialog : public QDialog
 
 public:
 
+    // Class exception
+
+    struct Exception : public std::runtime_error {
+
+        Exception(const QString & messageStr)
+            : std::runtime_error(QString("CogWheelUserSettingsDialog Failure: " + messageStr).toStdString()) {
+        }
+
+    };
+
     // Constructor / Destructor
 
     explicit CogWheelUserSettingsDialog(QString userName, QWidget *parent = 0);

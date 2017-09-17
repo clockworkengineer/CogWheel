@@ -47,8 +47,13 @@ int main(int argc, char *argv[])
             cogWheelMainWindow.show();
             return cogWheelManagerApp.exec();
 
+        } catch(std::runtime_error &err) {
+            qDebug() << err.what();
+            exit(EXIT_FAILURE);
+
         } catch(...) {
-            qDebug() << "CogWheel Server Manager Exception";
+            qDebug() << "A unknown exception occurred.";
+            exit(EXIT_FAILURE);
         }
 
     } else {

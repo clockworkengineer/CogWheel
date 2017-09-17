@@ -23,8 +23,6 @@
 // INCLUDE FILES
 // =============
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================

@@ -31,8 +31,6 @@
 #include <QObject>
 #include <QTcpServer>
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================

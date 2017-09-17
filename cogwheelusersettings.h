@@ -27,8 +27,6 @@
 
 #include <QSettings>
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================

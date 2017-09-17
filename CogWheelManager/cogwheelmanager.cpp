@@ -124,8 +124,7 @@ void CogWheelManager::startUpManager()
     // Setup socket listen
 
     if (!listen(m_serverName+kCWManagerPostfix)) {
-        qDebug() << "Manager unable listen on socket name: " << m_serverName;
-        return;
+        throw CogWheelManager::Exception("Manager unable listen on socket name: "+m_serverName);
     }
 
     // Try to connect to server
@@ -162,8 +161,7 @@ void CogWheelManager::connectToServer()
 
     m_managerSocket = new QLocalSocket();
     if (m_managerSocket==nullptr) {
-        qDebug() << "Error in creating manager socket.";
-        return;
+        throw CogWheelManager::Exception("Could not create manager local socket");
     }
 
     // Connect up its signals/slots
@@ -221,14 +219,11 @@ void CogWheelManager::incomingConnection(quintptr handle)
 
     m_managerSocket = new QLocalSocket();
     if (m_managerSocket==nullptr) {
-        qDebug() << "Error: Could not create manager socket.";
-        return;
+        throw CogWheelManager::Exception("Could not create manager local socket");
     }
 
     if (!m_managerSocket->setSocketDescriptor(handle)) {
-        qDebug() << "Error setting up socket for manager controller.";
-        resetManagerSocket();
-        return;
+        throw CogWheelManager::Exception("Could not assign manager local socket descriptor.");
     }
 
     connectUpManagerSocket();

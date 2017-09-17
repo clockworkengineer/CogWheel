@@ -33,8 +33,6 @@
 #include <QBuffer>
 #include <QCoreApplication>
 
-#include <stdexcept>
-
 // =================
 // CLASS DECLARATION
 // =================
