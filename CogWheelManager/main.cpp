@@ -24,6 +24,7 @@
 
 #include "cogwheelmanagermain.h"
 #include "cogwheelmanagersingleinstance.h"
+
 #include <QApplication>
 
 // ============================
@@ -38,10 +39,18 @@ int main(int argc, char *argv[])
     CogWheelManagerSingleInstance singleInstance(&cogWheelManagerApp);
 
     if (!singleInstance.alreadyRunning()){
-        CogWheelManagerMain cogWheelMainWindow;
-        singleInstance.setMainWindow(&cogWheelMainWindow);
-        cogWheelMainWindow.show();
-        return cogWheelManagerApp.exec();
+
+        try {
+
+            CogWheelManagerMain cogWheelMainWindow;
+            singleInstance.setMainWindow(&cogWheelMainWindow);
+            cogWheelMainWindow.show();
+            return cogWheelManagerApp.exec();
+
+        } catch(...) {
+            qDebug() << "CogWheel Server Manager Exception";
+        }
+
     } else {
         exit(EXIT_FAILURE);
     }

@@ -251,9 +251,9 @@ void CogWheelController::resetControllerSocket()
         }
         m_controllerSocket->deleteLater();
         m_controllerSocket=nullptr;
-        if (m_writeQBuffer.isOpen()) {
-            m_writeQBuffer.close();
-        }
+
+    }       if (m_writeQBuffer.isOpen()) {
+        m_writeQBuffer.close();
     }
 }
 
@@ -377,7 +377,7 @@ void CogWheelController::error(QLocalSocket::LocalSocketError socketError)
         cogWheelInfo("Manager not running at present....");
         return;
     }
-    cogWheelError( static_cast<QLocalSocket*>(sender())->errorString());;
+    cogWheelError( static_cast<QLocalSocket*>(sender())->errorString());
 }
 
 /**

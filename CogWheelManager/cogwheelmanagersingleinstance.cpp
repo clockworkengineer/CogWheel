@@ -12,8 +12,8 @@
 //
 // Class: CogWheelManagerSingleInstance
 //
-// Description: Class for making sure that olny one instance of the CogWheelManager
-// is run at a time. It tries to connect to a given QLocal socket and if it fails then call
+// Description: Class for making sure that only one instance of the CogWheelManager
+// is run at a time. It tries to connect to a given QLocal socket and if it fails then calls
 // listen() to wait for any connects from new instances. If connect does succeed then
 // the manager is already running. Note: The Incoming connection override for the main
 // instance brings the program to the front on an connection attempt.

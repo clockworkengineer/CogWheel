@@ -56,10 +56,10 @@ protected:
 
 private:
 
-    QApplication *m_appInstance;
-    QMainWindow *m_mainWindow;
-    QLocalSocket *m_appInstanceSocket=nullptr;
-    bool m_alreadyRunning=false;
+    QApplication *m_appInstance;                // Server Qt application instance
+    QMainWindow *m_mainWindow;                  // Manager main window
+    QLocalSocket *m_appInstanceSocket=nullptr;  // Instance socket
+    bool m_alreadyRunning=false;                // == true already running
 
 };
 

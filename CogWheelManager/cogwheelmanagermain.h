@@ -74,9 +74,9 @@ private:
 
     Ui::CogWheelManagerMain *ui;        // Qt window data
 
-    CogWheelManager m_serverManager;            // Server manager
-    QProcess *m_serverProcess=nullptr;          // Server process
-    QStringListModel m_loggingBuffer;
-};
+    CogWheelManager m_serverManager;        // Server manager
+    QProcess *m_serverProcess=nullptr;      // Server process
+    QStringListModel m_serverLoggingBuffer; // Server logging buffer
 
+};
 #endif // COGWHEELMANAGERMAIN_H

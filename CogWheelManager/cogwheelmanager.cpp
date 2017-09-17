@@ -86,7 +86,7 @@ void CogWheelManager::load()
 /**
  * @brief CogWheelManager::connectUpManagerSocket
  *
- * Connect up signal/slots for maanger socket.
+ * Connect up signal/slots for manager socket and setup read/write data streams.
  *
  */
 void CogWheelManager::connectUpManagerSocket()
@@ -96,6 +96,15 @@ void CogWheelManager::connectUpManagerSocket()
     connect(m_managerSocket,&QLocalSocket::disconnected, this, &CogWheelManager::disconnected);
     connect(m_managerSocket,static_cast<void(QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error), this, &CogWheelManager::error);
     connect(m_managerSocket,&QLocalSocket::readyRead, this, &CogWheelManager::readyRead);
+
+    m_managerReadStream.setVersion(QDataStream::Qt_4_7);
+    m_managerReadStream.setDevice(m_managerSocket);
+
+    m_writeQBuffer.setBuffer(&m_writeRawDataBuffer);
+    m_writeQBuffer.open(QIODevice::WriteOnly);
+    m_managerWriteStream.setVersion(QDataStream::Qt_4_7);
+    m_managerWriteStream.setDevice(&m_writeQBuffer);
+
 }
 
 /**
@@ -157,7 +166,7 @@ void CogWheelManager::connectToServer()
         return;
     }
 
-    // COnnectup its signals/slots
+    // Connect up its signals/slots
 
     connectUpManagerSocket();
 
@@ -190,6 +199,9 @@ void CogWheelManager::resetManagerSocket()
         }
         m_managerSocket->deleteLater();
         m_managerSocket=nullptr;
+        if (m_writeQBuffer.isOpen()) {
+            m_writeQBuffer.close();
+        }
     }
 }
 
@@ -259,9 +271,13 @@ void CogWheelManager::disconnected()
  */
 void CogWheelManager::error(QLocalSocket::LocalSocketError socketError)
 {
-    if (m_managerSocket) {
-        qDebug() << "Manager socket error" << socketError;
+
+    if (socketError==QLocalSocket::ConnectionRefusedError) {
+        qDebug() << "Server not running waiting for it to connect";
+        return;
     }
+    qDebug() << static_cast<QLocalSocket*>(sender())->errorString();
+
 }
 
 /**
@@ -277,23 +293,18 @@ void CogWheelManager::readyRead()
 
     while (m_managerSocket->bytesAvailable()) {
 
-        // Datastream for commands
-
-        QDataStream in(m_managerSocket);
-        in.setVersion(QDataStream::Qt_4_7);
-
         // Read blocksize header
 
         if (m_commandResponseBlockSize == 0) {
             if (m_managerSocket->bytesAvailable() < (int)sizeof(quint32)) {
                 return;
             }
-            in >> m_commandResponseBlockSize;
+            m_managerReadStream >> m_commandResponseBlockSize;
         }
 
         // Bytes still to read
 
-        if (m_managerSocket->bytesAvailable() < m_commandResponseBlockSize || in.atEnd()) {
+        if (m_managerSocket->bytesAvailable() < m_commandResponseBlockSize || m_managerReadStream.atEnd()) {
             return;
         }
 
@@ -301,10 +312,10 @@ void CogWheelManager::readyRead()
         // enable any response parameters to be processed.
 
         QString command;
-        in >> command;
+        m_managerReadStream >> command;
 
         if (m_controllerCommandTable.contains(command)) {
-            (this->*m_controllerCommandTable[command])(in);
+            (this->*m_controllerCommandTable[command])(m_managerReadStream);
             m_commandResponseBlockSize=0;
         } else {
             qDebug() << "Controller command [" << command << "] not valid.";
@@ -315,7 +326,6 @@ void CogWheelManager::readyRead()
         }
 
     }
-
 
 }
 
@@ -331,14 +341,13 @@ void CogWheelManager::readyRead()
 void CogWheelManager::writeCommandToController(const QString &command)
 {
     if (m_managerSocket) {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_7);
-        out << (quint32)0;
-        out << command;
-        out.device()->seek(0);
-        out << (quint32)(block.size() - sizeof(quint32));
-        m_managerSocket->write(block);
+        m_writeRawDataBuffer.clear();
+        m_managerWriteStream.device()->seek(0);
+        m_managerWriteStream << (quint32)0;
+        m_managerWriteStream << command;
+        m_managerWriteStream.device()->seek(0);
+        m_managerWriteStream << (quint32)(m_writeRawDataBuffer.size() - sizeof(quint32));
+        m_managerSocket->write(m_writeRawDataBuffer);
         m_managerSocket->flush();
     }
 }
@@ -350,20 +359,19 @@ void CogWheelManager::writeCommandToController(const QString &command)
  * text strings with no parameters at present.
  *
  * @param command   Command.
- *
+ * @param param1    String paramter.
  */
 void CogWheelManager::writeCommandToController(const QString &command, const QString &param1)
 {
     if (m_managerSocket) {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_7);
-        out << (quint32)0;
-        out << command;
-        out << param1;
-        out.device()->seek(0);
-        out << (quint32)(block.size() - sizeof(quint32));
-        m_managerSocket->write(block);
+        m_writeRawDataBuffer.clear();
+        m_managerWriteStream.device()->seek(0);
+        m_managerWriteStream << (quint32)0;
+        m_managerWriteStream << command;
+        m_managerWriteStream << param1;
+        m_managerWriteStream.device()->seek(0);
+        m_managerWriteStream << (quint32)(m_writeRawDataBuffer.size() - sizeof(quint32));
+        m_managerSocket->write(m_writeRawDataBuffer);
         m_managerSocket->flush();
     }
 }
@@ -402,6 +410,13 @@ void CogWheelManager::connectionList(QDataStream &input)
 
 }
 
+/**
+ * @brief CogWheelManager::logOutput
+ *
+ * Update server logging window.
+ *
+ * @param input
+ */
 void CogWheelManager::logOutput(QDataStream &input)
 {
 

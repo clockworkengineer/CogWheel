@@ -29,6 +29,7 @@
 #include <QObject>
 #include <QLocalSocket>
 #include <QLocalServer>
+#include <QBuffer>
 #include <QDataStream>
 #include <QSettings>
 
@@ -119,9 +120,12 @@ private:
 
     QString m_serverPath;                   // Path to CogWheel Server
     QString m_serverName;                   // Manager socket name
-
     QLocalSocket *m_managerSocket;          // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Command reply block size.
+    QByteArray m_writeRawDataBuffer;        // Write raw data buffer
+    QBuffer m_writeQBuffer;                 // Write QBuffer
+    QDataStream m_managerWriteStream;       // Write data stream
+    QDataStream m_managerReadStream;        // Read data stream
 
     // Controller command table
 

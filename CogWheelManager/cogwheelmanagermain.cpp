@@ -64,7 +64,7 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
     connect(&m_serverManager,&CogWheelManager::connectionListUpdate, this, &CogWheelManagerMain::connectionListUpdate);
     connect(&m_serverManager,&CogWheelManager::logWindowUpdate, this, &CogWheelManagerMain::logWindowUpdate);
 
-    ui->logListView->setModel(&m_loggingBuffer);
+    ui->logListView->setModel(&m_serverLoggingBuffer);
 
     // Setup window initial state
 
@@ -257,11 +257,11 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
 void CogWheelManagerMain::logWindowUpdate(const QStringList &logBuffer)
 {
     for (auto line : logBuffer) {
-        m_loggingBuffer.insertRow(m_loggingBuffer.rowCount());
-        QModelIndex index = m_loggingBuffer.index(m_loggingBuffer.rowCount()-1);
-        m_loggingBuffer.setData(index, line);
+        m_serverLoggingBuffer.insertRow(m_serverLoggingBuffer.rowCount());
+        QModelIndex index = m_serverLoggingBuffer.index(m_serverLoggingBuffer.rowCount()-1);
+        m_serverLoggingBuffer.setData(index, line);
     }
 
-    ui->logListView->setCurrentIndex(m_loggingBuffer.index(m_loggingBuffer.rowCount()-1));
+    ui->logListView->setCurrentIndex(m_serverLoggingBuffer.index(m_serverLoggingBuffer.rowCount()-1));
 
 }

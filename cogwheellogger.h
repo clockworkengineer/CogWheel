@@ -15,10 +15,11 @@
 //
 // Class: CogWheelLogger
 //
-// Description: Used to provide server logging to manager program. It is an singleton
+// Description: Used to provide server logging to manager program / file. It is an singleton
 // class whose interface and implementaion is provided in this single include file.
 // Note: If the server is not connected to the manager only the last kCWLoggingBufferLineMax
-// lines are kept in the buffer (for simplicity and space).
+// lines are kept in the buffer (for simplicity and space). Logging is also sent to a file is
+// so configured.
 //
 
 // =============
@@ -88,8 +89,6 @@ public:
     {
         return m_logFileName;
     }
-
-
 
     // Private data accessors
 
@@ -188,12 +187,16 @@ inline void flushLoggingFile()
     }
 }
 
+// Open logging for for append if configured
+
 inline void  setLogFileName(const QString &logFileName)
 {
     if (!logFileName.isEmpty()) {
-        CogWheelLogger::getInstance().m_logFileName = logFileName;
-        CogWheelLogger::getInstance().m_logFile.setFileName(logFileName);
-        CogWheelLogger::getInstance().m_logFile.open(QFile::Append);
+        if (!CogWheelLogger::getInstance().m_logFile.isOpen()) {
+            CogWheelLogger::getInstance().m_logFileName = logFileName;
+            CogWheelLogger::getInstance().m_logFile.setFileName(logFileName);
+            CogWheelLogger::getInstance().m_logFile.open(QFile::Append);
+        }
     }
 }
 
