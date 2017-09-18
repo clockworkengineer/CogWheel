@@ -859,7 +859,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     if(file.exists()) {
         if(!file.remove()) {
-            throw CogWheelFtpServerReply(551, "File could not be overwritten.");
+            throw CogWheelFtpServerReply(550, "File could not be overwritten.");
         }
     }
 
@@ -1093,8 +1093,9 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
         if(fileToDelete.remove()) {
             connection->sendReplyCode(250);
         } else {
-            throw CogWheelFtpServerReply("Could not delete file.");
+            throw CogWheelFtpServerReply(450, "Could not delete file.");
         }
+
     } else {
         throw CogWheelFtpServerReply("File not found.");
     }
@@ -1139,7 +1140,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
     QFile file { path  } ;
 
     if(file.exists()) {
-        throw CogWheelFtpServerReply(551, "File already exists.");
+        throw CogWheelFtpServerReply(550, "File already exists.");
     }
 
     // Connect up data channel and upload file
@@ -1304,7 +1305,7 @@ void CogWheelFTPCore::REST(CogWheelControlChannel *connection, const QString &ar
         connection->sendReplyCode(350,"Restarting at "+arguments+". Send STORE or RETRIEVE.");
     } else{
         connection->setRestoreFilePostion(0);
-        throw CogWheelFtpServerReply(500);
+        throw CogWheelFtpServerReply(501);
     }
 
 }
