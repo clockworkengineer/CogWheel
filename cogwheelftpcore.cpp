@@ -162,6 +162,8 @@ void CogWheelFTPCore::loadServerReponseTables()
 
     if (m_featTailoredRespone.empty()) {
         m_featTailoredRespone.insert("AUTH", "AUTH TLS");
+        m_featTailoredRespone.insert("MLSD", "MLSD Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*\r\n");
+        m_featTailoredRespone.insert("MLST", "MLST Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*\r\n");
     }
 
 }
@@ -235,6 +237,8 @@ void CogWheelFTPCore::loadFTPCommandTables()
         m_ftpCommandTableExtended.insert("AUTH", AUTH);
         m_ftpCommandTableExtended.insert("PROT", PROT);
         m_ftpCommandTableExtended.insert("PBSZ", PBSZ);
+        m_ftpCommandTableExtended.insert("MLSD", MLSD);
+        m_ftpCommandTableExtended.insert("MLST", MLST);
 
         QHashIterator<QString, FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
@@ -247,52 +251,108 @@ void CogWheelFTPCore::loadFTPCommandTables()
 }
 
 /**
+ * @brief CogWheelFTPCore::buildFilePermissions
+ *
+ * Build files permissions into QString and return.
+ *
+ * @param fileInfo  File to produce permissions for.
+ *
+ * @return Files permissions as a QString.
+ */
+QString CogWheelFTPCore::buildFilePermissions(const QFileInfo &fileInfo)
+{
+
+    QString line;
+
+    line.append((fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-');
+    line.append((fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-');
+    line.append((fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-');
+    line.append((fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-');
+    line.append((fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-');
+    line.append((fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-');
+    line.append((fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-');
+    line.append((fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-');
+    line.append((fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-');
+
+    return(line);
+
+}
+
+/**
+ * @brief CogWheelFTPCore::buildMLSDCommonLine
+ *
+ * Build common file facts to QString and return.
+ *
+ * @param fileInfo  File to produce facts for.
+ *
+ * @return Common file facts as a QString.
+ */
+QString CogWheelFTPCore::buildMLSDCommonLine(const QFileInfo &fileInfo)
+{
+    QString line;
+
+    line.append("Modify=");
+    line.append(fileInfo.lastModified().toString("yyyyMMddhhmmss"));
+    line.append(";");
+
+    line.append("Create=");
+    line.append(fileInfo.created().toString("yyyyMMddhhmmss"));
+    line.append(";");
+
+    line.append("UNIX.mode=");
+    line.append(buildFilePermissions(fileInfo));
+    line.append(";");
+
+    line.append("UNIX.owner=");
+    line.append(fileInfo.owner());
+    line.append(";");
+
+    line.append("UNIX.group=");
+    line.append(fileInfo.group());
+    line.append(";");
+
+    return line;
+}
+
+/**
  * @brief CogWheelFTPCore::buildListLine
  *
  * Build list line for passed in QFileInfo. The format of which
  * is the same as given for the Linux 'ls -l' command.
  *
- * @param file  File to produce list line for.
+ * @param fileInfo  File to produce list line for.
  *
- * @return List line string.
+ * @return List line QString.
  */
-QString CogWheelFTPCore::buildListLine(QFileInfo &file)
+QString CogWheelFTPCore::buildLISTLine(const QFileInfo &fileInfo)
 {
     QString line;
     QString temp;
 
-    if (file.isSymLink()) {
+    if (fileInfo.isSymLink()) {
         line.append('l');
-    } else if (file.isDir()){
+    } else if (fileInfo.isDir()){
         line.append('d');
     } else {
         line.append('-');
     }
 
-    line.append((file.permissions() & QFile::ReadUser) ? 'r' : '-');
-    line.append((file.permissions() & QFile::WriteUser) ? 'w' : '-');
-    line.append((file.permissions() & QFile::ExeUser) ? 'x' : '-');
-    line.append((file.permissions() & QFile::ReadGroup) ? 'r' : '-');
-    line.append((file.permissions() & QFile::WriteGroup) ? 'w' : '-');
-    line.append((file.permissions() & QFile::ExeGroup) ? 'x' : '-');
-    line.append((file.permissions() & QFile::ReadOther) ? 'r' : '-');
-    line.append((file.permissions() & QFile::WriteOther) ? 'w' : '-');
-    line.append((file.permissions() & QFile::ExeOther) ? 'x' : '-');
+    line.append(buildFilePermissions(fileInfo));
 
     line.append(" 1 ");
 
-    temp = file.owner();
+    temp = fileInfo.owner();
 
     if(temp == "") {
         temp = "0";
     }
 
-    line.append(file.owner().leftJustified(10,' ',true));
+    line.append(fileInfo.owner().leftJustified(10,' ',true));
     line.append(" ");
 
     // padded by 10 and left justified
 
-    temp = file.group();
+    temp = fileInfo.group();
 
     if(temp == "") {
         temp = "0";
@@ -303,21 +363,88 @@ QString CogWheelFTPCore::buildListLine(QFileInfo &file)
 
     // padded by 10 and right justified
 
-    temp = QString::number(file.size());
+    temp = QString::number(fileInfo.size());
     line.append(temp.rightJustified(10,' ',true));
     line.append(" ");
 
     // padded by 12 and left justified
 
-    temp = file.lastModified().toString("MMM dd hh:mm");
+    temp = fileInfo.lastModified().toString("MMM dd hh:mm");
 
     line.append(temp.rightJustified(12,' ',true));
     line.append(" ");
 
-    line.append(file.fileName());
+    line.append(fileInfo.fileName());
     line.append("\r\n");
 
     return(line);
+
+}
+
+/**
+ * @brief CogWheelFTPCore::buildMLSDPathLine
+ *
+ * Build list line for requested path in MLSD.
+ *
+ * @param pathInfo  Directory info to produce MLSD line for.
+ * @param path      Directory path.
+ *
+ * @return MLSD list line QString.
+ */
+QString CogWheelFTPCore::buildMLSDPathLine(const QFileInfo &pathInfo, const QString &path)
+{
+
+    QString line;
+
+    line.append("Type=cdir;");
+
+    line.append(buildMLSDCommonLine(pathInfo));
+
+    line.append(" ");
+    line.append(path);
+
+    line.append("\r\n");
+
+    return line;
+
+}
+
+/**
+ * @brief CogWheelFTPCore::buildMLSDLine
+ *
+ * Build list line for single file in MLSD list.
+ *
+ * @param fileInfo  File information
+ *
+ * @return List line for file QString.
+ */
+QString CogWheelFTPCore::buildMLSDLine(const QFileInfo &fileInfo)
+{
+
+    QString line;
+
+    line.append("Type=");
+    if(fileInfo.isDir()){
+        line.append("dir");
+    }else {
+        line.append("file");
+    }
+    line.append(";");
+
+    if(fileInfo.isFile()){
+        line.append("Size=");
+        line.append(QString::number(fileInfo.size()));
+        line.append(";");
+    }
+
+    line.append(buildMLSDCommonLine(fileInfo));
+
+    line.append(" ");
+    line.append(fileInfo.fileName());
+
+    line.append("\r\n");
+
+    return line;
 
 }
 
@@ -600,13 +727,13 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(buildListLine(item));
+                listing.append(buildLISTLine(item));
             }
 
             // List a single file
 
         } else {
-            listing.append(buildListLine(fileInfo));
+            listing.append(buildLISTLine(fileInfo));
         }
 
         // Send listing to clients
@@ -1414,7 +1541,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
         if(pathToList.exists()) {
             for (auto item : pathToList.entryInfoList()){
-                connection->sendOnControlChannel(buildListLine(item));
+                connection->sendOnControlChannel(buildLISTLine(item));
             }
         }else{
             connection->sendOnControlChannel(arguments+" does not exist.\r\n");
@@ -1602,6 +1729,90 @@ void CogWheelFTPCore::PBSZ(CogWheelControlChannel *connection, const QString &ar
     }
 
     connection->sendReplyCode(502);
+}
+
+/**
+ * @brief CogWheelFTPCore::MLSD
+ *
+ * Return listing of file facts for passed in path.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
+void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    QString path { mapPathToLocal(connection, arguments) } ;
+    QFileInfo fileInfo { path };
+
+    // Argument does not exist
+
+    if (!fileInfo.exists()) {
+        throw CogWheelFtpServerReply("Requested path not found.");
+    }
+
+    // Argument not a directory
+
+    if (!fileInfo.isDir()) {
+        throw CogWheelFtpServerReply("Requested path not a directory.");
+    }
+
+    // Connect up data channel and send file list
+
+    if (connection->connectDataChannel()) {
+
+        QString listing;
+
+        // List files for directory
+
+        listing.append(buildMLSDPathLine( fileInfo, path));
+
+        if (fileInfo.isDir()) {
+            QDir listDirectory { path };
+            listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
+            for (QFileInfo &item : listDirectory.entryInfoList()) {
+                listing.append(buildMLSDLine(item));
+            }
+
+        }
+
+        // Send listing to clients
+
+        connection->sendOnDataChannel(listing.toUtf8().data());
+
+        // Disconnect data channel
+
+        connection->disconnectDataChannel();
+
+    }
+
+}
+
+/**
+ * @brief CogWheelFTPCore::MLST
+ *
+ * Return file facts for argument passed in on control channel.
+ *
+ * @param connection   Pointer to control channel instance.
+ * @param arguments    Command arguments.
+ */
+void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &arguments)
+{
+
+    QFileInfo fileInfo(mapPathToLocal(connection, arguments));
+
+    if(fileInfo.exists()) {
+
+        connection->sendOnControlChannel("250-Listing " + arguments + "\r\n");
+
+        connection->sendOnControlChannel(buildMLSDLine(fileInfo));
+
+        connection->sendReplyCode(250,"End.");
+
+    } else {
+        connection->sendOnControlChannel(arguments+" does not exist.\r\n");
+    }
+
 }
 
 

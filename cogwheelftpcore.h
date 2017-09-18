@@ -89,9 +89,13 @@ private:
     static void loadServerReponseTables();
     static void loadFTPCommandTables();
 
-    // Build list file line
+    // Build LIST/MLSx command replies.
 
-    static QString buildListLine(QFileInfo &file);
+    static QString buildFilePermissions(const QFileInfo &fileInfo);
+    static QString buildMLSDCommonLine(const QFileInfo &fileInfo);
+    static QString buildMLSDPathLine(const QFileInfo &FileInfo, const QString &path);
+    static QString buildLISTLine(const QFileInfo &fileInfo);
+    static QString buildMLSDLine(const QFileInfo &fileInfo);
 
     // File path mapping functions
 
@@ -142,6 +146,8 @@ private:
     static void AUTH(CogWheelControlChannel *connection, const QString &arguments);
     static void PROT(CogWheelControlChannel *connection, const QString &arguments);
     static void PBSZ(CogWheelControlChannel *connection, const QString &arguments);
+    static void MLSD(CogWheelControlChannel *connection, const QString &arguments);
+    static void MLST(CogWheelControlChannel *connection, const QString &arguments);
 
 private:
 
