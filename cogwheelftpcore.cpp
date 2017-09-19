@@ -237,8 +237,8 @@ void CogWheelFTPCore::loadFTPCommandTables()
         m_ftpCommandTableExtended.insert("AUTH", AUTH);
         m_ftpCommandTableExtended.insert("PROT", PROT);
         m_ftpCommandTableExtended.insert("PBSZ", PBSZ);
-        m_ftpCommandTableExtended.insert("MLSD", MLSD);
-        m_ftpCommandTableExtended.insert("MLST", MLST);
+       // m_ftpCommandTableExtended.insert("MLSD", MLSD);
+      // m_ftpCommandTableExtended.insert("MLST", MLST);
 
         QHashIterator<QString, FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
@@ -314,58 +314,37 @@ QString CogWheelFTPCore::buildMLSDCommonLine(const QFileInfo &fileInfo)
  */
 QString CogWheelFTPCore::buildLISTLine(const QFileInfo &fileInfo)
 {
+
+    QChar   fileType= '-';
     QString line;
-    QString temp;
+    QString ownerGroup;
 
     if (fileInfo.isSymLink()) {
-        line.append('l');
+        fileType = 'l';
     } else if (fileInfo.isDir()){
-        line.append('d');
-    } else {
-        line.append('-');
+        fileType = 'd';
     }
 
-    line.append(buildFilePermissions(fileInfo));
+    line.append(fileType+buildFilePermissions(fileInfo)+" 1 ");
 
-    line.append(" 1 ");
-
-    temp = fileInfo.owner();
-
-    if(temp == "") {
-        temp = "0";
+    ownerGroup = fileInfo.owner();
+    if(ownerGroup.isEmpty()) {
+        ownerGroup = "0";
     }
+    line.append(ownerGroup.leftJustified(10,' ',true)+" ");
 
-    line.append(fileInfo.owner().leftJustified(10,' ',true));
-    line.append(" ");
-
-    // padded by 10 and left justified
-
-    temp = fileInfo.group();
-
-    if(temp == "") {
-        temp = "0";
+    ownerGroup = fileInfo.group();
+    if(ownerGroup.isEmpty()) {
+        ownerGroup = "0";
     }
+    line.append(ownerGroup.leftJustified(10,' ',true)+" ");
 
-    line.append(temp.leftJustified(10,' ',true));
-    line.append(" ");
-
-    // padded by 10 and right justified
-
-    temp = QString::number(fileInfo.size());
-    line.append(temp.rightJustified(10,' ',true));
-    line.append(" ");
-
-    // padded by 12 and left justified
-
-    temp = fileInfo.lastModified().toString("MMM dd hh:mm");
-
-    line.append(temp.rightJustified(12,' ',true));
-    line.append(" ");
-
-    line.append(fileInfo.fileName());
-    line.append("\r\n");
+    line.append(QString::number(fileInfo.size()).rightJustified(10,' ',true)+" ");
+    line.append(fileInfo.lastModified().toString("MMM dd hh:mm").rightJustified(12,' ',true)+" ");
+    line.append(fileInfo.fileName()+"\r\n");
 
     return(line);
+
 
 }
 
