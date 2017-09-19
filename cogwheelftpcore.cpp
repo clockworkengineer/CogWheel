@@ -253,7 +253,7 @@ void CogWheelFTPCore::loadFTPCommandTables()
 /**
  * @brief CogWheelFTPCore::buildFilePermissions
  *
- * Build files permissions into QString and return.
+ * Build files permissions (for LIST) into QString and return.
  *
  * @param fileInfo  File to produce permissions for.
  *
@@ -280,6 +280,34 @@ QString CogWheelFTPCore::buildFilePermissions(const QFileInfo &fileInfo)
 }
 
 /**
+ * @brief CogWheelFTPCore::buildUnixFilePermissions
+ *
+ * Build files unix permissions into octal QString and return.
+ *
+ * @param fileInfo  File to produce permissions for.
+ *
+ * @return Files permissions as a octal QString.
+ */
+QString CogWheelFTPCore::buildUnixFilePermissions(const QFileInfo &fileInfo)
+{
+
+    unsigned short permissions=0;
+
+    permissions |= (fileInfo.permissions() & QFile::ReadUser) ? 0400 : 0;
+    permissions |= (fileInfo.permissions() & QFile::WriteUser) ? 0200 : 0;
+    permissions |= (fileInfo.permissions() & QFile::ExeUser) ? 0100 : 0;
+    permissions |= (fileInfo.permissions() & QFile::ReadGroup) ? 0040 : 0;
+    permissions |= (fileInfo.permissions() & QFile::WriteGroup) ? 0020 : 0;
+    permissions |= (fileInfo.permissions() & QFile::ExeGroup) ? 0010 : 0;
+    permissions |= (fileInfo.permissions() & QFile::ReadOther) ? 0004 : 0;
+    permissions |= (fileInfo.permissions() & QFile::WriteOther) ? 0002 : 0;
+    permissions |= (fileInfo.permissions() & QFile::ExeOther) ? 0001 : 0;
+
+    return("0"+QString::number(permissions,8));
+
+}
+
+/**
  * @brief CogWheelFTPCore::buildMLSDCommonLine
  *
  * Build common file facts to QString and return.
@@ -294,16 +322,16 @@ QString CogWheelFTPCore::buildMLSDCommonLine(const QFileInfo &fileInfo)
 
     line.append(static_cast<QString>("Modify=")+fileInfo.lastModified().toString("yyyyMMddhhmmss;"));
     line.append(static_cast<QString>("Create=")+fileInfo.created().toString("yyyyMMddhhmmss;"));
-    line.append(static_cast<QString>("UNIX.mode=")+buildFilePermissions(fileInfo)+";");
-    line.append(static_cast<QString>("UNIX.owner=")+fileInfo.owner()+";");
-    line.append(static_cast<QString>("UNIX.group=")+fileInfo.group()+";");
+    line.append(static_cast<QString>("UNIX.mode=")+buildUnixFilePermissions(fileInfo)+";");
+    line.append(static_cast<QString>("UNIX.owner=")+QString::number(fileInfo.ownerId())+";");
+    line.append(static_cast<QString>("UNIX.group=")+QString::number(fileInfo.groupId())+";");
 
     return line;
 
 }
 
 /**
- * @brief CogWheelFTPCore::buildListLine
+ * @brief CogWheelFTPCore::buildLISTLine
  *
  * Build list line for passed in QFileInfo. The format of which
  * is the same as given for the Linux 'ls -l' command.
@@ -704,7 +732,7 @@ void CogWheelFTPCore::SYST(CogWheelControlChannel *connection, const QString &ar
 
     Q_UNUSED(arguments);
 
-    connection->sendReplyCode(215, "UNIX Type: CogWheel");  // MAY NEED TO CHANGE FOR NEW HOSTS
+    connection->sendReplyCode(215, "UNIX Type: L8");  // MAY NEED TO CHANGE FOR NEW HOSTS
 
 }
 

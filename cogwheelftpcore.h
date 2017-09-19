@@ -92,6 +92,7 @@ private:
     // Build LIST/MLSx command replies.
 
     static QString buildFilePermissions(const QFileInfo &fileInfo);
+    static QString buildUnixFilePermissions(const QFileInfo &fileInfo);
     static QString buildMLSDCommonLine(const QFileInfo &fileInfo);
     static QString buildMLSDPathLine(const QFileInfo &FileInfo, const QString &path);
     static QString buildLISTLine(const QFileInfo &fileInfo);
