@@ -460,7 +460,7 @@ QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, co
     if (mappedPath.startsWith(connection->rootDirectory())) {
         mappedPath = mappedPath.remove(0,connection->rootDirectory().length());
 
-        // If trying to go above root then reset to root
+    // If trying to go above root then reset to root
 
     } else if (mappedPath.length() < connection->rootDirectory().length()){
         mappedPath = "";
