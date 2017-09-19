@@ -237,8 +237,8 @@ void CogWheelFTPCore::loadFTPCommandTables()
         m_ftpCommandTableExtended.insert("AUTH", AUTH);
         m_ftpCommandTableExtended.insert("PROT", PROT);
         m_ftpCommandTableExtended.insert("PBSZ", PBSZ);
-       // m_ftpCommandTableExtended.insert("MLSD", MLSD);
-      // m_ftpCommandTableExtended.insert("MLST", MLST);
+        m_ftpCommandTableExtended.insert("MLSD", MLSD);
+        m_ftpCommandTableExtended.insert("MLST", MLST);
 
         QHashIterator<QString, FTPCommandFunction> command(m_ftpCommandTableExtended);
         while(command.hasNext()) {
