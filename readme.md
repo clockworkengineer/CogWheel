@@ -5,12 +5,13 @@ CogWheel is a Qt based personal FTP server initially built and run on Linux alth
 
 At present it allows multiple plain or  TLS (explicit) FTP connections  with each connection running in its own separate thread; the data channel can also be encrypted using TLS with support for both the PROT and PBSZ extended commands. 
 
-The server comes with a companion program **CogWheelManger**  that can be used to modify server based parameters and add/remove users and their related information (password, root directory etc). The Manager program also has the ability to start/stop the server and also kill/launch the server process. Logging is also provided in the form of a window that displays redirected server logging.
+The server comes with a companion program **CogWheelManger**  that can be used to modify server based parameters and add/remove users and their related information (password, root directory etc). The Manager program also has the ability to start/stop the server and also kill/launch the server process. 
+
+Logging is also provided in the form of a window that can display redirected server logging. Logging to a specified file can also be set along with the logging level via the server settings in the config file (no UI is currently provided for the latter two).
 
 Also only one instance of the server and manager me be run at a time with a new invocation of the manager bringing the window of the currently running manager to the foregroud.
 
 **To Do List**
 ***
-- FTP commands MLSx.
 - Try out on other Qt platforms (Windows/MasOS).
  
