@@ -262,19 +262,20 @@ void CogWheelFTPCore::loadFTPCommandTables()
 QString CogWheelFTPCore::buildFilePermissions(const QFileInfo &fileInfo)
 {
 
-    QString line;
+    char permissions[10];
 
-    line.append((fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-');
-    line.append((fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-');
-    line.append((fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-');
-    line.append((fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-');
-    line.append((fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-');
-    line.append((fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-');
-    line.append((fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-');
-    line.append((fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-');
-    line.append((fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-');
+    permissions[0] = (fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-';
+    permissions[1] = (fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-';
+    permissions[2] = (fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-';
+    permissions[3] = (fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-';
+    permissions[4] = (fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-';
+    permissions[5] = (fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-';
+    permissions[6] = (fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-';
+    permissions[7] = (fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-';
+    permissions[8] = (fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-';
+    permissions[9] = 0;
 
-    return(line);
+    return(permissions);
 
 }
 
@@ -291,27 +292,14 @@ QString CogWheelFTPCore::buildMLSDCommonLine(const QFileInfo &fileInfo)
 {
     QString line;
 
-    line.append("Modify=");
-    line.append(fileInfo.lastModified().toString("yyyyMMddhhmmss"));
-    line.append(";");
-
-    line.append("Create=");
-    line.append(fileInfo.created().toString("yyyyMMddhhmmss"));
-    line.append(";");
-
-    line.append("UNIX.mode=");
-    line.append(buildFilePermissions(fileInfo));
-    line.append(";");
-
-    line.append("UNIX.owner=");
-    line.append(fileInfo.owner());
-    line.append(";");
-
-    line.append("UNIX.group=");
-    line.append(fileInfo.group());
-    line.append(";");
+    line.append(static_cast<QString>("Modify=")+fileInfo.lastModified().toString("yyyyMMddhhmmss;"));
+    line.append(static_cast<QString>("Create=")+fileInfo.created().toString("yyyyMMddhhmmss;"));
+    line.append(static_cast<QString>("UNIX.mode=")+buildFilePermissions(fileInfo)+";");
+    line.append(static_cast<QString>("UNIX.owner=")+fileInfo.owner()+";");
+    line.append(static_cast<QString>("UNIX.group=")+fileInfo.group()+";");
 
     return line;
+
 }
 
 /**
@@ -393,20 +381,7 @@ QString CogWheelFTPCore::buildLISTLine(const QFileInfo &fileInfo)
  */
 QString CogWheelFTPCore::buildMLSDPathLine(const QFileInfo &pathInfo, const QString &path)
 {
-
-    QString line;
-
-    line.append("Type=cdir;");
-
-    line.append(buildMLSDCommonLine(pathInfo));
-
-    line.append(" ");
-    line.append(path);
-
-    line.append("\r\n");
-
-    return line;
-
+    return (static_cast<QString>("Type=cdir;")+buildMLSDCommonLine(pathInfo)+" "+path+"\r\n");
 }
 
 /**
@@ -423,26 +398,13 @@ QString CogWheelFTPCore::buildMLSDLine(const QFileInfo &fileInfo)
 
     QString line;
 
-    line.append("Type=");
     if(fileInfo.isDir()){
-        line.append("dir");
+        line.append("Type=dir;");
     }else {
-        line.append("file");
-    }
-    line.append(";");
-
-    if(fileInfo.isFile()){
-        line.append("Size=");
-        line.append(QString::number(fileInfo.size()));
-        line.append(";");
+        line.append((static_cast<QString>("Type=file;")+"Size=")+QString::number(fileInfo.size())+";");
     }
 
-    line.append(buildMLSDCommonLine(fileInfo));
-
-    line.append(" ");
-    line.append(fileInfo.fileName());
-
-    line.append("\r\n");
+    line.append(buildMLSDCommonLine(fileInfo)+" "+fileInfo.fileName()+"\r\n");
 
     return line;
 
