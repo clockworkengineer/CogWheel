@@ -12,7 +12,10 @@
 //
 // Namespace: CogWheelFTPCoreUtil
 //
-// Description: CogWheelFTPCore utility functions.
+// Description: CogWheelFTPCore utility functions. This includes functions
+// for mapping to/from the local file system (root relative) and for the creation
+// of list information/fact lines for files returned in reponse to the various FTP
+// list commands.
 //
 
 // =============
