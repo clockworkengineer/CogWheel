@@ -28,6 +28,86 @@
 namespace CogWheelFTPCoreUtil {
 
 /**
+ * @brief buildFilePermissions
+ *
+ * Build files permissions (for LIST) into QString and return.
+ *
+ * @param fileInfo  File to produce permissions for.
+ *
+ * @return Files permissions as a QString.
+ */
+static QString buildFilePermissions(const QFileInfo &fileInfo)
+{
+
+    char permissions[10];
+
+    permissions[0] = (fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-';
+    permissions[1] = (fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-';
+    permissions[2] = (fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-';
+    permissions[3] = (fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-';
+    permissions[4] = (fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-';
+    permissions[5] = (fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-';
+    permissions[6] = (fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-';
+    permissions[7] = (fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-';
+    permissions[8] = (fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-';
+    permissions[9] = 0;
+
+    return(permissions);
+
+}
+
+/**
+ * @brief buildUnixModePermissions
+ *
+ * Build files unix permissions into octal QString and return.
+ *
+ * @param fileInfo  File to produce permissions for.
+ *
+ * @return Files permissions as a octal QString.
+ */
+static QString buildUnixModePermissions(const QFileInfo &fileInfo)
+{
+
+   unsigned short permissions=0;
+
+   permissions |= (fileInfo.permissions() & QFile::ReadUser) ? 0400 : 0;
+   permissions |= (fileInfo.permissions() & QFile::WriteUser) ? 0200 : 0;
+   permissions |= (fileInfo.permissions() & QFile::ExeUser) ? 0100 : 0;
+   permissions |= (fileInfo.permissions() & QFile::ReadGroup) ? 0040 : 0;
+   permissions |= (fileInfo.permissions() & QFile::WriteGroup) ? 0020 : 0;
+   permissions |= (fileInfo.permissions() & QFile::ExeGroup) ? 0010 : 0;
+   permissions |= (fileInfo.permissions() & QFile::ReadOther) ? 0004 : 0;
+   permissions |= (fileInfo.permissions() & QFile::WriteOther) ? 0002 : 0;
+   permissions |= (fileInfo.permissions() & QFile::ExeOther) ? 0001 : 0;
+
+   return("0"+QString::number(permissions,8));
+
+}
+
+/**
+* @brief buildFileCommonFactList
+*
+* Build a list of common facts for file information passed in.
+*
+* @param fileInfo  File to produce facts for.
+*
+* @return Common file facts.
+*/
+static QString buildFileCommonFactList(const QFileInfo &fileInfo)
+{
+   QString factList;
+
+   factList.append(static_cast<QString>("Modify=")+fileInfo.lastModified().toString("yyyyMMddhhmmss;"));
+   factList.append(static_cast<QString>("Create=")+fileInfo.created().toString("yyyyMMddhhmmss;"));
+   factList.append(static_cast<QString>("UNIX.mode=")+buildUnixModePermissions(fileInfo)+";");
+   factList.append(static_cast<QString>("UNIX.owner=")+QString::number(fileInfo.ownerId())+";");
+   factList.append(static_cast<QString>("UNIX.group=")+QString::number(fileInfo.groupId())+";");
+
+   return factList;
+
+}
+
+/**
  * @brief mapPathToLocal
  *
  * Map a FTP root relative path to local filesystem.
@@ -92,86 +172,6 @@ QString mapPathFromLocal(CogWheelControlChannel *connection, const QString &path
 }
 
 /**
- * @brief buildFilePermissions
- *
- * Build files permissions (for LIST) into QString and return.
- *
- * @param fileInfo  File to produce permissions for.
- *
- * @return Files permissions as a QString.
- */
-QString buildFilePermissions(const QFileInfo &fileInfo)
-{
-
-    char permissions[10];
-
-    permissions[0] = (fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-';
-    permissions[1] = (fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-';
-    permissions[2] = (fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-';
-    permissions[3] = (fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-';
-    permissions[4] = (fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-';
-    permissions[5] = (fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-';
-    permissions[6] = (fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-';
-    permissions[7] = (fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-';
-    permissions[8] = (fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-';
-    permissions[9] = 0;
-
-    return(permissions);
-
-}
-
-/**
- * @brief buildUnixFilePermissions
- *
- * Build files unix permissions into octal QString and return.
- *
- * @param fileInfo  File to produce permissions for.
- *
- * @return Files permissions as a octal QString.
- */
-QString buildUnixFilePermissions(const QFileInfo &fileInfo)
-{
-
-    unsigned short permissions=0;
-
-    permissions |= (fileInfo.permissions() & QFile::ReadUser) ? 0400 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteUser) ? 0200 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeUser) ? 0100 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ReadGroup) ? 0040 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteGroup) ? 0020 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeGroup) ? 0010 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ReadOther) ? 0004 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteOther) ? 0002 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeOther) ? 0001 : 0;
-
-    return("0"+QString::number(permissions,8));
-
-}
-
-/**
- * @brief buildMLSDCommonLine
- *
- * Build common file facts to QString and return.
- *
- * @param fileInfo  File to produce facts for.
- *
- * @return Common file facts as a QString.
- */
-QString buildMLSDCommonLine(const QFileInfo &fileInfo)
-{
-    QString line;
-
-    line.append(static_cast<QString>("Modify=")+fileInfo.lastModified().toString("yyyyMMddhhmmss;"));
-    line.append(static_cast<QString>("Create=")+fileInfo.created().toString("yyyyMMddhhmmss;"));
-    line.append(static_cast<QString>("UNIX.mode=")+buildUnixFilePermissions(fileInfo)+";");
-    line.append(static_cast<QString>("UNIX.owner=")+QString::number(fileInfo.ownerId())+";");
-    line.append(static_cast<QString>("UNIX.group=")+QString::number(fileInfo.groupId())+";");
-
-    return line;
-
-}
-
-/**
  * @brief buildLISTLine
  *
  * Build list line for passed in QFileInfo. The format of which
@@ -214,47 +214,46 @@ QString buildLISTLine(const QFileInfo &fileInfo)
 
     return(line);
 
-
 }
 
 /**
- * @brief buildMLSDPathLine
+ * @brief buildPathFactList
  *
- * Build list line for requested path in MLSD.
+ * Build fact list for passed in path (directory).
  *
- * @param pathInfo  Directory info to produce MLSD line for.
+ * @param pathInfo  Path information to produce fact list for.
  * @param path      Directory path.
  *
- * @return MLSD list line QString.
+ * @return Fact list for path.
  */
-QString buildMLSDPathLine(const QFileInfo &pathInfo, const QString &path)
+QString buildPathFactList(const QFileInfo &pathInfo, const QString &path)
 {
-    return (static_cast<QString>("Type=cdir;")+buildMLSDCommonLine(pathInfo)+" "+path+"\r\n");
+    return (static_cast<QString>("Type=cdir;")+buildFileCommonFactList(pathInfo)+" "+path+"\r\n");
 }
 
 /**
- * @brief buildMLSDLine
+ * @brief buildFileFactList
  *
- * Build list line for single file in MLSD list.
+ * Build fact list for file information passed in.
  *
- * @param fileInfo  File information
+ * @param fileInfo  File information to produce fact list for.
  *
- * @return List line for file QString.
+ * @return Fact list for file.
  */
-QString buildMLSDLine(const QFileInfo &fileInfo)
+QString buildFileFactList(const QFileInfo &fileInfo)
 {
 
-    QString line;
+    QString factList;
 
     if(fileInfo.isDir()){
-        line.append("Type=dir;");
+        factList.append("Type=dir;");
     }else {
-        line.append((static_cast<QString>("Type=file;")+"Size=")+QString::number(fileInfo.size())+";");
+        factList.append((static_cast<QString>("Type=file;")+"Size=")+QString::number(fileInfo.size())+";");
     }
 
-    line.append(buildMLSDCommonLine(fileInfo)+" "+fileInfo.fileName()+"\r\n");
+    factList.append(buildFileCommonFactList(fileInfo)+" "+fileInfo.fileName()+"\r\n");
 
-    return line;
+    return factList;
 
 }
 

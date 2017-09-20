@@ -17,12 +17,12 @@
 // two parameters the first which is a pointer to the control channel instance and
 // the second a string containing the commands arguments.
 //
-// Note: Two tables exist that are indexed by command string onto the relevant
+// Two tables exist that are indexed by command string onto the relevant
 // command. The first tabel contains the commands that maybe used in an unauthorised
 // mode (minimum) and the second which contains all commands (full) for when a user
 // has been authorised either through USER/PASSWORD or logging on anonymously.
 //
-// A third table has been added for FTP command extensions and kept separate but entries
+// A third table contains FTP command extensions and that are kept separate but entries
 // are copied to the main table on initialisation.
 //
 //
@@ -1513,13 +1513,13 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
 
         // List files for directory
 
-        listing.append(FTPUtil::buildMLSDPathLine( fileInfo, path));
+        listing.append(FTPUtil::buildPathFactList( fileInfo, path));
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(FTPUtil::buildMLSDLine(item));
+                listing.append(FTPUtil::buildFileFactList(item));
             }
 
         }
@@ -1550,13 +1550,9 @@ void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &ar
     QFileInfo fileInfo(FTPUtil::mapPathToLocal(connection, arguments));
 
     if(fileInfo.exists()) {
-
         connection->sendOnControlChannel("250-Listing " + arguments + "\r\n");
-
-        connection->sendOnControlChannel(FTPUtil::buildMLSDLine(fileInfo));
-
+        connection->sendOnControlChannel(FTPUtil::buildFileFactList(fileInfo));
         connection->sendReplyCode(250,"End.");
-
     } else {
         connection->sendOnControlChannel(arguments+" does not exist.\r\n");
     }

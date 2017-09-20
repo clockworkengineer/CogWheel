@@ -20,12 +20,12 @@
 // two parameters the first which is a pointer to the control channel instance and
 // the second a string containing the commands arguments.
 //
-// Note: Two tables exist that are indexed by command string onto the relevant
+// Two tables exist that are indexed by command string onto the relevant
 // command. The first tabel contains the commands that maybe used in an unauthorised
 // mode (minimum) and the second which contains all commands (full) for when a user
 // has been authorised either through USER/PASSWORD or logging on anonymously.
 //
-// A third table has been added for FTP command extensions and kept separate but entries
+// A third table contains FTP command extensions and that are kept separate but entries
 // are copied to the main table on initialisation.
 //
 //
@@ -38,9 +38,8 @@
 #include "cogwheelusersettings.h"
 #include "cogwheelftpserverreply.h"
 
-#include <QMap>
+#include <QHash>
 #include <QString>
-#include <QFileInfo>
 
 // =================
 // CLASS DECLARATION
@@ -88,20 +87,6 @@ private:
 
     static void loadServerReponseTables();
     static void loadFTPCommandTables();
-
-    // Build LIST/MLSx command replies.
-
-    static QString buildFilePermissions(const QFileInfo &fileInfo);
-    static QString buildUnixFilePermissions(const QFileInfo &fileInfo);
-    static QString buildMLSDCommonLine(const QFileInfo &fileInfo);
-    static QString buildMLSDPathLine(const QFileInfo &FileInfo, const QString &path);
-    static QString buildLISTLine(const QFileInfo &fileInfo);
-    static QString buildMLSDLine(const QFileInfo &fileInfo);
-
-    // File path mapping functions
-
-    static QString mapPathToLocal(CogWheelControlChannel *connection, const QString& path);
-    static QString mapPathFromLocal(CogWheelControlChannel *connection, const QString& path);
 
     // FTP commands (RFC959)
 
