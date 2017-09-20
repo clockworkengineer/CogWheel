@@ -1,5 +1,5 @@
 /*
- * File:   cogwheelftpcore.cpp
+ * File:   cogwheelftpcoreutil.cpp
  *
  * Author: Robert Tizzard
  *
