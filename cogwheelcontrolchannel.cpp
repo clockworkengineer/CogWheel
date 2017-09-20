@@ -26,6 +26,9 @@
 #include "cogwheelftpcore.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
 
 /**
  * @brief CogWheelControlChannel::CogWheelControlChannel

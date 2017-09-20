@@ -34,6 +34,10 @@
 #include <QLockFile>
 #include <QDir>
 
+// ===============
+// LOCAL FUNCTIONS
+// ===============
+
 /**
  * @brief alreadyRunning
  *
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
             QCoreApplication::setOrganizationName(kCWOrganizationName);
             QCoreApplication::setApplicationName(kCWApplicationName);
 
-             // Server controller instance
+            // Server controller instance
 
             CogWheelController controller(&cogWheelServerApplication);
 
@@ -85,13 +89,13 @@ int main(int argc, char *argv[])
 
             flushLoggingFile();
 
-        // Controller/Server/Conenction errors
+            // Controller/Server/Conenction errors
 
         } catch (const std::runtime_error &err) {
             qDebug() << err.what();
             exit(EXIT_FAILURE);
 
-        // Fall through
+            // Fall through
 
         } catch (...) {
             cogWheelError("CogWheel FTP Server Exception.");

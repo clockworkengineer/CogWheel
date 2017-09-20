@@ -25,6 +25,10 @@
 
 #include <QCryptographicHash>
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 /**
  * @brief CogWheelUserSettings::checkUserName
  * @param userName

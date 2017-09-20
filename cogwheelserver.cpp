@@ -23,6 +23,10 @@
 #include "cogwheelserver.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 /**
  * @brief CogWheelServer::CogWheelServer
  *

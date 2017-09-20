@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     cogwheelusersettings.cpp \
     cogwheelcontrolchannel.cpp \
     cogwheelserversettings.cpp \
-    cogwheelcontroller.cpp
+    cogwheelcontroller.cpp \
+    cogwheelftpcoreutil.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -42,4 +43,5 @@ HEADERS += \
     cogwheelcontroller.h \
     cogwheellogger.h \
     cogwheel.h \
-    cogwheelftpserverreply.h
+    cogwheelftpserverreply.h \
+    cogwheelftpcoreutil.h

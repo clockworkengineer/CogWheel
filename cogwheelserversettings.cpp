@@ -22,6 +22,10 @@
 #include "cogwheelserversettings.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 /**
  * @brief CogWheelServerSettings::load
  *

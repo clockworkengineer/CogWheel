@@ -32,10 +32,20 @@
 // =============
 
 #include "cogwheelftpcore.h"
+#include "cogwheelftpcoreutil.h"
 #include "cogwheellogger.h"
 
-#include <QDir>
-#include <QDateTime>
+// =======
+// IMPORTS
+// =======
+
+// FTP Core Utils
+
+namespace FTPUtil = CogWheelFTPCoreUtil;
+
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
 
 // Unathorised command table (minimum)
 
@@ -251,173 +261,6 @@ void CogWheelFTPCore::loadFTPCommandTables()
 }
 
 /**
- * @brief CogWheelFTPCore::buildFilePermissions
- *
- * Build files permissions (for LIST) into QString and return.
- *
- * @param fileInfo  File to produce permissions for.
- *
- * @return Files permissions as a QString.
- */
-QString CogWheelFTPCore::buildFilePermissions(const QFileInfo &fileInfo)
-{
-
-    char permissions[10];
-
-    permissions[0] = (fileInfo.permissions() & QFile::ReadUser) ? 'r' : '-';
-    permissions[1] = (fileInfo.permissions() & QFile::WriteUser) ? 'w' : '-';
-    permissions[2] = (fileInfo.permissions() & QFile::ExeUser) ? 'x' : '-';
-    permissions[3] = (fileInfo.permissions() & QFile::ReadGroup) ? 'r' : '-';
-    permissions[4] = (fileInfo.permissions() & QFile::WriteGroup) ? 'w' : '-';
-    permissions[5] = (fileInfo.permissions() & QFile::ExeGroup) ? 'x' : '-';
-    permissions[6] = (fileInfo.permissions() & QFile::ReadOther) ? 'r' : '-';
-    permissions[7] = (fileInfo.permissions() & QFile::WriteOther) ? 'w' : '-';
-    permissions[8] = (fileInfo.permissions() & QFile::ExeOther) ? 'x' : '-';
-    permissions[9] = 0;
-
-    return(permissions);
-
-}
-
-/**
- * @brief CogWheelFTPCore::buildUnixFilePermissions
- *
- * Build files unix permissions into octal QString and return.
- *
- * @param fileInfo  File to produce permissions for.
- *
- * @return Files permissions as a octal QString.
- */
-QString CogWheelFTPCore::buildUnixFilePermissions(const QFileInfo &fileInfo)
-{
-
-    unsigned short permissions=0;
-
-    permissions |= (fileInfo.permissions() & QFile::ReadUser) ? 0400 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteUser) ? 0200 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeUser) ? 0100 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ReadGroup) ? 0040 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteGroup) ? 0020 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeGroup) ? 0010 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ReadOther) ? 0004 : 0;
-    permissions |= (fileInfo.permissions() & QFile::WriteOther) ? 0002 : 0;
-    permissions |= (fileInfo.permissions() & QFile::ExeOther) ? 0001 : 0;
-
-    return("0"+QString::number(permissions,8));
-
-}
-
-/**
- * @brief CogWheelFTPCore::buildMLSDCommonLine
- *
- * Build common file facts to QString and return.
- *
- * @param fileInfo  File to produce facts for.
- *
- * @return Common file facts as a QString.
- */
-QString CogWheelFTPCore::buildMLSDCommonLine(const QFileInfo &fileInfo)
-{
-    QString line;
-
-    line.append(static_cast<QString>("Modify=")+fileInfo.lastModified().toString("yyyyMMddhhmmss;"));
-    line.append(static_cast<QString>("Create=")+fileInfo.created().toString("yyyyMMddhhmmss;"));
-    line.append(static_cast<QString>("UNIX.mode=")+buildUnixFilePermissions(fileInfo)+";");
-    line.append(static_cast<QString>("UNIX.owner=")+QString::number(fileInfo.ownerId())+";");
-    line.append(static_cast<QString>("UNIX.group=")+QString::number(fileInfo.groupId())+";");
-
-    return line;
-
-}
-
-/**
- * @brief CogWheelFTPCore::buildLISTLine
- *
- * Build list line for passed in QFileInfo. The format of which
- * is the same as given for the Linux 'ls -l' command.
- *
- * @param fileInfo  File to produce list line for.
- *
- * @return List line QString.
- */
-QString CogWheelFTPCore::buildLISTLine(const QFileInfo &fileInfo)
-{
-
-    QChar   fileType= '-';
-    QString line;
-    QString ownerGroup;
-
-    if (fileInfo.isSymLink()) {
-        fileType = 'l';
-    } else if (fileInfo.isDir()){
-        fileType = 'd';
-    }
-
-    line.append(fileType+buildFilePermissions(fileInfo)+" 1 ");
-
-    ownerGroup = fileInfo.owner();
-    if(ownerGroup.isEmpty()) {
-        ownerGroup = "0";
-    }
-    line.append(ownerGroup.leftJustified(10,' ',true)+" ");
-
-    ownerGroup = fileInfo.group();
-    if(ownerGroup.isEmpty()) {
-        ownerGroup = "0";
-    }
-    line.append(ownerGroup.leftJustified(10,' ',true)+" ");
-
-    line.append(QString::number(fileInfo.size()).rightJustified(10,' ',true)+" ");
-    line.append(fileInfo.lastModified().toString("MMM dd hh:mm").rightJustified(12,' ',true)+" ");
-    line.append(fileInfo.fileName()+"\r\n");
-
-    return(line);
-
-
-}
-
-/**
- * @brief CogWheelFTPCore::buildMLSDPathLine
- *
- * Build list line for requested path in MLSD.
- *
- * @param pathInfo  Directory info to produce MLSD line for.
- * @param path      Directory path.
- *
- * @return MLSD list line QString.
- */
-QString CogWheelFTPCore::buildMLSDPathLine(const QFileInfo &pathInfo, const QString &path)
-{
-    return (static_cast<QString>("Type=cdir;")+buildMLSDCommonLine(pathInfo)+" "+path+"\r\n");
-}
-
-/**
- * @brief CogWheelFTPCore::buildMLSDLine
- *
- * Build list line for single file in MLSD list.
- *
- * @param fileInfo  File information
- *
- * @return List line for file QString.
- */
-QString CogWheelFTPCore::buildMLSDLine(const QFileInfo &fileInfo)
-{
-
-    QString line;
-
-    if(fileInfo.isDir()){
-        line.append("Type=dir;");
-    }else {
-        line.append((static_cast<QString>("Type=file;")+"Size=")+QString::number(fileInfo.size())+";");
-    }
-
-    line.append(buildMLSDCommonLine(fileInfo)+" "+fileInfo.fileName()+"\r\n");
-
-    return line;
-
-}
-
-/**
  * @brief CogWheelFTPCore::getResponseText
  *
  * Get string for a given reponse code or "" if one does not exist.
@@ -433,70 +276,6 @@ QString CogWheelFTPCore::getResponseText(quint16 responseCode)
     } else {
         return("");
     }
-}
-
-/**
- * @brief CogWheelFTPCore::mapPathToLocal
- *
- * Map a FTP root relative path to local filesystem.
- *
- * @param connection   Pointer to control channel instance.
- * @param path         Path to map to local filesystem.
- *
- * @return Local file system path string,
- */
-QString CogWheelFTPCore::mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
-{
-
-    QString mappedPath;
-
-    if (path.startsWith('/')) {
-        mappedPath = connection->rootDirectory()+path;
-    } else {
-        mappedPath = connection->rootDirectory()+connection->currentWorkingDirectory();
-        if (connection->currentWorkingDirectory()=="/") {
-            mappedPath += path;
-        } else {
-            mappedPath += ("/" + path);
-        }
-    }
-
-    cogWheelInfo(connection->socketHandle(),"Mapping local "+path+" to "+mappedPath);
-
-    return(mappedPath);
-}
-
-/**
- * @brief CogWheelFTPCore::mapPathFromLocal
- *
- * Map a given local filesystem path to a FTP root path.
- *
- * @param connection   Pointer to control channel instance.
- * @param path         Path to map from local filesystem.
- *
- * @return  FTP root path.
- */
-QString CogWheelFTPCore::mapPathFromLocal(CogWheelControlChannel *connection, const QString &path)
-{
-
-    QString mappedPath { QFileInfo(path).absoluteFilePath()};
-
-    cogWheelInfo(connection->socketHandle(),"mapped path : "+mappedPath);
-
-    // Strip off root path
-
-    if (mappedPath.startsWith(connection->rootDirectory())) {
-        mappedPath = mappedPath.remove(0,connection->rootDirectory().length());
-
-    // If trying to go above root then reset to root
-
-    } else if (mappedPath.length() < connection->rootDirectory().length()){
-        mappedPath = "";
-    }
-
-    cogWheelInfo(connection->socketHandle(),"Mapping local from "+path+" to "+mappedPath);
-
-    return(mappedPath);
 }
 
 /**
@@ -675,7 +454,7 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
     // Some clients use "LIST -a" to list . files but as server does it automatically
     // set argument to empty string (current workign directory)
 
-    QString path { mapPathToLocal(connection, (arguments!="-a") ? arguments : "") } ;
+    QString path { FTPUtil::mapPathToLocal(connection, (arguments!="-a") ? arguments : "") } ;
     QFileInfo fileInfo { path };
 
     // Argument does not exist
@@ -696,13 +475,13 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(buildLISTLine(item));
+                listing.append(FTPUtil::buildLISTLine(item));
             }
 
             // List a single file
 
         } else {
-            listing.append(buildLISTLine(fileInfo));
+            listing.append(FTPUtil::buildLISTLine(fileInfo));
         }
 
         // Send listing to clients
@@ -802,13 +581,13 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::CWD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QString cwdPath = mapPathToLocal(connection, arguments);
+    QString cwdPath = FTPUtil::mapPathToLocal(connection, arguments);
     QDir path { cwdPath };
 
     if(!path.exists()) {
         throw CogWheelFtpServerReply("Requested path not found.");
     } else {
-        connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, cwdPath));
+        connection->setCurrentWorkingDirectory(FTPUtil::mapPathFromLocal(connection, cwdPath));
         connection->sendReplyCode(250);
     }
 
@@ -853,12 +632,12 @@ void CogWheelFTPCore::PASS(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QDir path  { mapPathToLocal(connection, arguments) };
+    QDir path  { FTPUtil::mapPathToLocal(connection, arguments) };
 
     if(!path.cdUp()) {
         throw CogWheelFtpServerReply("Requested path not found.");
     } else {
-        connection->setCurrentWorkingDirectory(mapPathFromLocal(connection, path.absolutePath()));
+        connection->setCurrentWorkingDirectory(FTPUtil::mapPathFromLocal(connection, path.absolutePath()));
         connection->sendReplyCode(250);
     }
 
@@ -876,7 +655,7 @@ void CogWheelFTPCore::CDUP(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QFile file { mapPathToLocal(connection, arguments) } ;
+    QFile file { FTPUtil::mapPathToLocal(connection, arguments) } ;
 
     if(!file.exists()){
         throw CogWheelFtpServerReply(450);
@@ -891,7 +670,7 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
     // Connect up data channel and download file
 
     if (connection->connectDataChannel()) {
-        connection->downloadFileFromDataChannel(mapPathToLocal(connection, arguments ));
+        connection->downloadFileFromDataChannel(FTPUtil::mapPathToLocal(connection, arguments ));
     }
 
 }
@@ -949,7 +728,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     // Check destination does not exist
 
-    QFile file { mapPathToLocal(connection,arguments) } ;
+    QFile file { FTPUtil::mapPathToLocal(connection,arguments) } ;
 
     // Remove file if exists
 
@@ -962,7 +741,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
     // Connect up  data channel and upload file.
 
     if (connection->connectDataChannel()) {
-        connection->uploadFileToDataChannel( mapPathToLocal(connection,arguments) );
+        connection->uploadFileToDataChannel( FTPUtil::mapPathToLocal(connection,arguments) );
     }
 
 }
@@ -1047,7 +826,7 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QString path { mapPathToLocal(connection, arguments) };
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) };
     QFileInfo fileInfo { path };
 
     // Check for directory that exists
@@ -1095,7 +874,7 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
-    QString path { mapPathToLocal(connection, arguments) };
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) };
     QDir newDirectory { path };
 
     if(!newDirectory.mkdir(path)){
@@ -1128,7 +907,7 @@ void CogWheelFTPCore::RMD(CogWheelControlChannel *connection, const QString &arg
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
-    QString path { mapPathToLocal(connection, arguments) };
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) };
     QDir directoryToDelete { path  };
 
     if(directoryToDelete.exists()){
@@ -1182,7 +961,7 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
-    QFile fileToDelete { mapPathToLocal(connection, arguments) };
+    QFile fileToDelete { FTPUtil::mapPathToLocal(connection, arguments) };
 
     if(fileToDelete.exists()){
 
@@ -1232,7 +1011,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
-    QString path { mapPathToLocal(connection, arguments) };
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) };
     QFile file { path  } ;
 
     if(file.exists()) {
@@ -1325,7 +1104,7 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("User needs write access to perform command.");
     }
 
-    QString path { mapPathToLocal(connection, arguments) };
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) };
 
     connection->setRenameFromFileName("");
 
@@ -1370,7 +1149,7 @@ void CogWheelFTPCore::RNTO(CogWheelControlChannel *connection, const QString &ar
 
     QFile sourceName(connection->renameFromFileName());
 
-    if(sourceName.rename(mapPathToLocal(connection, arguments) )){
+    if(sourceName.rename(FTPUtil::mapPathToLocal(connection, arguments) )){
         connection->sendReplyCode(250);
     }else{
         connection->sendReplyCode(553);
@@ -1486,7 +1265,7 @@ void CogWheelFTPCore::APPE(CogWheelControlChannel *connection, const QString &ar
     // Connect up data channel and upload file
 
     if (connection->connectDataChannel()) {
-        connection->uploadFileToDataChannel(mapPathToLocal(connection,arguments) );
+        connection->uploadFileToDataChannel(FTPUtil::mapPathToLocal(connection,arguments) );
     }
 
 }
@@ -1506,11 +1285,11 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
         connection->sendOnControlChannel("213-Status of " + arguments + "\r\n");
 
-        QDir pathToList(mapPathToLocal(connection, arguments));
+        QDir pathToList(FTPUtil::mapPathToLocal(connection, arguments));
 
         if(pathToList.exists()) {
             for (auto item : pathToList.entryInfoList()){
-                connection->sendOnControlChannel(buildLISTLine(item));
+                connection->sendOnControlChannel(FTPUtil::buildLISTLine(item));
             }
         }else{
             connection->sendOnControlChannel(arguments+" does not exist.\r\n");
@@ -1600,7 +1379,7 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QString file { mapPathToLocal(connection, arguments) } ;
+    QString file { FTPUtil::mapPathToLocal(connection, arguments) } ;
     QFileInfo fileInfo { file };
 
     if (!fileInfo.exists()) {
@@ -1627,7 +1406,7 @@ void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &ar
  */
 void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &arguments)
 {
-    QString file { mapPathToLocal(connection, arguments) } ;
+    QString file { FTPUtil::mapPathToLocal(connection, arguments) } ;
     QFileInfo fileInfo { file };
 
     if (!fileInfo.exists()) {
@@ -1711,7 +1490,7 @@ void CogWheelFTPCore::PBSZ(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QString path { mapPathToLocal(connection, arguments) } ;
+    QString path { FTPUtil::mapPathToLocal(connection, arguments) } ;
     QFileInfo fileInfo { path };
 
     // Argument does not exist
@@ -1734,13 +1513,13 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
 
         // List files for directory
 
-        listing.append(buildMLSDPathLine( fileInfo, path));
+        listing.append(FTPUtil::buildMLSDPathLine( fileInfo, path));
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(buildMLSDLine(item));
+                listing.append(FTPUtil::buildMLSDLine(item));
             }
 
         }
@@ -1768,13 +1547,13 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
 void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &arguments)
 {
 
-    QFileInfo fileInfo(mapPathToLocal(connection, arguments));
+    QFileInfo fileInfo(FTPUtil::mapPathToLocal(connection, arguments));
 
     if(fileInfo.exists()) {
 
         connection->sendOnControlChannel("250-Listing " + arguments + "\r\n");
 
-        connection->sendOnControlChannel(buildMLSDLine(fileInfo));
+        connection->sendOnControlChannel(FTPUtil::buildMLSDLine(fileInfo));
 
         connection->sendReplyCode(250,"End.");
 

@@ -27,6 +27,10 @@
 #include "cogwheelconnections.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 /**
  * @brief CogWheelConnections::CogWheelConnections
  *

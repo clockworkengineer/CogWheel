@@ -27,6 +27,10 @@
 #include "cogwheelftpserverreply.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 /**
  * @brief CogWheelDataChannel::CogWheelDataChannel
  *

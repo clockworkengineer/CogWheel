@@ -25,6 +25,10 @@
 #include "cogwheelserver.h"
 #include "cogwheellogger.h"
 
+// ====================
+// CLASS IMPLEMENTATION
+// ====================
+
 // Server instance and Qt application pointer
 
 CogWheelServer *CogWheelController::m_server=nullptr;
