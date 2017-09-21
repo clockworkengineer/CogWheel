@@ -93,7 +93,7 @@ private:
 
     // Start/Stop logging to Manager
 
-    void enableLoggingToManager(bool enable);
+//    void enableLoggingToManager(bool enable);
 
     // Controller commands
 

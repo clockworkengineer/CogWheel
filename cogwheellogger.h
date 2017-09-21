@@ -17,9 +17,7 @@
 //
 // Description: Used to provide server logging to manager program / file. It is an singleton
 // class whose interface and implementaion is provided in this single include file.
-// Note: If the server is not connected to the manager only the last kCWLoggingBufferLineMax
-// lines are kept in the buffer (for simplicity and space). Logging is also sent to a file is
-// so configured.
+// Note:  Logging is also sent to a file isso configured.
 //
 
 // =============
@@ -119,13 +117,12 @@ private:
 
     void appendMessageToLogBuffer(const QString &message) {
         m_loggingBufferMutex.lock();
-        if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
-            m_loggingBuffer.removeFirst();
-        }
+//        if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
+//            m_loggingBuffer.removeFirst();
+//        }
         m_loggingBuffer.append(QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss")+" : "+message);
         if (m_logFile.isOpen()) {
             m_logFile.write(m_loggingBuffer.back().toUtf8()+"\n");
-            m_logFile.flush();  // THIS IS INEFFICIENT AND NEEDS TO BE CHANGED
         }
         m_loggingBufferMutex.unlock();
     }

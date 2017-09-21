@@ -54,4 +54,5 @@ QString buildPathFactList(const QFileInfo &pathInfo, const QString &path);
 QString buildFileFactList(const QFileInfo &fileInfo);
 
 } // namespace CogWheelFTPCoreUtil
+
 #endif // COGWHEELFTPCOREUTIL_H

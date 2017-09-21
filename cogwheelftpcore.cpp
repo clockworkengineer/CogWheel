@@ -411,7 +411,7 @@ void CogWheelFTPCore::USER(CogWheelControlChannel *connection, const QString &ar
     connection->setPassword(userSettings.getUserPassword());
     connection->setWriteAccess(userSettings.getWriteAccess());
 
-    // Set intial workign directory
+    // Set intial working directory
 
     if (!connection->isAnonymous()) {
         connection->setRootDirectory(userSettings.getRootPath());

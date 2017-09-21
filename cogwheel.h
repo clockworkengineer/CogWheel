@@ -55,7 +55,7 @@ constexpr const quint64 kCWLoggingFlushTimer=500;
 
 // Maximum logging buffer lines
 
-constexpr const qint32 kCWLoggingBufferLineMax=1000;
+//constexpr const qint32 kCWLoggingBufferLineMax=1000;
 
 // Default server connection port
 
