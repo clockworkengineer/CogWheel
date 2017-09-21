@@ -40,6 +40,7 @@ constexpr const char *kCWCommandLOGOUTPUT    { "LOGOUTPUT" };
 
 constexpr const char *kCWStatusSTOPPED       { "STOPPED" };
 constexpr const char *kCWStatusRUNNING       { "RUNNING" };
+constexpr const char *kCWStatusTERMINATED    { "TERMINATED" };
 
 // Write size for file downloads
 

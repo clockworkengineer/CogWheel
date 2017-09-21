@@ -121,7 +121,7 @@ void CogWheelManagerMain::killServer()
         m_serverProcess=nullptr;
     }
 
-    m_serverManager.disconnectFromServer();
+//    m_serverManager.disconnectFromServer();
 
 
 }
@@ -227,6 +227,12 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
         ui->startButton->setEnabled(false);
         ui->stopButton->setEnabled(true);
         ui->launchKillButton->setText("Kill");
+    } else if (status==kCWStatusTERMINATED) {
+        ui->launchKillButton->setText("Launch");
+        ui->startButton->setEnabled(false);
+        ui->stopButton->setEnabled(false);
+        ui->connectionList->clear();
+        ui->serverStatus->setText("<b>Not Running.</b>");
     }
 
     ui->connectionList->clear();

@@ -508,6 +508,8 @@ void CogWheelController::stopServer(QDataStream &controllerInputStream)
 void CogWheelController::killServer(QDataStream &controllerInputStream)
 {
     stopServer(controllerInputStream);
+    writeCommandToManager(kCWCommandSTATUS, kCWStatusTERMINATED);
+    cogWheelInfo("CogWheel Server terminated.");
     m_cogWheelApplication->quit();
 }
 
