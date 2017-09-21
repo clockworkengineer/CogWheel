@@ -298,6 +298,8 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
         cogWheelInfo(connection->socketHandle(),"COMMAND : ["+command+"]  ARGUMENTS ["+arguments+"]");
 
+        cogWheelCommand(connection->socketHandle(), command+" "+arguments);
+
         if (m_ftpCommandTable.contains(command)) {
 
             FTPCommandFunction commandFn;

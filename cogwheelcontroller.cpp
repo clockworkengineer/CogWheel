@@ -149,7 +149,7 @@ void CogWheelController::connectUpControllerSocket()
 void CogWheelController::startController()
 {
 
-    cogWheelInfo("Start Controller....");
+    cogWheelInfo("Starting Controller....");
 
     if (!listen(m_serverName)) {
         throw CogWheelController::Exception("Controller unable listen on socket name: " + m_serverName);
@@ -172,7 +172,7 @@ void CogWheelController::startController()
 
     writeCommandToManager("STATUS", (m_server) ? "RUNNING" : "STOPPED");
 
-    cogWheelInfo("CogWheel Controller Started on ["+m_serverName+"]");
+    cogWheelInfo("CogWheel Controller Started on local socket["+m_serverName+"]");
 
 }
 
@@ -184,7 +184,7 @@ void CogWheelController::startController()
  */
 void CogWheelController::stopController()
 {
-    cogWheelInfo("Stopping Controller");
+    cogWheelInfo("Stopping Controller.");
 
     resetLoggingFlushTimer();
 
@@ -194,7 +194,6 @@ void CogWheelController::stopController()
             m_controllerSocket->waitForDisconnected(-1);
         }
     }
-
 
 
 }

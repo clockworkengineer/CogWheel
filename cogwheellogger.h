@@ -56,6 +56,7 @@ public:
         Warning = 2,
         Error = 4,
         Channel = 8,
+        Command = 16,
         All = ~0
     };
 
@@ -101,6 +102,7 @@ public:
     friend void cogWheelError(qintptr handle, const QString &message);
     friend void cogWheelWarning(const QString &message);
     friend void cogWheelWarning(qintptr handle, const QString &message);
+    friend void cogWheelCommand(qintptr handle, const QString &message);
     friend void setLoggingLevel(const QStringList &logLevels);
     friend void clearLoggingBuffer();
     friend quint64 getLoggingLevel();
@@ -117,9 +119,6 @@ private:
 
     void appendMessageToLogBuffer(const QString &message) {
         m_loggingBufferMutex.lock();
-//        if (m_loggingBuffer.size() == kCWLoggingBufferLineMax) {
-//            m_loggingBuffer.removeFirst();
-//        }
         m_loggingBuffer.append(QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss")+" : "+message);
         if (m_logFile.isOpen()) {
             m_logFile.write(m_loggingBuffer.back().toUtf8()+"\n");
@@ -159,6 +158,8 @@ inline void setLoggingLevel(const QStringList &logLevels) {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Error;
         } else if (level =="Channel") {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Channel;
+        } else if (level =="Command") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Command;
         }else if (level =="All") {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::All;
         }
@@ -222,6 +223,13 @@ inline void cogWheelWarning (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
         CogWheelLogger::getInstance().warning(QString("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
+    }
+}
+
+inline void cogWheelCommand (qintptr handle, const QString &message)
+{
+    if (getLoggingLevel() & CogWheelLogger::Command) {
+        CogWheelLogger::getInstance().info(QString("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 #endif // COGWHEELLOGGER_H
