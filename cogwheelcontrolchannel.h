@@ -34,6 +34,7 @@
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QThread>
+#include <QHostInfo>
 
 // =================
 // CLASS DECLARATION
@@ -132,8 +133,8 @@ public:
     void setTransferTypeFormat(const QChar &transferTypeFormat);
     qint16 transTypeByteSize() const;
     void setTransTypeByteSize(const qint16 &transTypeByteSize);
-    qint64 writeBytesSize() const;
-    void setWriteBytesSize(const qint64 &writeBytesSize);
+    qint64 serverWriteBytesSize() const;
+    void setServerWriteBytesSize(const qint64 &serverWriteBytesSize);
     bool writeAccess() const;
     void setWriteAccess(bool writeAccess);
     bool IsSslConnection() const;
@@ -146,6 +147,8 @@ public:
     void setServerCert(const QByteArray &serverCert);
     bool serverEnabled() const;
     void setServerEnabled(bool serverEnabled);
+    QString serverGlobalIP() const;
+    void setServerGlobalIP(const QString &serverGlobalIP);
 
 private:
 
@@ -207,10 +210,11 @@ private:
     QString m_renameFromFileName;       // RNFR/RNTO file name
     QChar m_dataChanelProtection='C';   // Data channel protecion level
 
-    qint64 m_writeBytesSize=0;          // Number of bytes per write
+    qint64 m_serverWriteBytesSize=0;    // Number of bytes per write
     QByteArray m_serverPrivateKey;      // Server private key
     QByteArray m_serverCert;            // Server Certificate
     bool m_serverEnabled=false;         // == true Server enabled
+    QString m_serverGlobalIP;           // Server IP Address outside of NAT
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket

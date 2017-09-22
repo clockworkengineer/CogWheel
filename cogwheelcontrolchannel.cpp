@@ -43,10 +43,11 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
 
     // Setup any control channel server settings
 
-    setWriteBytesSize(serverSettings.serverWriteBytesSize());
+    setServerWriteBytesSize(serverSettings.serverWriteBytesSize());
     setServerPrivateKey(serverSettings.serverPrivateKey());
     setServerCert(serverSettings.serverCert());
     setServerEnabled(serverSettings.serverEnabled());
+    setServerGlobalIP(serverSettings.serverGlobalName());
 
 }
 
@@ -213,7 +214,13 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
 
     createDataChannel();
 
-    m_dataChannel->listenForConnection(m_serverIP);
+    if (serverGlobalIP().isEmpty()) {
+        m_dataChannel->listenForConnection(m_serverIP);
+    } else {
+        m_dataChannel->listenForConnection(serverGlobalIP());
+
+    }
+
 
 }
 
@@ -477,6 +484,8 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
 }
 
+
+
 /**
  * @brief CogWheelControlChannel::sendReplyCode
  *
@@ -586,6 +595,32 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 // ============================
 
 /**
+ * @brief CogWheelControlChannel::serverGlobalIP
+ * @return
+ */
+QString CogWheelControlChannel::serverGlobalIP() const
+{
+    return m_serverGlobalIP;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerGlobalIP
+ *
+ * Converts server global name into IP address with use with passive mode through a NAT.
+ *
+ * @param serverGlobalName
+ */
+void CogWheelControlChannel::setServerGlobalIP(const QString &serverGlobalName)
+{
+    m_serverGlobalIP = m_serverIP;
+    QHostInfo info = QHostInfo::fromName(serverGlobalName);
+    if (!info.addresses().isEmpty()) {
+        QHostAddress address { info.addresses().first().toIPv4Address() };
+        m_serverGlobalIP = static_cast<QHostAddress>(info.addresses().first().toIPv4Address()).toString();
+    }
+}
+
+/**
  * @brief CogWheelControlChannel::serverEnabled
  * @return
  */
@@ -693,18 +728,18 @@ void CogWheelControlChannel::setWriteAccess(bool writeAccess)
  * @brief CogWheelControlChannel::writeBytesSize
  * @return
  */
-qint64 CogWheelControlChannel::writeBytesSize() const
+qint64 CogWheelControlChannel::serverWriteBytesSize() const
 {
-    return m_writeBytesSize;
+    return m_serverWriteBytesSize;
 }
 
 /**
  * @brief CogWheelControlChannel::setWriteBytesSize
  * @param writeBytesSize
  */
-void CogWheelControlChannel::setWriteBytesSize(const qint64 &writeBytesSize)
+void CogWheelControlChannel::setServerWriteBytesSize(const qint64 &writeBytesSize)
 {
-    m_writeBytesSize = writeBytesSize;
+    m_serverWriteBytesSize = writeBytesSize;
 }
 
 /**

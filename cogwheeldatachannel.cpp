@@ -120,7 +120,7 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
 
     // Set write size
 
-    m_writeBytesSize = connection->writeBytesSize();
+    m_writeBytesSize = connection->serverWriteBytesSize();
 
     // Re-check connected status and return error if not
 

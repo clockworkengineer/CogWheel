@@ -84,6 +84,9 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("loggingfile")) {
         server.setValue("loggingfile", "");
     }
+    if (!server.childKeys().contains("globalservername")) {
+        server.setValue("globalservername", "");
+    }
     server.endGroup();
 
     server.beginGroup("Server");
@@ -102,6 +105,7 @@ void CogWheelServerSettings::load()
     setServerLoggingEnabled(server.value("loggingenabled").toBool());
     setServerLoggingLevels(server.value("logginglevels").toStringList());
     setServerLoggingFileName(server.value("loggingfile").toString());
+    setServerGlobalName(server.value("globalservername").toString());
     server.endGroup();
 
 }
@@ -132,6 +136,7 @@ void CogWheelServerSettings::save()
     server.setValue("loggingenabled",serverLoggingEnabled());
     server.setValue("logginglevels",serverLoggingLevels());
     server.setValue("loggingfile",serverLoggingFileName());
+    server.setValue("globalservername",serverGlobalName());
     server.endGroup();
 
 }
@@ -386,5 +391,16 @@ void CogWheelServerSettings::setServerLoggingLevels(const QStringList &serverLog
 {
     m_serverLoggingLevels = serverLoggingLevels;
 }
+
+QString CogWheelServerSettings::serverGlobalName() const
+{
+    return m_serverGlobalName;
+}
+
+void CogWheelServerSettings::setServerGlobalName(const QString &serverGlobalName)
+{
+    m_serverGlobalName = serverGlobalName;
+}
+
 
 

@@ -91,10 +91,12 @@ public:
     void setServerLoggingFileName(const QString &serverLoggingFileName);
     QStringList serverLoggingLevels() const;
     void setServerLoggingLevels(const QStringList &serverLoggingLevels);
+    QString serverGlobalName() const;
+    void setServerGlobalName(const QString &serverGlobalName);
 
 private:
 
-    QString m_serverName;                                    //  Server Name
+    QString m_serverName;                                    // Server Name
     QString m_serverVersion;                                 // Server Version
     bool m_serverAllowSMNT=false;                            // ==true allow SMNT command
     quint64 m_serverPort;                                    // Server connection port
@@ -105,6 +107,8 @@ private:
     bool m_serverAnonymousEnabled=false;                     // == true anonymous login enabled
     QString m_serverKeyFileName;                             // Server private key file name
     QString m_serverCertFileName;                            // Server certifucate file
+    QString m_serverGlobalName;                              // Address of server outside NAT
+
     quint64 m_connectionListUpdateTime=kCWConnListUpdateTime;// Connection list update timer
     bool m_serverLoggingEnabled=false;                       // == true logging enabled
     QStringList m_serverLoggingLevels;                       // Server logging levels
