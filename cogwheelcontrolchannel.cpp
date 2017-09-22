@@ -299,13 +299,8 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
     // Get client and server IP address.
 
-    QHostAddress host = m_controlChannelSocket->peerAddress();
-    m_clientHostIP = host.toString();
-    m_clientHostIP.remove(0,QString("::ffff:").length());
-
-    host = m_controlChannelSocket->localAddress();
-    m_serverIP = host.toString();
-    m_serverIP.remove(0,QString("::ffff:").length());
+    m_clientHostIP = static_cast<QHostAddress>(m_controlChannelSocket->peerAddress().toIPv4Address()).toString();
+    m_serverIP = static_cast<QHostAddress>(m_controlChannelSocket->localAddress().toIPv4Address()).toString();
 
     cogWheelInfo(socketHandle,"Opened control channel from "+m_clientHostIP);
     cogWheelInfo(socketHandle,"Opened control channel to "+m_serverIP);
