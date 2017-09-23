@@ -221,14 +221,20 @@ quint64 CogWheelControlChannel::getPassivePort()
 {
     quint64 passivePort=0;
 
+    // Range not set (return use any  port)
+
     if (serverPassivePortLow()==0) {
         return(0);
     }
+
+    // All ports being used (return use any port)
 
     if (passivePortMap.size()==(serverPassivePortHigh()-serverPassivePortLow()+1)) {
         cogWheelError("Passive port table overflow");
         return(0);
     }
+
+    // Pick a random unused port and use.
 
     if (serverPassivePortHigh() >= serverPassivePortLow()) {
 

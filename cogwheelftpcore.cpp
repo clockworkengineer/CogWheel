@@ -566,6 +566,7 @@ void CogWheelFTPCore::PORT(CogWheelControlChannel *connection, const QString &ar
 
     // Signal to data channel mode to be used
 
+    connection->setPassive(false);
     connection->setHostPortForDataChannel(arguments.split(','));
     connection->sendReplyCode(200);
 
