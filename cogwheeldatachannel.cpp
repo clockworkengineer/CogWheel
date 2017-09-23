@@ -197,11 +197,13 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
     try
     {
         // Pick a random port and start listening
-        if(listen(QHostAddress::Any)) {
+        if(listen(QHostAddress::Any, m_clientHostPort)) {
             cogWheelInfo(m_controlSocketHandle,"Listening for passive connect....");
-            setClientHostIP(serverIP);
-            setClientHostPort(serverPort());
+        } else {
+            cogWheelError("Possible Data port conflict on port: "+QString::number(m_clientHostPort));
         }
+        setClientHostIP(serverIP);
+        setClientHostPort(serverPort());
         emit passiveConnection();
         m_listening=true;
     }catch(std::exception &err) {

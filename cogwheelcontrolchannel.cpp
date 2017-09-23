@@ -30,6 +30,8 @@
 // CLASS IMPLEMENTATION
 // ====================
 
+QSet<quint64> CogWheelControlChannel::passivePortMap;
+
 /**
  * @brief CogWheelControlChannel::CogWheelControlChannel
  *
@@ -48,6 +50,8 @@ CogWheelControlChannel::CogWheelControlChannel(CogWheelServerSettings serverSett
     setServerCert(serverSettings.serverCert());
     setServerEnabled(serverSettings.serverEnabled());
     setServerGlobalIP(serverSettings.serverGlobalName());
+    setServerPassivePortLow(serverSettings.serverPassivePortLow());
+    setServerPassivePortHigh(serverSettings.serverPassivePortHigh());
 
 }
 
@@ -163,6 +167,12 @@ void CogWheelControlChannel::disconnectDataChannel()
 
     m_dataChannel->disconnectFromClient(this);
 
+    // Remove any passive port from used map
+
+    if (isPassive()) {
+        removePassivePort(m_dataChannel->clientHostPort());
+    }
+
     // Destroy data channel when not in use.
 
     tearDownDataChannel();
@@ -201,6 +211,57 @@ void CogWheelControlChannel::downloadFileFromDataChannel(const QString &file)
 }
 
 /**
+ * @brief CogWheelControlChannel::getPassivePort
+ *
+ * Return a random port from range if it is specified.
+ *
+ * @return
+ */
+quint64 CogWheelControlChannel::getPassivePort()
+{
+    quint64 passivePort=0;
+
+    if (serverPassivePortLow()==0) {
+        return(0);
+    }
+
+    if (passivePortMap.size()==(serverPassivePortHigh()-serverPassivePortLow()+1)) {
+        cogWheelError("Passive port table overflow");
+        return(0);
+    }
+
+    if (serverPassivePortHigh() >= serverPassivePortLow()) {
+
+        do {
+            qsrand(qrand());
+            passivePort = qrand() % ((serverPassivePortHigh() + 1) - serverPassivePortLow()) + serverPassivePortLow();
+        } while(passivePortMap.contains(passivePort));
+
+        passivePortMap.insert(passivePort);
+
+    }
+
+    return(passivePort);
+
+}
+
+/**
+ * @brief CogWheelControlChannel::removePassivePort
+ *
+ * Remove port from port map.
+ *
+ * @param passivePort
+ */
+void CogWheelControlChannel::removePassivePort(quint64 passivePort)
+{
+
+    if (passivePort && passivePortMap.contains(passivePort)) {
+        passivePortMap.remove(passivePort);
+    }
+
+}
+
+/**
  * @brief CogWheelControlChannel::listenForConnectionOnDataChannel
  *
  * Listen for a connection from client on data channel.
@@ -214,11 +275,14 @@ void CogWheelControlChannel::listenForConnectionOnDataChannel()
 
     createDataChannel();
 
+    m_dataChannel->setClientHostPort(getPassivePort());
+
+    // Listen for connections using either local IP or global IP though NAT.
+
     if (serverGlobalIP().isEmpty()) {
         m_dataChannel->listenForConnection(m_serverIP);
     } else {
         m_dataChannel->listenForConnection(serverGlobalIP());
-
     }
 
 
@@ -272,6 +336,7 @@ void CogWheelControlChannel::processFTPCommand(QString commandLine)
     CogWheelFTPCore::performCommand(this, command.toUpper(), arguments);
 
 }
+
 
 /**
  * @brief CogWheelControlChannel::openConnection
@@ -482,6 +547,26 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
     m_sslConnection=true;
 
+}
+
+quint64 CogWheelControlChannel::serverPassivePortHigh() const
+{
+    return m_serverPassivePortHigh;
+}
+
+void CogWheelControlChannel::setServerPassivePortHigh(const quint64 &serverPassivePortHigh)
+{
+    m_serverPassivePortHigh = serverPassivePortHigh;
+}
+
+quint64 CogWheelControlChannel::serverPassivePortLow() const
+{
+    return m_serverPassivePortLow;
+}
+
+void CogWheelControlChannel::setServerPassivePortLow(const quint64 &serverPassivePortLow)
+{
+    m_serverPassivePortLow = serverPassivePortLow;
 }
 
 

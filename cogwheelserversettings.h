@@ -93,6 +93,10 @@ public:
     void setServerLoggingLevels(const QStringList &serverLoggingLevels);
     QString serverGlobalName() const;
     void setServerGlobalName(const QString &serverGlobalName);
+    quint64 serverPassivePortLow() const;
+    void setServerPassivePortLow(const quint64 &serverPassivePortLow);
+    quint64 serverPassivePortHigh() const;
+    void setServerPassivePortHigh(const quint64 &serverPassivePortHigh);
 
 private:
 
@@ -108,6 +112,8 @@ private:
     QString m_serverKeyFileName;                             // Server private key file name
     QString m_serverCertFileName;                            // Server certifucate file
     QString m_serverGlobalName;                              // Address of server outside NAT
+    quint64 m_serverPassivePortLow=0;                        // Passive port low range
+    quint64 m_serverPassivePortHigh=0;                       // Passice port high range
 
     quint64 m_connectionListUpdateTime=kCWConnListUpdateTime;// Connection list update timer
     bool m_serverLoggingEnabled=false;                       // == true logging enabled

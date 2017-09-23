@@ -149,12 +149,21 @@ public:
     void setServerEnabled(bool serverEnabled);
     QString serverGlobalIP() const;
     void setServerGlobalIP(const QString &serverGlobalIP);
+    quint64 serverPassivePortLow() const;
+    void setServerPassivePortLow(const quint64 &serverPassivePortLow);
+    quint64 serverPassivePortHigh() const;
+    void setServerPassivePortHigh(const quint64 &serverPassivePortHigh);
 
 private:
 
     // Process FTP command
 
     void processFTPCommand(QString commandLine);
+
+    // Passive port allocation/deallocation.
+
+    quint64 getPassivePort();
+    void removePassivePort(quint64 passivePort);
 
 signals:
 
@@ -215,6 +224,8 @@ private:
     QByteArray m_serverCert;            // Server Certificate
     bool m_serverEnabled=false;         // == true Server enabled
     QString m_serverGlobalIP;           // Server IP Address outside of NAT
+    quint64 m_serverPassivePortLow=0;   // Passive port low range
+    quint64 m_serverPassivePortHigh=0;  // Passive port High range
 
     QThread *m_connectionThread=nullptr;            // Connection thread
     QSslSocket *m_controlChannelSocket=nullptr;     // Control channel socket
@@ -222,6 +233,8 @@ private:
     QString m_readBuffer;                           // Control channel read buffer
     qintptr m_socketHandle;                         // Control channel socket handle
     bool m_sslConnection=false;                     // == true connection is SSL
+
+    static QSet<quint64> passivePortMap;      // Currently active passive ports
 
 };
 

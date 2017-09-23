@@ -87,6 +87,12 @@ void CogWheelServerSettings::load()
     if (!server.childKeys().contains("globalservername")) {
         server.setValue("globalservername", "");
     }
+    if (!server.childKeys().contains("passiveportlow")) {
+        server.setValue("passiveportlow", 0);
+    }
+    if (!server.childKeys().contains("passiveporthigh")) {
+        server.setValue("passiveporthigh", 0);
+    }
     server.endGroup();
 
     server.beginGroup("Server");
@@ -106,6 +112,8 @@ void CogWheelServerSettings::load()
     setServerLoggingLevels(server.value("logginglevels").toStringList());
     setServerLoggingFileName(server.value("loggingfile").toString());
     setServerGlobalName(server.value("globalservername").toString());
+    setServerPassivePortLow(server.value("passiveportlow").toInt());
+    setServerPassivePortHigh(server.value("passiveporthigh").toInt());
     server.endGroup();
 
 }
@@ -137,6 +145,8 @@ void CogWheelServerSettings::save()
     server.setValue("logginglevels",serverLoggingLevels());
     server.setValue("loggingfile",serverLoggingFileName());
     server.setValue("globalservername",serverGlobalName());
+    server.setValue("passiveportlow",serverPassivePortLow());
+    server.setValue("passiveporthigh",serverPassivePortHigh());
     server.endGroup();
 
 }
@@ -400,6 +410,26 @@ QString CogWheelServerSettings::serverGlobalName() const
 void CogWheelServerSettings::setServerGlobalName(const QString &serverGlobalName)
 {
     m_serverGlobalName = serverGlobalName;
+}
+
+quint64 CogWheelServerSettings::serverPassivePortLow() const
+{
+    return m_serverPassivePortLow;
+}
+
+void CogWheelServerSettings::setServerPassivePortLow(const quint64 &serverPassivePortLow)
+{
+    m_serverPassivePortLow = serverPassivePortLow;
+}
+
+quint64 CogWheelServerSettings::serverPassivePortHigh() const
+{
+    return m_serverPassivePortHigh;
+}
+
+void CogWheelServerSettings::setServerPassivePortHigh(const quint64 &serverPassivePortHigh)
+{
+    m_serverPassivePortHigh = serverPassivePortHigh;
 }
 
 
