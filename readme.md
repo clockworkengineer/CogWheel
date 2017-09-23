@@ -7,11 +7,15 @@ At present it allows multiple plain or  TLS (explicit) FTP connections  with eac
 
 The server comes with a companion program **CogWheelManger**  that can be used to modify server based parameters and add/remove users and their related information (password, root directory etc). The Manager program also has the ability to start/stop the server and also kill/launch the server process. 
 
-Logging is also provided in the form of a window that can display redirected server logging. Logging to a specified file can also be set along with the logging level via the server settings in the config file (no UI is currently provided for the latter two).
+Logging is also provided in the form of a window within the manager that displays redirected server logging output. Logging to a specified file can also be set along with the logging level via the server settings in the config file (no UI is currently provided for the latter two).Also only one instance of the server and manager me be run at a time with a new invocation of the manager bringing the window of the currently running manager to the foregroud.
 
-Also only one instance of the server and manager me be run at a time with a new invocation of the manager bringing the window of the currently running manager to the foregroud.
+The server also has the ability to run behind a NAT home router that has been properly configured portwise and with a suitable DDNS provider.Although that needs to be done is apply suitable values to server settings **globalservername**, **passiveportlow** and **passiveporthigh**.
 
 **To Do List**
 ***
 - Try out on other Qt platforms (Windows/MasOS).
+- Use standard ports as default.
+- Faster logging to manager.
+- Upgrade Manaager interface.
+- Performance work on server.
  
