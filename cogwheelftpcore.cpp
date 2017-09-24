@@ -296,8 +296,6 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
 
     try {
 
-        cogWheelInfo(connection->socketHandle(),"COMMAND : ["+command+"]  ARGUMENTS ["+arguments+"]");
-
         cogWheelCommand(connection->socketHandle(), command+" "+arguments);
 
         if (m_ftpCommandTable.contains(command)) {
@@ -1348,20 +1346,15 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     Q_UNUSED(arguments);
 
-    QString featReply;
-
-    featReply.append(static_cast<QString>("211-Extensions supported: ")+kCWEOL);
+    connection->sendOnControlChannel("211-Extensions supported: ");
 
     for( auto key :  m_ftpCommandTableExtended.keys() ) {
         if (!m_featTailoredRespone.contains(key))  {
-            featReply.append(" "+key+kCWEOL);
+            connection->sendOnControlChannel(" "+key);
         } else {
-            featReply.append(" "+m_featTailoredRespone[key]+kCWEOL);
+            connection->sendOnControlChannel(" "+m_featTailoredRespone[key]);
         }
     }
-
-    featReply.chop(2);
-    connection->sendOnControlChannel(featReply);
 
     connection->sendReplyCode(211, "End.");
 

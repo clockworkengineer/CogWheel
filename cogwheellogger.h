@@ -128,9 +128,7 @@ private:
 
     // Base line logging.
 
-    void info(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message); }
-    void error(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
-    void warning(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message);}
+    void logMessage(const QString &message) { if (m_enabled) appendMessageToLogBuffer(message); }
 
     bool m_enabled=false;           // == true logging enabled
     quint64 m_loggingLevel;         // Logging level
@@ -197,39 +195,41 @@ inline void  setLogFileName(const QString &logFileName)
     }
 }
 
-// Base string logging
+// Base info, error and info string logging
 
-inline void cogWheelInfo(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Info) CogWheelLogger::getInstance().info(message); }
-inline void cogWheelError(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Error) CogWheelLogger::getInstance().error(message); }
-inline void cogWheelWarning(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Warning) CogWheelLogger::getInstance().warning(message); }
+inline void cogWheelInfo(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Info) CogWheelLogger::getInstance().logMessage(message); }
+inline void cogWheelError(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Error) CogWheelLogger::getInstance().logMessage("E: "+message); }
+inline void cogWheelWarning(const QString &message) { if (getLoggingLevel() & CogWheelLogger::Warning) CogWheelLogger::getInstance().logMessage("W: "+message); }
 
 // Command channel logging (socket handle for command channel is passed in)
 
 inline void cogWheelInfo (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().info(static_cast<QString>("CHANNEL[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelError (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().error(static_cast<QString>("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelWarning (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().warning(static_cast<QString>("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
+// Log FTP Commands
+
 inline void cogWheelCommand (qintptr handle, const QString &message)
 {
-    if (getLoggingLevel() & CogWheelLogger::Command) {
-        CogWheelLogger::getInstance().info(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
+    if (getLoggingLevel() & (CogWheelLogger::Command | CogWheelLogger::Channel)) {
+        CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 #endif // COGWHEELLOGGER_H
