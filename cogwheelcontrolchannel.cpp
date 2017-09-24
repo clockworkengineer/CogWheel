@@ -580,12 +580,14 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
  *
  * @param dataToSend    Data to send over control channel.
  */
-void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
+void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend)
+{
 
-    // Convert QString to bytes
+    // Convert QString to bytes appending end of line
 
     m_controlChannelSocket->write((dataToSend+kCWEOL).toUtf8().data());
 
+    cogWheelCommandReply(socketHandle(), dataToSend);
 
 }
 

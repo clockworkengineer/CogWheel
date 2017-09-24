@@ -57,6 +57,7 @@ public:
         Error = 4,
         Channel = 8,
         Command = 16,
+        CommandReply = 32,
         All = ~0
     };
 
@@ -103,6 +104,7 @@ public:
     friend void cogWheelWarning(const QString &message);
     friend void cogWheelWarning(qintptr handle, const QString &message);
     friend void cogWheelCommand(qintptr handle, const QString &message);
+    friend void cogWheelCommandReply(qintptr handle, const QString &message);
     friend void setLoggingLevel(const QStringList &logLevels);
     friend void clearLoggingBuffer();
     friend quint64 getLoggingLevel();
@@ -158,6 +160,8 @@ inline void setLoggingLevel(const QStringList &logLevels) {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Channel;
         } else if (level =="Command") {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::Command;
+        } else if (level =="CommandReply") {
+            CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::CommandReply;
         }else if (level =="All") {
             CogWheelLogger::getInstance().m_loggingLevel |= CogWheelLogger::All;
         }
@@ -229,6 +233,13 @@ inline void cogWheelWarning (qintptr handle, const QString &message)
 inline void cogWheelCommand (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & (CogWheelLogger::Command | CogWheelLogger::Channel)) {
+        CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
+    }
+}
+
+inline void cogWheelCommandReply (qintptr handle, const QString &message)
+{
+    if (getLoggingLevel() & (CogWheelLogger::CommandReply)) {
         CogWheelLogger::getInstance().logMessage(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
