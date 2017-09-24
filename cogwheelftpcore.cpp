@@ -172,8 +172,8 @@ void CogWheelFTPCore::loadServerReponseTables()
 
     if (m_featTailoredRespone.empty()) {
         m_featTailoredRespone.insert("AUTH", "AUTH TLS");
-        m_featTailoredRespone.insert("MLSD", "MLSD Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*\r\n");
-        m_featTailoredRespone.insert("MLST", "MLST Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*\r\n");
+        m_featTailoredRespone.insert("MLSD", "MLSD Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*");
+        m_featTailoredRespone.insert("MLST", "MLST Type*;Size*;Create*;Modify*;UNIX.mode*;UNIX.owner*;UNIX.group*");
     }
 
 }
@@ -785,16 +785,16 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &ar
     QString helpReply;
     int column=0;
 
-    helpReply.append("214-The following commands are available:\r\n");
+    helpReply.append(static_cast<QString>("214-The following commands are available:")+kCWEOL);
 
     for( auto key :  m_ftpCommandTable.keys() ) {
         helpReply.append(" "+key);
         if (column++ == 8) {
-            helpReply.append("\r\n");
+            helpReply.append(kCWEOL);
             column=0;
         }
     }
-    if (column!=0)helpReply.append("\r\n");
+    if (column!=0)helpReply.append(kCWEOL);
     connection->sendOnControlChannel(helpReply);
 
     connection->sendReplyCode(214, "Help OK.");
@@ -846,7 +846,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
         QDir listDirectory { path };
 
         for (QString item : listDirectory.entryList()) {
-            listing.append(item+"\r\n");
+            listing.append(item+kCWEOL);
         }
 
         connection->sendOnDataChannel(listing.toUtf8().data());
@@ -1286,7 +1286,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
     if(!arguments.isEmpty()) {
 
-        connection->sendOnControlChannel("213-Status of " + arguments + "\r\n");
+        connection->sendOnControlChannel("213-Status of " + arguments + kCWEOL);
 
         QDir pathToList(FTPUtil::mapPathToLocal(connection, arguments));
 
@@ -1295,7 +1295,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
                 connection->sendOnControlChannel(FTPUtil::buildLISTLine(item));
             }
         }else{
-            connection->sendOnControlChannel(arguments+" does not exist.\r\n");
+            connection->sendOnControlChannel(arguments+" does not exist."+kCWEOL);
         }
 
         connection->sendReplyCode(213);
@@ -1313,18 +1313,18 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
     // No File transfer and no argument
 
     if(!connection->dataChannel() && arguments.isEmpty()) {
-        connection->sendOnControlChannel("213- "+ m_serverSettings.serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + "\r\n");
-        connection->sendOnControlChannel("Version "+ m_serverSettings.serverVersion()+ "\r\n");
-        connection->sendOnControlChannel("Connected from "+connection->clientHostIP()+"\r\n");
+        connection->sendOnControlChannel("213- "+ m_serverSettings.serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + kCWEOL);
+        connection->sendOnControlChannel("Version "+ m_serverSettings.serverVersion()+ kCWEOL);
+        connection->sendOnControlChannel("Connected from "+connection->clientHostIP()+kCWEOL);
         if (connection->isAnonymous()) {
-            connection->sendOnControlChannel("Logged in anonymously \r\n");
+            connection->sendOnControlChannel(static_cast<QString>("Logged in anonymously ")+kCWEOL);
         } else {
-            connection->sendOnControlChannel("Logged in as user " + connection->userName() + "\r\n");
+            connection->sendOnControlChannel("Logged in as user " + connection->userName() + kCWEOL);
         }
         if (connection->dataChannel()==nullptr) {
-            connection->sendOnControlChannel("No data connection.\r\n");
+            connection->sendOnControlChannel(static_cast<QString>("No data connection.")+kCWEOL);
         }else {
-            connection->sendOnControlChannel("Trasferring data.\r\n");
+            connection->sendOnControlChannel(static_cast<QString>("Trasferring data.")+kCWEOL);
         }
         connection->sendReplyCode(213);
     }
@@ -1350,13 +1350,13 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
 
     QString featReply;
 
-    featReply.append("211-Extensions supported: \r\n");
+    featReply.append(static_cast<QString>("211-Extensions supported: ")+kCWEOL);
 
     for( auto key :  m_ftpCommandTableExtended.keys() ) {
         if (!m_featTailoredRespone.contains(key))  {
-            featReply.append(" "+key+"\r\n");
+            featReply.append(" "+key+kCWEOL);
         } else {
-            featReply.append(" "+m_featTailoredRespone[key]+"\r\n");
+            featReply.append(" "+m_featTailoredRespone[key]+kCWEOL);
         }
     }
 
@@ -1553,11 +1553,11 @@ void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &ar
     QFileInfo fileInfo(FTPUtil::mapPathToLocal(connection, arguments));
 
     if(fileInfo.exists()) {
-        connection->sendOnControlChannel("250-Listing " + arguments + "\r\n");
+        connection->sendOnControlChannel("250-Listing " + arguments + kCWEOL);
         connection->sendOnControlChannel(FTPUtil::buildFileFactList(fileInfo));
         connection->sendReplyCode(250,"End.");
     } else {
-        connection->sendOnControlChannel(arguments+" does not exist.\r\n");
+        connection->sendOnControlChannel(arguments+" does not exist."+kCWEOL);
     }
 
 }

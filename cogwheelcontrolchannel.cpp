@@ -477,20 +477,6 @@ void CogWheelControlChannel::passiveConnection()
 }
 
 /**
- * @brief CogWheelControlChannel::sendOnControlChannel
- *
- * Send data string on control channel to client.
- *
- * @param dataToSend    Data to send over control channel.
- */
-void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
-
-    // Convert QString to bytes
-
-    m_controlChannelSocket->write(dataToSend.toUtf8().data());
-}
-
-/**
  * @brief CogWheelControlChannel::enbleTLSSupport
  *
  * Enable TLS support for on SSL socket as an AUTH TLS command has been sent.
@@ -555,28 +541,6 @@ void CogWheelControlChannel::controlChannelEncrypted()
 
 }
 
-quint64 CogWheelControlChannel::serverPassivePortHigh() const
-{
-    return m_serverPassivePortHigh;
-}
-
-void CogWheelControlChannel::setServerPassivePortHigh(const quint64 &serverPassivePortHigh)
-{
-    m_serverPassivePortHigh = serverPassivePortHigh;
-}
-
-quint64 CogWheelControlChannel::serverPassivePortLow() const
-{
-    return m_serverPassivePortLow;
-}
-
-void CogWheelControlChannel::setServerPassivePortLow(const quint64 &serverPassivePortLow)
-{
-    m_serverPassivePortLow = serverPassivePortLow;
-}
-
-
-
 /**
  * @brief CogWheelControlChannel::sendReplyCode
  *
@@ -590,10 +554,9 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
 
     // Convert reply code to string, append message and send.
 
-    QString reply { QString::number(replyCode) + " " + message + "\r\n"};
+    QString reply { QString::number(replyCode) + " " + message + kCWEOL};
 
-    m_controlChannelSocket->write(reply.toUtf8().data());
-    m_controlChannelSocket->flush();    //  Make sure replies arent buffered.
+    sendOnControlChannel(reply);
 
 }
 
@@ -607,6 +570,22 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &mess
 void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
 {
     sendReplyCode(replyCode, CogWheelFTPCore::getResponseText(replyCode));
+}
+
+/**
+ * @brief CogWheelControlChannel::sendOnControlChannel
+ *
+ * Send data string on control channel to client.
+ *
+ * @param dataToSend    Data to send over control channel.
+ */
+void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
+
+    // Convert QString to bytes, flush to make sure replies arent buffered.
+
+    m_controlChannelSocket->write(dataToSend.toUtf8().data());
+    m_controlChannelSocket->flush();
+
 }
 
 /**
@@ -684,6 +663,42 @@ void CogWheelControlChannel::bytesWritten(qint64 numberOfBytes)
 // ============================
 // CLASS PRIVATE DATA ACCESSORS
 // ============================
+
+/**
+ * @brief CogWheelControlChannel::serverPassivePortHigh
+ * @return
+ */
+quint64 CogWheelControlChannel::serverPassivePortHigh() const
+{
+    return m_serverPassivePortHigh;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerPassivePortHigh
+ * @param serverPassivePortHigh
+ */
+void CogWheelControlChannel::setServerPassivePortHigh(const quint64 &serverPassivePortHigh)
+{
+    m_serverPassivePortHigh = serverPassivePortHigh;
+}
+
+/**
+ * @brief CogWheelControlChannel::serverPassivePortLow
+ * @return
+ */
+quint64 CogWheelControlChannel::serverPassivePortLow() const
+{
+    return m_serverPassivePortLow;
+}
+
+/**
+ * @brief CogWheelControlChannel::setServerPassivePortLow
+ * @param serverPassivePortLow
+ */
+void CogWheelControlChannel::setServerPassivePortLow(const quint64 &serverPassivePortLow)
+{
+    m_serverPassivePortLow = serverPassivePortLow;
+}
 
 /**
  * @brief CogWheelControlChannel::serverGlobalIP

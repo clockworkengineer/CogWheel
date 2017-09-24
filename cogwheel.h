@@ -27,6 +27,10 @@ constexpr const char   *kCWApplicationName { "CogWheel" };
 
 constexpr const char   *kCWManagerPostfix { "Manager" };
 
+// End of Line
+
+constexpr const char   *kCWEOL { "\r\n" };
+
 // Manager/Controller commands
 
 constexpr const char *kCWCommandSTATUS       { "STATUS" };
