@@ -47,7 +47,7 @@
  */
 static bool alreadyRunning() {
 
-    static QLockFile lockFile(QDir::tempPath() + "/"+QString(kCWApplicationName)+".lock" );
+    static QLockFile lockFile(QDir::tempPath() + "/"+static_cast<QString>(kCWApplicationName)+".lock" );
 
     if(!lockFile.tryLock(100)){
         return (true);

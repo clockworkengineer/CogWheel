@@ -43,7 +43,7 @@ public:
     struct Exception : public std::runtime_error {
 
         Exception(const QString & messageStr)
-            : std::runtime_error(QString("CogWheelLogger Failure: " + messageStr).toStdString()) {
+            : std::runtime_error(static_cast<QString>("CogWheelLogger Failure: " + messageStr).toStdString()) {
         }
 
     };
@@ -208,28 +208,28 @@ inline void cogWheelWarning(const QString &message) { if (getLoggingLevel() & Co
 inline void cogWheelInfo (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().info(QString("CHANNEL[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().info(static_cast<QString>("CHANNEL[%1]I: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelError (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().error(QString("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().error(static_cast<QString>("CHANNEL[%1]E: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelWarning (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Channel) {
-        CogWheelLogger::getInstance().warning(QString("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().warning(static_cast<QString>("CHANNEL[%1]W: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 
 inline void cogWheelCommand (qintptr handle, const QString &message)
 {
     if (getLoggingLevel() & CogWheelLogger::Command) {
-        CogWheelLogger::getInstance().info(QString("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
+        CogWheelLogger::getInstance().info(static_cast<QString>("CHANNEL[%1]: %2").arg(QString::number(handle), message).toStdString().c_str());
     }
 }
 #endif // COGWHEELLOGGER_H

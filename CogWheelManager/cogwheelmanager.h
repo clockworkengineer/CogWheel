@@ -52,7 +52,7 @@ public:
     struct Exception : public std::runtime_error {
 
         Exception(const QString & messageStr)
-            : std::runtime_error(QString("CogWheelManager Failure: " + messageStr).toStdString()) {
+            : std::runtime_error(static_cast<QString>("CogWheelManager Failure: " + messageStr).toStdString()) {
         }
 
     };

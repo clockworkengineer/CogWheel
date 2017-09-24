@@ -61,6 +61,16 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
         }
     }
 
+    if (!m_serverSettings.serverGlobalName().isEmpty()) {
+        cogWheelInfo("Server Global Name ["+m_serverSettings.serverGlobalName()+"]");
+    }
+
+    if (m_serverSettings.serverPassivePortLow()) {
+        QString portLow { QString::number(m_serverSettings.serverPassivePortLow()) };
+        QString portHigh { QString::number(m_serverSettings.serverPassivePortHigh()) };
+        cogWheelInfo(static_cast<QString>("Server Passive Port Range: [")+portLow+" - "+portHigh+"]");
+    }
+
     // Setup server settings
 
     m_connections.setServerSettings (m_serverSettings);
@@ -69,6 +79,8 @@ CogWheelServer::CogWheelServer(bool autoStart, QObject *parent) : QTcpServer(par
     if (autoStart) {
         startServer();
     }
+
+
 
 }
 

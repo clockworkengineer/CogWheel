@@ -41,7 +41,7 @@ public:
     struct Exception : public std::runtime_error {
 
         Exception(const QString & messageStr)
-            : std::runtime_error(QString("CogWheelServerSettings Failure: " + messageStr).toStdString()) {
+            : std::runtime_error(static_cast<QString>("CogWheelServerSettings Failure: " + messageStr).toStdString()) {
         }
 
     };

@@ -202,8 +202,7 @@ void CogWheelDataChannel::listenForConnection(const QString &serverIP)
             setClientHostIP(serverIP);
             setClientHostPort(serverPort());
         } else {
-            cogWheelError("Possible Data port conflict on port: "+QString::number(m_clientHostPort));
-            throw CogWheelDataChannel::Exception("Possible data channel conflict on port: "+QString::number(m_clientHostPort));
+            throw Exception("Possible data channel conflict on port: "+QString::number(m_clientHostPort));
         }
         emit passiveConnection();
         m_listening=true;
