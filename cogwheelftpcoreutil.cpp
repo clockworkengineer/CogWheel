@@ -210,7 +210,7 @@ QString buildLISTLine(const QFileInfo &fileInfo)
 
     line.append(QString::number(fileInfo.size()).rightJustified(10,' ',true)+" ");
     line.append(fileInfo.lastModified().toString("MMM dd hh:mm").rightJustified(12,' ',true)+" ");
-    line.append(fileInfo.fileName()+kCWEOL);
+    line.append(fileInfo.fileName());
 
     return(line);
 
@@ -228,7 +228,7 @@ QString buildLISTLine(const QFileInfo &fileInfo)
  */
 QString buildPathFactList(const QFileInfo &pathInfo, const QString &path)
 {
-    return (static_cast<QString>("Type=cdir;")+buildFileCommonFactList(pathInfo)+" "+path+kCWEOL);
+    return (static_cast<QString>("Type=cdir;")+buildFileCommonFactList(pathInfo)+" "+path);
 }
 
 /**
@@ -251,7 +251,7 @@ QString buildFileFactList(const QFileInfo &fileInfo)
         factList.append((static_cast<QString>("Type=file;")+"Size=")+QString::number(fileInfo.size())+";");
     }
 
-    factList.append(buildFileCommonFactList(fileInfo)+" "+fileInfo.fileName()+kCWEOL);
+    factList.append(buildFileCommonFactList(fileInfo)+" "+fileInfo.fileName());
 
     return factList;
 

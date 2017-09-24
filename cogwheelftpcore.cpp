@@ -354,8 +354,8 @@ void CogWheelFTPCore::performCommand(CogWheelControlChannel *connection, const Q
         connection->sendReplyCode(550, err.what());
     } catch(...) {
         connection->disconnectDataChannel(); // Disconnect any data channel
-        cogWheelError(connection->socketHandle(), "Unknown error handling " + command + " command.");
-        connection->sendReplyCode(550, "Unknown error handling " + command + " command.");
+        cogWheelError(connection->socketHandle(), "Unknown error handling "+command+" command.");
+        connection->sendReplyCode(550, "Unknown error handling "+command+" command.");
     }
 
 }
@@ -477,13 +477,13 @@ void CogWheelFTPCore::LIST(CogWheelControlChannel *connection, const QString &ar
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(FTPUtil::buildLISTLine(item));
+                listing.append(FTPUtil::buildLISTLine(item)+kCWEOL);
             }
 
             // List a single file
 
         } else {
-            listing.append(FTPUtil::buildLISTLine(fileInfo));
+            listing.append(FTPUtil::buildLISTLine(fileInfo)+kCWEOL);
         }
 
         // Send listing to clients
@@ -794,7 +794,7 @@ void CogWheelFTPCore::HELP(CogWheelControlChannel *connection, const QString &ar
             column=0;
         }
     }
-    if (column!=0)helpReply.append(kCWEOL);
+    if (column==0) helpReply.chop(2);
     connection->sendOnControlChannel(helpReply);
 
     connection->sendReplyCode(214, "Help OK.");
@@ -1115,7 +1115,7 @@ void CogWheelFTPCore::RNFR(CogWheelControlChannel *connection, const QString &ar
 
     QFileInfo fileToRename { path };
     if(!fileToRename.exists()){
-        throw CogWheelFtpServerReply("Could not find '" + arguments + "'");
+        throw CogWheelFtpServerReply("Could not find '"+arguments+"'");
     } else{
         connection->setRenameFromFileName(path);
         connection->sendReplyCode(350);
@@ -1286,7 +1286,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
     if(!arguments.isEmpty()) {
 
-        connection->sendOnControlChannel("213-Status of " + arguments + kCWEOL);
+        connection->sendOnControlChannel("213-Status of "+arguments);
 
         QDir pathToList(FTPUtil::mapPathToLocal(connection, arguments));
 
@@ -1295,7 +1295,7 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
                 connection->sendOnControlChannel(FTPUtil::buildLISTLine(item));
             }
         }else{
-            connection->sendOnControlChannel(arguments+" does not exist."+kCWEOL);
+            connection->sendOnControlChannel(arguments+" does not exist.");
         }
 
         connection->sendReplyCode(213);
@@ -1313,18 +1313,18 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
     // No File transfer and no argument
 
     if(!connection->dataChannel() && arguments.isEmpty()) {
-        connection->sendOnControlChannel("213- "+ m_serverSettings.serverName() + " (" + connection->serverIP()+ ") FTP Server Status:" + kCWEOL);
-        connection->sendOnControlChannel("Version "+ m_serverSettings.serverVersion()+ kCWEOL);
-        connection->sendOnControlChannel("Connected from "+connection->clientHostIP()+kCWEOL);
+        connection->sendOnControlChannel("213- "+ m_serverSettings.serverName()+" ("+connection->serverIP()+ ") FTP Server Status:");
+        connection->sendOnControlChannel("Version "+ m_serverSettings.serverVersion());
+        connection->sendOnControlChannel("Connected from "+connection->clientHostIP());
         if (connection->isAnonymous()) {
-            connection->sendOnControlChannel(static_cast<QString>("Logged in anonymously ")+kCWEOL);
+            connection->sendOnControlChannel("Logged in anonymously.");
         } else {
-            connection->sendOnControlChannel("Logged in as user " + connection->userName() + kCWEOL);
+            connection->sendOnControlChannel("Logged in as user "+connection->userName());
         }
         if (connection->dataChannel()==nullptr) {
-            connection->sendOnControlChannel(static_cast<QString>("No data connection.")+kCWEOL);
+            connection->sendOnControlChannel("No data connection.");
         }else {
-            connection->sendOnControlChannel(static_cast<QString>("Trasferring data.")+kCWEOL);
+            connection->sendOnControlChannel("Trasferring data.");
         }
         connection->sendReplyCode(213);
     }
@@ -1360,6 +1360,7 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
         }
     }
 
+    featReply.chop(2);
     connection->sendOnControlChannel(featReply);
 
     connection->sendReplyCode(211, "End.");
@@ -1416,7 +1417,7 @@ void CogWheelFTPCore::SIZE(CogWheelControlChannel *connection, const QString &ar
         throw CogWheelFtpServerReply("Requested file not found.");
     }
 
-    cogWheelInfo(connection->socketHandle(),"File [" + file + "] Size [" + QString::number(fileInfo.size()) + "]");
+    cogWheelInfo(connection->socketHandle(),"File ["+file+"] Size ["+QString::number(fileInfo.size())+"]");
 
     connection->sendReplyCode(213, QString::number(fileInfo.size()));
 
@@ -1516,13 +1517,13 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
 
         // List files for directory
 
-        listing.append(FTPUtil::buildPathFactList( fileInfo, path));
+        listing.append(FTPUtil::buildPathFactList( fileInfo, path)+kCWEOL);
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
             for (QFileInfo &item : listDirectory.entryInfoList()) {
-                listing.append(FTPUtil::buildFileFactList(item));
+                listing.append(FTPUtil::buildFileFactList(item)+kCWEOL);
             }
 
         }
@@ -1553,11 +1554,11 @@ void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &ar
     QFileInfo fileInfo(FTPUtil::mapPathToLocal(connection, arguments));
 
     if(fileInfo.exists()) {
-        connection->sendOnControlChannel("250-Listing " + arguments + kCWEOL);
+        connection->sendOnControlChannel("250-Listing "+arguments);
         connection->sendOnControlChannel(FTPUtil::buildFileFactList(fileInfo));
         connection->sendReplyCode(250,"End.");
     } else {
-        connection->sendOnControlChannel(arguments+" does not exist."+kCWEOL);
+        connection->sendOnControlChannel(arguments+" does not exist.");
     }
 
 }

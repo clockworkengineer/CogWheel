@@ -552,11 +552,12 @@ void CogWheelControlChannel::controlChannelEncrypted()
 void CogWheelControlChannel::sendReplyCode(quint16 replyCode,const QString &message)
 {
 
-    // Convert reply code to string, append message and send.
+    // Convert reply code to string, append message, send and flush.
 
-    QString reply { QString::number(replyCode) + " " + message + kCWEOL};
+    QString reply { QString::number(replyCode) + " " + message};
 
     sendOnControlChannel(reply);
+    m_controlChannelSocket->flush();
 
 }
 
@@ -581,10 +582,10 @@ void CogWheelControlChannel::sendReplyCode(quint16 replyCode)
  */
 void CogWheelControlChannel::sendOnControlChannel(const QString &dataToSend) {
 
-    // Convert QString to bytes, flush to make sure replies arent buffered.
+    // Convert QString to bytes
 
-    m_controlChannelSocket->write(dataToSend.toUtf8().data());
-    m_controlChannelSocket->flush();
+    m_controlChannelSocket->write((dataToSend+kCWEOL).toUtf8().data());
+
 
 }
 
