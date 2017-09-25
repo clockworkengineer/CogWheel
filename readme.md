@@ -13,9 +13,13 @@ The server also has the ability to run behind a NAT home router that has been pr
 
 **To Do List**
 ***
+- UTF-8 file/path support.
+- ASCII transfer mode ?
 - Try out on other Qt platforms (Windows/MasOS).
+- Build an installer for the program (I think Qt provides the ability).
 - Use standard ports as default.
 - Faster logging to manager.
-- Upgrade Manaager interface.
+- Upgrade Manager interface.
 - Performance work on server.
+- Documentation (maybe).
  
