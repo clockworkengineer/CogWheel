@@ -74,11 +74,15 @@ void CogWheelManager::load()
     if (!manager.childKeys().contains("serverpath")) {
         manager.setValue("serverpath", "");
     }
+    if (!manager.childKeys().contains("serverautostart")) {
+        manager.setValue("serverautostart", false);
+    }
     manager.endGroup();
 
     manager.beginGroup("Manager");
     m_serverName = manager.value("servername").toString();
     m_serverPath = manager.value("serverpath").toString();
+    m_serverAutoStart = manager.value("serverautostart").toBool();
     manager.endGroup();
 
 }
@@ -322,6 +326,21 @@ void CogWheelManager::readyRead()
 
     }
 
+}
+
+QLocalSocket *CogWheelManager::managerSocket() const
+{
+    return m_managerSocket;
+}
+
+bool CogWheelManager::serverAutoStart() const
+{
+    return m_serverAutoStart;
+}
+
+void CogWheelManager::setServerAutoStart(bool serverAutoStart)
+{
+    m_serverAutoStart = serverAutoStart;
 }
 
 /**

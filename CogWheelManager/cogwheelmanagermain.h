@@ -61,7 +61,7 @@ public:
 
     // Launch and kill server
 
-    bool launchServer();
+    void launchServer();
     void killServer();
 
 private slots:

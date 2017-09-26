@@ -68,10 +68,13 @@ CogWheelManagerMain::CogWheelManagerMain(QWidget *parent) :
 
     // Setup window initial state
 
-    ui->startButton->setEnabled(false);
-    ui->stopButton->setEnabled(false);
-    ui->launchKillButton->setText("Launch");
-    ui->serverStatus->setText("<b>Not Running.</b>");
+    serverStatusUpdate(kCWStatusTERMINATED);
+
+    // If server not started and auto start set then launch
+
+    if (m_serverManager.serverAutoStart() && !m_serverManager.managerSocket()) {
+        launchServer();
+    }
 
 }
 
@@ -93,15 +96,12 @@ CogWheelManagerMain::~CogWheelManagerMain()
  *
  * @return == true on success.
  */
-bool CogWheelManagerMain::launchServer()
+void CogWheelManagerMain::launchServer()
 {
 
     m_serverProcess = new QProcess();
     m_serverProcess->startDetached(m_serverManager.serverPath());
     m_serverProcess->waitForStarted(-1);
-
-    return(true);
-
 }
 
 /**
@@ -120,8 +120,6 @@ void CogWheelManagerMain::killServer()
         m_serverProcess->deleteLater();
         m_serverProcess=nullptr;
     }
-
-//    m_serverManager.disconnectFromServer();
 
 
 }
@@ -188,20 +186,9 @@ void CogWheelManagerMain::on_stopButton_clicked()
 void CogWheelManagerMain::on_launchKillButton_clicked()
 {
     if (ui->launchKillButton->text()=="Launch") {
-        if (launchServer()) {
-            ui->launchKillButton->setText("Kill");
-            ui->startButton->setEnabled(false);
-            ui->stopButton->setEnabled(false);
-            ui->connectionList->clear();
-            ui->serverStatus->setText("<b>Running.</b>");
-        }
+        launchServer();
     } else {
         killServer();
-        ui->launchKillButton->setText("Launch");
-        ui->startButton->setEnabled(false);
-        ui->stopButton->setEnabled(false);
-        ui->connectionList->clear();
-        ui->serverStatus->setText("<b>Not Running.</b>");
     }
 }
 
@@ -218,21 +205,20 @@ void CogWheelManagerMain::serverStatusUpdate(const QString status)
     qDebug() << "Server Status " << status;
 
     if (status==kCWStatusSTOPPED) {
-        ui->serverStatus->setText("<b>Running but stopped.</b>");
+        ui->serverStatus->setText("<b style=color:red;>Running but stopped.</b>");
+        ui->launchKillButton->setText("Kill");
         ui->startButton->setEnabled(true);
         ui->stopButton->setEnabled(false);
-        ui->launchKillButton->setText("Kill");
     } else if (status==kCWStatusRUNNING) {
-        ui->serverStatus->setText("<b>Running.</b>");
+        ui->serverStatus->setText("<b style=color:green;>Running.</b>");
+        ui->launchKillButton->setText("Kill");
         ui->startButton->setEnabled(false);
         ui->stopButton->setEnabled(true);
-        ui->launchKillButton->setText("Kill");
     } else if (status==kCWStatusTERMINATED) {
+        ui->serverStatus->setText("<b>Not Running.</b>");
         ui->launchKillButton->setText("Launch");
         ui->startButton->setEnabled(false);
         ui->stopButton->setEnabled(false);
-        ui->connectionList->clear();
-        ui->serverStatus->setText("<b>Not Running.</b>");
     }
 
     ui->connectionList->clear();

@@ -92,6 +92,9 @@ public:
     void setServerPath(const QString &serverPath);
     QString serverName() const;
     void setServerName(const QString &serverName);
+    bool serverAutoStart() const;
+    void setServerAutoStart(bool serverAutoStart);
+    QLocalSocket *managerSocket() const;
 
 private:
 
@@ -130,6 +133,7 @@ private:
 
     QString m_serverPath;                   // Path to CogWheel Server
     QString m_serverName;                   // Manager socket name
+    bool m_serverAutoStart=false;           // == true auto start server
     QLocalSocket *m_managerSocket=nullptr;  // Manager socket
     quint32 m_commandResponseBlockSize=0;   // Command reply block size.
     QByteArray m_writeRawDataBuffer;        // Write raw data buffer
