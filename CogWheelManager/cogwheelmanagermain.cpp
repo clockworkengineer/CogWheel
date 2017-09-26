@@ -248,12 +248,13 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
  */
 void CogWheelManagerMain::logWindowUpdate(const QStringList &logBuffer)
 {
+    int currentRow =m_serverLoggingBuffer.rowCount();
+     m_serverLoggingBuffer.insertRows(currentRow, logBuffer.size());
+
     for (auto line : logBuffer) {
-        m_serverLoggingBuffer.insertRow(m_serverLoggingBuffer.rowCount());
-        QModelIndex index = m_serverLoggingBuffer.index(m_serverLoggingBuffer.rowCount()-1);
-        m_serverLoggingBuffer.setData(index, line);
+        m_serverLoggingBuffer.setData(m_serverLoggingBuffer.index(currentRow++), line);
     }
 
-    ui->logListView->setCurrentIndex(m_serverLoggingBuffer.index(m_serverLoggingBuffer.rowCount()-1));
+    ui->logListView->setCurrentIndex(m_serverLoggingBuffer.index(currentRow-1));
 
 }
