@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
             flushLoggingFile();
 
-            // Controller/Server/Conenction errors
+            // Controller/Server/Connection errors
 
         } catch (const std::runtime_error &err) {
             qDebug() << err.what();

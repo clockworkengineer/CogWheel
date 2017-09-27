@@ -530,7 +530,7 @@ void CogWheelControlChannel::sslError(QList<QSslError> errors)
         errorStr.append(e.errorString());
     }
 
-    emit cogWheelError(socketHandle(),errorStr);
+    cogWheelError(socketHandle(),errorStr);
 
     m_controlChannelSocket->ignoreSslErrors();
 
