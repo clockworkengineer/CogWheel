@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
 
         } catch(...) {
-            qDebug() << "A unknown exception occurred.";
+            qDebug() << "An unknown exception occurred.";
             exit(EXIT_FAILURE);
         }
 

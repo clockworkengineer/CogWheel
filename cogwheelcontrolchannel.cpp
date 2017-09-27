@@ -30,6 +30,9 @@
 // CLASS IMPLEMENTATION
 // ====================
 
+// Passive port map access mutex & currently active passive ports table
+
+QMutex CogWheelControlChannel::m_passiveMapMutex;
 QSet<quint64> CogWheelControlChannel::passivePortMap;
 
 /**
@@ -231,6 +234,8 @@ quint64 CogWheelControlChannel::getPassivePort()
 
     if (serverPassivePortHigh() >= serverPassivePortLow()) {
 
+        QMutexLocker    passivePortMapLock { &m_passiveMapMutex };
+
         // All ports being used (return use any port)
 
         if (passivePortMap.size()==(static_cast<int>(serverPassivePortHigh()-serverPassivePortLow()+1))) {
@@ -260,6 +265,8 @@ quint64 CogWheelControlChannel::getPassivePort()
  */
 void CogWheelControlChannel::removePassivePort(quint64 passivePort)
 {
+
+    QMutexLocker    passivePortMapLock { &m_passiveMapMutex };
 
     if (passivePort && passivePortMap.contains(passivePort)) {
         passivePortMap.remove(passivePort);

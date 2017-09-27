@@ -35,6 +35,7 @@
 #include <QSslKey>
 #include <QThread>
 #include <QHostInfo>
+#include <QMutex>
 
 // =================
 // CLASS DECLARATION
@@ -234,6 +235,7 @@ private:
     qintptr m_socketHandle;                         // Control channel socket handle
     bool m_sslConnection=false;                     // == true connection is SSL
 
+    static QMutex m_passiveMapMutex;          // Passive port map access mutex
     static QSet<quint64> passivePortMap;      // Currently active passive ports
 
 };

@@ -248,7 +248,8 @@ void CogWheelManagerMain::connectionListUpdate(const QStringList &connections)
  */
 void CogWheelManagerMain::logWindowUpdate(const QStringList &logBuffer)
 {
-    int currentRow =m_serverLoggingBuffer.rowCount();
+    int currentRow = m_serverLoggingBuffer.rowCount();
+
      m_serverLoggingBuffer.insertRows(currentRow, logBuffer.size());
 
     for (auto line : logBuffer) {
