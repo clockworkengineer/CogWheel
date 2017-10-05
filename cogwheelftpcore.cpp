@@ -659,7 +659,7 @@ void CogWheelFTPCore::RETR(CogWheelControlChannel *connection, const QString &ar
     QFile file { FTPUtil::mapPathToLocal(connection, arguments) } ;
 
     if(!file.exists()){
-        throw CogWheelFtpServerReply(450);
+        throw CogWheelFtpServerReply("File does not exist.");
     }
 
     QFileInfo fileInfo { file };
@@ -735,7 +735,7 @@ void CogWheelFTPCore::STOR(CogWheelControlChannel *connection, const QString &ar
 
     if(file.exists()) {
         if(!file.remove()) {
-            throw CogWheelFtpServerReply(550, "File could not be overwritten.");
+            throw CogWheelFtpServerReply(450, "File could not be overwritten.");
         }
     }
 
@@ -1016,7 +1016,7 @@ void CogWheelFTPCore::STOU(CogWheelControlChannel *connection, const QString &ar
     QFile file { path  } ;
 
     if(file.exists()) {
-        throw CogWheelFtpServerReply(550, "File already exists.");
+        throw CogWheelFtpServerReply("File already exists.");
     }
 
     // Connect up data channel and upload file
@@ -1493,13 +1493,13 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
     // Argument does not exist
 
     if (!fileInfo.exists()) {
-        throw CogWheelFtpServerReply("Requested path not found.");
+        throw CogWheelFtpServerReply(501, "Requested path not found.");
     }
 
     // Argument not a directory
 
     if (!fileInfo.isDir()) {
-        throw CogWheelFtpServerReply("Requested path not a directory.");
+        throw CogWheelFtpServerReply(501, "Requested path not a directory.");
     }
 
     // Connect up data channel and send file list
@@ -1510,7 +1510,7 @@ void CogWheelFTPCore::MLSD(CogWheelControlChannel *connection, const QString &ar
 
         // List files for directory
 
-        listing.append(FTPUtil::buildPathFactList( fileInfo, path)+kCWEOL);
+        listing.append(FTPUtil::buildPathFactList( fileInfo, arguments)+kCWEOL);
 
         if (fileInfo.isDir()) {
             QDir listDirectory { path };
@@ -1551,7 +1551,7 @@ void CogWheelFTPCore::MLST(CogWheelControlChannel *connection, const QString &ar
         connection->sendOnControlChannel(FTPUtil::buildFileFactList(fileInfo));
         connection->sendReplyCode(250,"End.");
     } else {
-        connection->sendOnControlChannel(arguments+" does not exist.");
+        connection->sendReplyCode(501, "File does not exist.");
     }
 
 }

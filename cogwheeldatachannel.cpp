@@ -90,14 +90,14 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
         return(m_connected);
     }
 
+    connection->sendReplyCode(150);
+
     if (!connection->isPassive()) {
 
         cogWheelInfo(m_controlSocketHandle,"Active Mode. Connecting data channel to client ....");
 
         m_dataChannelSocket->connectToHost(m_clientHostIP, m_clientHostPort);
         m_dataChannelSocket->waitForConnected(-1);
-
-        connection->sendReplyCode(150);
 
     } else {
 
@@ -106,8 +106,6 @@ bool CogWheelDataChannel::connectToClient(CogWheelControlChannel *connection)
         if (m_dataChannelSocket->state() != QAbstractSocket::ConnectedState) {
             waitForNewConnection(-1);
         }
-
-        connection->sendReplyCode(125);
 
     }
 

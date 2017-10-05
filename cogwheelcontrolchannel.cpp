@@ -403,7 +403,7 @@ void CogWheelControlChannel::openConnection(qint64 socketHandle)
 
         // Set connected and return success.
 
-        sendReplyCode(200);
+        sendReplyCode(220);
 
     } else {
 
