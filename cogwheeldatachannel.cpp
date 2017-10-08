@@ -517,6 +517,16 @@ void CogWheelDataChannel::socketError(QAbstractSocket::SocketError socketError)
     if (socketError!=QAbstractSocket::RemoteHostClosedError) {
         cogWheelError(m_controlSocketHandle,"Data channel socket error: "+QString::number(socketError));
     }
+
+    if (socketError==QAbstractSocket::RemoteHostClosedError) {
+        if (m_dataChannelSocket->state() == QAbstractSocket::ConnectedState) {
+            m_dataChannelSocket->disconnectFromHost();
+            if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
+                m_dataChannelSocket->waitForDisconnected(-1);
+            }
+        }
+    }
+
 }
 
 // ============================

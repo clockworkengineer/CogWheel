@@ -946,7 +946,7 @@ void CogWheelFTPCore::QUIT(CogWheelControlChannel *connection, const QString &ar
 /**
  * @brief CogWheelFTPCore::DELE
  *
- * Delete a specified fiel from the server. An error is returned to the client
+ * Delete a specified file from the server. An error is returned to the client
  * if the user does not have write access, the files does not exist or if remove()
  * fails to delete the file.
  *
@@ -973,7 +973,7 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
         }
 
     } else {
-        throw CogWheelFtpServerReply("File not found.");
+        throw CogWheelFtpServerReply(450, "File not found.");
     }
 
 }
