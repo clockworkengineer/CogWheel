@@ -151,6 +151,7 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
             }
             connection->sendReplyCode(226); // Data channel closed reply
         }
+        m_dataChannelSocket->close();
     }
     m_connected=false;
 

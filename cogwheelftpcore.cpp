@@ -818,8 +818,8 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
  * @brief CogWheelFTPCore::NLST
  *
  * Produce  a list of files from the passed in path and send over data channel.
- * An error is returned to the client of the passed in path is not a directory
- * or does not exist.
+ * An error is returned to the client of the passed in path is does not exist is not
+ * a directory or file.
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -832,7 +832,7 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 
     // Check for directory that exists
 
-    if (!fileInfo.exists() || !fileInfo.isDir()) {
+    if (!fileInfo.exists()|| !(fileInfo.isDir() || fileInfo.isFile())) {
         throw CogWheelFtpServerReply("Requested path not found.");
     }
 
@@ -840,14 +840,17 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
 
     if (connection->connectDataChannel()) {
 
-        QString listing;
-        QDir listDirectory { path };
-
-        for (QString item : listDirectory.entryList()) {
-            listing.append(item+kCWEOL);
+        if (fileInfo.isDir()) {
+            QString listing;
+            QDir listDirectory { path };
+            listDirectory.setFilter(listDirectory.filter() | QDir::NoDotAndDotDot | QDir::NoDot | QDir::Hidden);
+            for (QString item : listDirectory.entryList()) {
+                listing.append(arguments+"/"+item+kCWEOL);
+            }
+            connection->sendOnDataChannel(listing.toUtf8().data());
+        } else {
+           connection->sendOnDataChannel(QString(arguments+kCWEOL).toUtf8().data());
         }
-
-        connection->sendOnDataChannel(listing.toUtf8().data());
 
         // Disconnect data channel
 
@@ -973,7 +976,7 @@ void CogWheelFTPCore::DELE(CogWheelControlChannel *connection, const QString &ar
         }
 
     } else {
-        throw CogWheelFtpServerReply(450, "File not found.");
+        throw CogWheelFtpServerReply(550, "File not found.");
     }
 
 }
