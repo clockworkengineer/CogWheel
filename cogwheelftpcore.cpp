@@ -819,7 +819,7 @@ void CogWheelFTPCore::SITE(CogWheelControlChannel *connection, const QString &ar
  *
  * Produce  a list of files from the passed in path and send over data channel.
  * An error is returned to the client of the passed in path is does not exist is not
- * a directory or file.
+ * a directory or file (single files are just passed back).
  *
  * @param connection   Pointer to control channel instance.
  * @param arguments    Command arguments.
@@ -1289,18 +1289,24 @@ void CogWheelFTPCore::STAT(CogWheelControlChannel *connection, const QString &ar
 
         connection->sendOnControlChannel("213-Status of "+arguments);
 
-        QDir pathToList(FTPUtil::mapPathToLocal(connection, arguments));
+        QFileInfo fileInfo { FTPUtil::mapPathToLocal(connection, arguments) };
 
-        if(pathToList.exists()) {
-            for (auto item : pathToList.entryInfoList()){
+        if (fileInfo.isDir()) {
+
+            QDir listDirectory { fileInfo .absolutePath() };
+            listDirectory.setFilter(listDirectory.filter() | QDir::Hidden);
+            for (QFileInfo &item : listDirectory.entryInfoList()) {
                 connection->sendOnControlChannel(FTPUtil::buildLISTLine(item));
             }
-        }else{
-            connection->sendOnControlChannel(arguments+" does not exist.");
+
+        } else if (fileInfo.isFile()){
+           connection->sendOnControlChannel(FTPUtil::buildLISTLine(fileInfo));
         }
 
         connection->sendReplyCode(213);
+
         return;
+
     }
 
 
