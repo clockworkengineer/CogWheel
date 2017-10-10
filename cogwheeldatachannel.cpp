@@ -149,7 +149,9 @@ void CogWheelDataChannel::disconnectFromClient(CogWheelControlChannel *connectio
             if (m_dataChannelSocket->state() != QAbstractSocket::UnconnectedState) {
                 m_dataChannelSocket->waitForDisconnected(-1);
             }
-            connection->sendReplyCode(226); // Data channel closed reply
+            if (m_connected) {
+                connection->sendReplyCode(226); // Data channel closed
+            }
         }
         m_dataChannelSocket->close();
     }
