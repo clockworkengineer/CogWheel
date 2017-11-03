@@ -883,12 +883,12 @@ void CogWheelFTPCore::MKD(CogWheelControlChannel *connection, const QString &arg
 
     if(!newDirectory.mkdir(path)){
         if (newDirectory.exists()) {
-            throw CogWheelFtpServerReply(521, "Directory already exists.");
+            throw CogWheelFtpServerReply(521, "Directory "+arguments+" already exists.");
         }  else {
-            throw CogWheelFtpServerReply("Could not create directory.");
+            throw CogWheelFtpServerReply("Could not create directory "+arguments+".");
         }
     }else{
-        connection->sendReplyCode(257);
+        connection->sendReplyCode(257, "Directory "+arguments+" sucessfully created.");
     }
 
 }

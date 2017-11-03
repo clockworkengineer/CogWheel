@@ -420,8 +420,6 @@ void CogWheelDataChannel::disconnected()
 
     cogWheelInfo(m_controlSocketHandle,"Data channel disconnected.");
 
-    m_connected=false;
-
     if (m_fileBeingTransferred) {
         fileTransferCleanup();
         emit transferFinished();
