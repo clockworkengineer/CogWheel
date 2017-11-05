@@ -845,7 +845,11 @@ void CogWheelFTPCore::NLST(CogWheelControlChannel *connection, const QString &ar
             QDir listDirectory { path };
             listDirectory.setFilter(listDirectory.filter() | QDir::NoDotAndDotDot | QDir::NoDot | QDir::Hidden);
             for (QString item : listDirectory.entryList()) {
-                listing.append(arguments+"/"+item+kCWEOL);
+                if (arguments.endsWith("/"))  {
+                    listing.append(arguments+item+kCWEOL);
+                }else {
+                    listing.append(arguments+"/"+item+kCWEOL);
+                }
             }
             connection->sendOnDataChannel(listing.toUtf8().data());
         } else {
@@ -1364,6 +1368,9 @@ void CogWheelFTPCore::FEAT(CogWheelControlChannel *connection, const QString &ar
             connection->sendOnControlChannel(" "+m_featTailoredRespone[key]);
         }
     }
+
+    connection->sendOnControlChannel(" REST STREAM");
+    connection->sendOnControlChannel(" TVFS");
 
     connection->sendReplyCode(211, "End.");
 

@@ -135,6 +135,8 @@ QString mapPathToLocal(CogWheelControlChannel *connection, const QString &path)
 
     cogWheelInfo(connection->socketHandle(),"Mapping local "+path+" to "+mappedPath);
 
+    if (mappedPath.endsWith("/")) mappedPath.chop(1);
+
     return(mappedPath);
 }
 
@@ -167,6 +169,8 @@ QString mapPathFromLocal(CogWheelControlChannel *connection, const QString &path
     }
 
     cogWheelInfo(connection->socketHandle(),"Mapping local from "+path+" to "+mappedPath);
+
+   if (mappedPath.endsWith("/")) mappedPath.chop(1);
 
     return(mappedPath);
 }
