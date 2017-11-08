@@ -1395,8 +1395,8 @@ void CogWheelFTPCore::MDTM(CogWheelControlChannel *connection, const QString &ar
     QString file { FTPUtil::mapPathToLocal(connection, arguments) } ;
     QFileInfo fileInfo { file };
 
-    if (!fileInfo.exists()) {
-        throw CogWheelFtpServerReply("Requested file not found.");
+    if (!fileInfo.exists()||fileInfo.isDir()) {
+        throw CogWheelFtpServerReply("Could not get file modification time.");
     }
 
     if (!fileInfo.lastModified().toString("zzz").isEmpty()){
