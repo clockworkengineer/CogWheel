@@ -29,8 +29,8 @@ SOURCES += \
     cogwheelserversettingsdialog.cpp \
     cogwheeluserlistdialog.cpp \
     cogwheelusersettingsdialog.cpp \
-    ../cogwheelserversettings.cpp \
-    ../cogwheelusersettings.cpp \
+    ../CogWheelSettings/cogwheelserversettings.cpp \
+    ../CogWheelSettings/cogwheelusersettings.cpp \
     cogwheelmanager.cpp \
     cogwheelmanagersingleinstance.cpp
 
@@ -47,3 +47,8 @@ FORMS += \
     cogwheelserversettingsdialog.ui \
     cogwheeluserlistdialog.ui \
     cogwheelusersettingsdialog.ui
+
+INCLUDEPATH += $$PWD/../CogWheelServer/ \
+               $$PWD/../CogWheelSettings/
+DEPENDPATH += $$PWD/../CogWheelServer/ \
+              $$PWD/../CogWheelSettings/

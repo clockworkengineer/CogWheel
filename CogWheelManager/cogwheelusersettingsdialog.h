@@ -22,8 +22,8 @@
 // INCLUDE FILES
 // =============
 
-#include "../cogwheel.h"
-#include "../cogwheelusersettings.h"
+#include "cogwheel.h"
+#include "cogwheelusersettings.h"
 
 #include <QDialog>
 #include <QString>

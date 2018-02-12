@@ -25,7 +25,7 @@
 // INCLUDE FILES
 // =============
 
-#include "../cogwheel.h"
+#include "cogwheel.h"
 
 #include <QObject>
 #include <QLocalServer>
