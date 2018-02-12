@@ -22,5 +22,4 @@ The server also has the ability to run behind a NAT home router that has been pr
 - Upgrade Manager interface.
 - Performance work on server.
 - Documentation (maybe).
-- Move server code to a separate directory
  
