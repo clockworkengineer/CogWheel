@@ -10,16 +10,16 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
-    cogwheelserver.cpp \
-    cogwheeldatachannel.cpp \
-    cogwheelftpcore.cpp \
-    cogwheelconnections.cpp \
-    cogwheelusersettings.cpp \
-    cogwheelcontrolchannel.cpp \
-    cogwheelserversettings.cpp \
-    cogwheelcontroller.cpp \
-    cogwheelftpcoreutil.cpp
+SOURCES += CogWheelServer/main.cpp \
+    CogWheelServer/cogwheelserver.cpp \
+    CogWheelServer/cogwheeldatachannel.cpp \
+    CogWheelServer/cogwheelftpcore.cpp \
+    CogWheelServer/cogwheelconnections.cpp \
+    CogWheelSettings/cogwheelusersettings.cpp \
+    CogWheelServer/cogwheelcontrolchannel.cpp \
+    CogWheelSettings/cogwheelserversettings.cpp \
+    CogWheelServer/cogwheelcontroller.cpp \
+    CogWheelServer/cogwheelftpcoreutil.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -33,15 +33,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    cogwheelserver.h \
-    cogwheeldatachannel.h \
-    cogwheelftpcore.h \
-    cogwheelconnections.h \
-    cogwheelusersettings.h \
-    cogwheelcontrolchannel.h \
-    cogwheelserversettings.h \
-    cogwheelcontroller.h \
-    cogwheellogger.h \
-    cogwheel.h \
-    cogwheelftpserverreply.h \
-    cogwheelftpcoreutil.h
+    CogWheelServer/cogwheelserver.h \
+    CogWheelServer/cogwheeldatachannel.h \
+    CogWheelServer/cogwheelftpcore.h \
+    CogWheelServer/cogwheelconnections.h \
+    CogWheelSettings/cogwheelusersettings.h \
+    CogWheelServer/cogwheelcontrolchannel.h \
+    CogWheelSettings/cogwheelserversettings.h \
+    CogWheelServer/cogwheelcontroller.h \
+    CogWheelServer/cogwheellogger.h \
+    CogWheelServer/cogwheel.h \
+    CogWheelServer/cogwheelftpserverreply.h \
+    CogWheelServer/cogwheelftpcoreutil.h
+
+INCLUDEPATH += $$PWD/CogWheelServer/ \
+               $$PWD/CogWheelSettings/
+DEPENDPATH += $$PWD/CogWheelServer/ \
+              $$PWD/CogWheelSettings/
