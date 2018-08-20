@@ -38,6 +38,8 @@
 #include "cogwheelusersettings.h"
 #include "cogwheelftpserverreply.h"
 
+#include <functional>
+
 #include <QHash>
 #include <QString>
 
@@ -81,7 +83,7 @@ private:
 
     // FTP command function pointer
 
-    typedef std::function<void (CogWheelControlChannel *, const QString &) > FTPCommandFunction;
+    using FTPCommandFunction = std::function<void (CogWheelControlChannel *, const QString &)>;
 
     // Setup tables
 
